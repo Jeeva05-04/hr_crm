@@ -95,5 +95,47 @@ namespace hr_crm.Controllers
 
             return Ok("Project created successfully");
         }
+
+        // =====================================
+        // PUT: api/project/{id}
+        // =====================================
+        [HttpPut("{id}")]
+        [Consumes("application/json")]
+        public IActionResult UpdateProject(int id, [FromBody] ProjectCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = @"
+                UPDATE projects
+                SET
+                    project_name = @name,
+                    duration = @duration,
+                    status = @status,
+                    manager_id = @manager,
+                    department_id = @dept
+                WHERE project_id = @id;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("name", dto.ProjectName);
+            cmd.Parameters.AddWithValue("duration", dto.Duration);
+            cmd.Parameters.AddWithValue("status", dto.Status);
+            cmd.Parameters.AddWithValue("manager", dto.ManagerId);
+            cmd.Parameters.AddWithValue("dept", dto.DepartmentId);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rowsAffected = cmd.ExecuteNonQuery();
+
+            if (rowsAffected == 0)
+                return NotFound("Project not found");
+
+            return Ok("Project updated successfully");
+        }
     }
 }

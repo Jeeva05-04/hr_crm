@@ -91,6 +91,43 @@ namespace hr_crm.Controllers
 
             return Ok("To-Do task added successfully");
         }
+
+        // =====================================
+        // PUT: api/todo/{id}
+        // =====================================
+        [HttpPut("{id}")]
+        public IActionResult UpdateTask(int id, [FromBody] TodoCreateDto task)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = @"
+                UPDATE todo_tasks
+                SET
+                    title = @title,
+                    description = @desc,
+                    assigned_to = @assigned,
+                    due_date = @due,
+                    status = @status
+                WHERE task_id = @id;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("title", task.Title);
+            cmd.Parameters.AddWithValue("desc", task.Description);
+            cmd.Parameters.AddWithValue("assigned", task.AssignedTo);
+            cmd.Parameters.AddWithValue("due", task.DueDate);
+            cmd.Parameters.AddWithValue("status", task.Status);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rowsAffected = cmd.ExecuteNonQuery();
+
+            if (rowsAffected == 0)
+                return NotFound("Task not found");
+
+            return Ok("To-Do task updated successfully");
+        }
     }
 }
-
