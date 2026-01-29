@@ -16,4 +16,6 @@ public partial class Attendance
     public DateTime? CreatedAt { get; set; }
 
     public virtual Employee Employee { get; set; } = null!;
+
+    
 }

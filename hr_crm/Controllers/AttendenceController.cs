@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using System;
 
 namespace hr_crm.Controllers
 {
@@ -113,5 +114,125 @@ namespace hr_crm.Controllers
 
             return Ok(list);
         }
+
+        [HttpPost("check-in")]
+        public IActionResult CheckIn([FromQuery] int employeeId)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var checkSql = @"
+        SELECT COUNT(*)
+        FROM attendance
+        WHERE employee_id = @empId
+        AND attendance_date = CURRENT_DATE;
+    ";
+
+            using var checkCmd = new NpgsqlCommand(checkSql, conn);
+            checkCmd.Parameters.AddWithValue("empId", employeeId);
+
+            int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+            if (count > 0)
+                return BadRequest("Already checked in today");
+            var insertSql = @"
+INSERT INTO attendance
+(employee_id, attendance_date, check_in_time, status)
+VALUES
+(@empId, CURRENT_DATE, CURRENT_TIME, 'Present');
+";
+
+
+            using var insertCmd = new NpgsqlCommand(insertSql, conn);
+            insertCmd.Parameters.AddWithValue("empId", employeeId);
+
+            try
+            {
+                insertCmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+            return Ok("Check-in successful");
+        }
+        [HttpPost("check-out")]
+        public IActionResult CheckOut([FromQuery] int employeeId)
+        {
+            string connStr = _config.GetConnectionString("HR_CRM");
+
+            using (var conn = new NpgsqlConnection(connStr))
+            {
+                conn.Open();
+
+                string sql =
+                    "UPDATE attendance " +
+                    "SET check_out_time = CURRENT_TIME, " +
+                    "total_hours = CURRENT_TIMESTAMP - (attendance_date + check_in_time) " +
+                    "WHERE employee_id = @empId " +
+                    "AND attendance_date = CURRENT_DATE " +
+                    "AND check_out_time IS NULL;";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("empId", employeeId);
+
+                    int rows = cmd.ExecuteNonQuery();
+
+                    if (rows == 0)
+                        return BadRequest("No active check-in found");
+
+                    return Ok("Check-out successful");
+                }
+            }
+        }
+
+        [HttpGet("total-hours")]
+        public IActionResult GetTotalHours([FromQuery] int employeeId)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = @"
+        SELECT
+            employee_id,
+            attendance_date,
+            check_in_time,
+            check_out_time,
+            total_hours
+        FROM attendance
+        WHERE employee_id = @empId
+        AND attendance_date = CURRENT_DATE;
+    ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("empId", employeeId);
+
+            using var reader = cmd.ExecuteReader();
+
+            if (!reader.Read())
+                return NotFound("Attendance record not found for today");
+
+            return Ok(new
+            {
+                EmployeeId = reader.GetInt32(0),
+                Date = reader.GetDateTime(1).ToString("yyyy-MM-dd"),
+                CheckIn = reader.IsDBNull(2) ? null : reader.GetTimeSpan(2).ToString(),
+                CheckOut = reader.IsDBNull(3) ? null : reader.GetTimeSpan(3).ToString(),
+                TotalHours = reader.IsDBNull(4) ? null : reader.GetTimeSpan(4).ToString()
+            });
+        }
+
+
+
+
+
     }
 }
+
+
