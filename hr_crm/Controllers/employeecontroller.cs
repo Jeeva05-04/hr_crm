@@ -158,5 +158,31 @@ namespace hr_crm.Controllers
 
             return Ok("Employee updated successfully");
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = @"
+        UPDATE employees
+        SET status = 'Inactive'
+        WHERE employee_id = @id;
+    ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return NotFound("Employee not found");
+
+            return Ok("Employee deactivated successfully");
+        }
+
     }
 }

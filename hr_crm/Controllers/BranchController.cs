@@ -109,5 +109,31 @@ namespace hr_crm.Controllers
 
             return Ok("Branch updated successfully");
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBranch(int id)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = @"
+        UPDATE branches
+        SET status = 'Inactive'
+        WHERE branch_id = @id;
+    ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return NotFound("Branch not found");
+
+            return Ok("Branch deactivated successfully");
+        }
+
     }
 }

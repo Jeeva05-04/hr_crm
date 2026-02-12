@@ -129,5 +129,27 @@ namespace hr_crm.Controllers
 
             return Ok("To-Do task updated successfully");
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTask(int id)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = "DELETE FROM todo_tasks WHERE task_id = @id;";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return NotFound("Task not found");
+
+            return Ok("Task deleted successfully");
+        }
+
     }
 }

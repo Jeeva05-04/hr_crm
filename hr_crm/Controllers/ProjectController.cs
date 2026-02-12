@@ -137,5 +137,27 @@ namespace hr_crm.Controllers
 
             return Ok("Project updated successfully");
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProject(int id)
+        {
+            var connStr = _config.GetConnectionString("HR_CRM");
+
+            using var conn = new NpgsqlConnection(connStr);
+            conn.Open();
+
+            var sql = "DELETE FROM projects WHERE project_id = @id;";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return NotFound("Project not found");
+
+            return Ok("Project deleted successfully");
+        }
+
     }
 }
