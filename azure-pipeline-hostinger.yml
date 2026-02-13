@@ -25,7 +25,7 @@ steps:
       latest
       $(tag)
 
-# - script: |
-#     curl -X POST -k https://89.116.20.215:9443/api/stacks/webhooks/0779bec8-4748-4687-957e-909a85ef0a82?IMAGE_TAG=$(Build.BuildId)
-#   displayName: 'Trigger Portainer webhook deployment'
-#   condition: succeeded()
+- script: |
+    curl -X POST -k https://89.116.20.215:9443/api/stacks/webhooks/4173be62-b5d0-4073-9fda-ffdecea4c731?IMAGE_TAG=$(Build.BuildId)
+  displayName: 'Trigger Portainer webhook deployment'
+  condition: succeeded()
