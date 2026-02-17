@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using hr_crm.Models;
+﻿using hr_crm.Models;
+using hr_crm.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace hr_crm.Controllers
 {
@@ -8,132 +8,47 @@ namespace hr_crm.Controllers
     [Route("api/[controller]")]
     public class BranchController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IBranchService _service;
 
-        public BranchController(IConfiguration config)
+        public BranchController(IBranchService service)
         {
-            _config = config;
+            _service = service;
         }
 
-        // =====================================
-        // GET: api/branch
-        // =====================================
         [HttpGet]
-        public IActionResult GetBranches()
+        public async Task<IActionResult> GetBranches()
         {
-            var connStr = _config.GetConnectionString("HrDb");
-            var branches = new List<object>();
-
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                SELECT branch_id, branch_name, location, status
-                FROM branches
-                ORDER BY branch_name;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                branches.Add(new
-                {
-                    BranchId = reader.GetInt32(0),
-                    BranchName = reader.GetString(1),
-                    Location = reader.GetString(2),
-                    Status = reader.GetString(3)
-                });
-            }
-
+            var branches = await _service.GetAllAsync();
             return Ok(branches);
         }
 
-        // =====================================
-        // POST: api/branch
-        // =====================================
         [HttpPost]
-        public IActionResult AddBranch([FromBody] BranchCreateDto branch)
+        public async Task<IActionResult> AddBranch([FromBody] BranchCreateDto dto)
         {
-            var connStr = _config.GetConnectionString("HrDb");
-
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                INSERT INTO branches (branch_name, location, status)
-                VALUES (@name, @loc, @status);
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("name", branch.BranchName);
-            cmd.Parameters.AddWithValue("loc", branch.Location);
-            cmd.Parameters.AddWithValue("status", branch.Status);
-
-            cmd.ExecuteNonQuery();
-
+            await _service.CreateAsync(dto.BranchName, dto.Location, dto.Status);
             return Ok("Branch added successfully");
         }
 
-        // =====================================
-        // PUT: api/branch/{id}
-        // =====================================
         [HttpPut("{id}")]
-        public IActionResult UpdateBranch(int id, [FromBody] BranchCreateDto branch)
+        public async Task<IActionResult> UpdateBranch(int id, [FromBody] BranchCreateDto dto)
         {
-            var connStr = _config.GetConnectionString("HrDb");
+            var result = await _service.UpdateAsync(id, dto.BranchName, dto.Location, dto.Status);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                UPDATE branches
-                SET
-                    branch_name = @name,
-                    location = @loc,
-                    status = @status
-                WHERE branch_id = @id;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("name", branch.BranchName);
-            cmd.Parameters.AddWithValue("loc", branch.Location);
-            cmd.Parameters.AddWithValue("status", branch.Status);
-            cmd.Parameters.AddWithValue("id", id);
-
-            int rowsAffected = cmd.ExecuteNonQuery();
-
-            if (rowsAffected == 0)
+            if (!result)
                 return NotFound("Branch not found");
 
             return Ok("Branch updated successfully");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteBranch(int id)
+        public async Task<IActionResult> DeleteBranch(int id)
         {
-            var connStr = _config.GetConnectionString("HrDb");
+            var result = await _service.DeactivateAsync(id);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-        UPDATE branches
-        SET status = 'Inactive'
-        WHERE branch_id = @id;
-    ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("id", id);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            if (rows == 0)
+            if (!result)
                 return NotFound("Branch not found");
 
             return Ok("Branch deactivated successfully");
         }
-
     }
 }

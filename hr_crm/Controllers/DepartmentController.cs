@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
-using System.Collections.Generic;
-using hr_crm.Models;   // VERY IMPORTANT
+﻿using hr_crm.Models;
+using hr_crm.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace hr_crm.Controllers
 {
@@ -10,127 +8,53 @@ namespace hr_crm.Controllers
     [Route("api/[controller]")]
     public class DepartmentController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IDepartmentService _service;
 
-        public DepartmentController(IConfiguration config)
+        public DepartmentController(IDepartmentService service)
         {
-            _config = config;
+            _service = service;
         }
 
-        // ==============================
-        // GET: api/department
-        // ==============================
         [HttpGet]
-        public IActionResult GetDepartments()
+        public async Task<IActionResult> GetDepartments()
         {
-            var connStr = _config.GetConnectionString("HrDb");
-            var departments = new List<object>();
+            var departments = await _service.GetAllAsync();
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                SELECT d.department_id,
-                       d.department_name,
-                       d.branch_id,
-                       b.branch_name
-                FROM departments d
-                JOIN branches b ON d.branch_id = b.branch_id
-                ORDER BY d.department_name;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            var result = departments.Select(d => new
             {
-                departments.Add(new
-                {
-                    DepartmentId = reader.GetInt32(0),
-                    DepartmentName = reader.GetString(1),
-                    BranchId = reader.GetInt32(2),
-                    BranchName = reader.GetString(3)
-                });
-            }
+                d.DepartmentId,
+                d.DepartmentName,
+                d.BranchId,
+                BranchName = d.Branch?.BranchName
+            });
 
-            return Ok(departments);
+            return Ok(result);
         }
 
-        // ==============================
-        // POST: api/department
-        // ==============================
         [HttpPost]
-        public IActionResult AddDepartment([FromBody] DepartmentDto dto)
+        public async Task<IActionResult> AddDepartment([FromBody] DepartmentDto dto)
         {
-            var connStr = _config.GetConnectionString("HrDb");
-
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                INSERT INTO departments (department_name, branch_id)
-                VALUES (@name, @branchId);
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("name", dto.DepartmentName);
-            cmd.Parameters.AddWithValue("branchId", dto.BranchId);
-
-            cmd.ExecuteNonQuery();
-
+            await _service.CreateAsync(dto.DepartmentName, dto.BranchId);
             return Ok("Department added successfully");
         }
 
-        // ==============================
-        // PUT: api/department/{id}
-        // ==============================
         [HttpPut("{id}")]
-        public IActionResult UpdateDepartment(int id, [FromBody] DepartmentDto dto)
+        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] DepartmentDto dto)
         {
-            var connStr = _config.GetConnectionString("HrDb");
+            var result = await _service.UpdateAsync(id, dto.DepartmentName, dto.BranchId);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                UPDATE departments
-                SET department_name = @name,
-                    branch_id = @branchId
-                WHERE department_id = @id;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("name", dto.DepartmentName);
-            cmd.Parameters.AddWithValue("branchId", dto.BranchId);
-            cmd.Parameters.AddWithValue("id", id);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            if (rows == 0)
+            if (!result)
                 return NotFound("Department not found");
 
             return Ok("Department updated successfully");
         }
 
-        // ==============================
-        // DELETE: api/department/{id}
-        // ==============================
         [HttpDelete("{id}")]
-        public IActionResult DeleteDepartment(int id)
+        public async Task<IActionResult> DeleteDepartment(int id)
         {
-            var connStr = _config.GetConnectionString("HrDb");
+            var result = await _service.DeleteAsync(id);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = "DELETE FROM departments WHERE department_id = @id;";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("id", id);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            if (rows == 0)
+            if (!result)
                 return NotFound("Department not found");
 
             return Ok("Department deleted successfully");

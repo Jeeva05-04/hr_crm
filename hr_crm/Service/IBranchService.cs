@@ -1,0 +1,12 @@
+﻿using hr_crm.Entities;
+
+namespace hr_crm.Services
+{
+    public interface IBranchService
+    {
+        Task<List<Branch>> GetAllAsync();
+        Task<bool> CreateAsync(string name, string location, string status);
+        Task<bool> UpdateAsync(int id, string name, string location, string status);
+        Task<bool> DeactivateAsync(int id);
+    }
+}

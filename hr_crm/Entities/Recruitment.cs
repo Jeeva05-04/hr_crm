@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace hr_crm.Entities;
 
 public partial class Recruitment
 {
+    [Key]
     public int CandidateId { get; set; }
 
     public string FirstName { get; set; } = null!;

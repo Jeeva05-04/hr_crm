@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+﻿using hr_crm.Entities;
 using hr_crm.Models;
+using hr_crm.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace hr_crm.Controllers
 {
@@ -8,138 +9,75 @@ namespace hr_crm.Controllers
     [Route("api/[controller]")]
     public class KnowledgeController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IKnowledgeService _service;
 
-        public KnowledgeController(IConfiguration config)
+        public KnowledgeController(IKnowledgeService service)
         {
-            _config = config;
+            _service = service;
         }
 
-        // ==================================================
-        // GET: api/knowledge
-        // ==================================================
         [HttpGet]
-        public IActionResult GetKnowledge()
+        public async Task<IActionResult> GetKnowledge()
         {
-            var connStr = _config.GetConnectionString("HrDb");
-            var result = new List<object>();
+            var records = await _service.GetAllAsync();
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                SELECT 
-                    branch_id,
-                    record_type,
-                    code,
-                    title,
-                    category,
-                    sub_category,
-                    summary,
-                    approval_status,
-                    apporved_by,
-                    visibility,
-                    status,
-                    created_by,
-                    created_date
-                FROM knowledge
-                ORDER BY created_date DESC;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            var result = records.Select(k => new
             {
-                result.Add(new
-                {
-                    BranchId = reader.GetInt32(0),
-                    RecordType = reader.GetString(1),
-                    Code = reader.GetString(2),
-                    Title = reader.GetString(3),
-                    Category = reader.GetString(4),
-                    SubCategory = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                    Summary = reader.GetString(6),
-                    ApprovalStatus = reader.GetString(7),
-                    ApprovedBy = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                    Visibility = reader.GetString(9),
-                    Status = reader.GetString(10),
-                    CreatedBy = reader.GetInt32(11),
-                    CreatedDate = reader.GetDateTime(12)
-                });
-            }
+                k.BranchId,
+                k.RecordType,
+                k.Code,
+                k.Title,
+                k.Category,
+                k.SubCategory,
+                k.Summary,
+                k.ApprovalStatus,
+                k.ApporvedBy,
+                k.Visibility,
+                k.Status,
+                k.CreatedBy,
+                k.CreatedDate
+            });
 
             return Ok(result);
         }
 
-        // ==================================================
-        // POST: api/knowledge
-        // ==================================================
         [HttpPost]
-        [Consumes("application/json")]
-        public IActionResult AddKnowledge([FromBody] KnowledgeCreateDto dto)
+        public async Task<IActionResult> AddKnowledge([FromBody] KnowledgeCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var connStr = _config.GetConnectionString("HrDb");
+            var knowledge = new Knowledge
+            {
+                BranchId = dto.BranchId,
+                RecordType = dto.RecordType,
+                Code = dto.Code,
+                Title = dto.Title,
+                Category = dto.Category,
+                SubCategory = dto.SubCategory,
+                Summary = dto.Summary,
+                ApprovalStatus = dto.ApprovalStatus,
+                ApporvedBy = dto.ApprovedBy,
+                Visibility = dto.Visibility,
+                Status = dto.Status,
+                CreatedBy = dto.CreatedBy,
+                CreatedDate = DateTime.UtcNow
+            };
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                INSERT INTO knowledge
-                (branch_id, record_type, code, title, category, sub_category,
-                 summary, approval_status, apporved_by, visibility, status, created_by)
-                VALUES
-                (@branchId, @recordType, @code, @title, @category, @subCategory,
-                 @summary, @approvalStatus, @approvedBy, @visibility, @status, @createdBy);
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("branchId", dto.BranchId);
-            cmd.Parameters.AddWithValue("recordType", dto.RecordType);
-            cmd.Parameters.AddWithValue("code", dto.Code);
-            cmd.Parameters.AddWithValue("title", dto.Title);
-            cmd.Parameters.AddWithValue("category", dto.Category);
-            cmd.Parameters.AddWithValue("subCategory", dto.SubCategory ?? "");
-            cmd.Parameters.AddWithValue("summary", dto.Summary);
-            cmd.Parameters.AddWithValue("approvalStatus", dto.ApprovalStatus);
-            cmd.Parameters.AddWithValue("approvedBy", dto.ApprovedBy ?? "");
-            cmd.Parameters.AddWithValue("visibility", dto.Visibility);
-            cmd.Parameters.AddWithValue("status", dto.Status);
-            cmd.Parameters.AddWithValue("createdBy", dto.CreatedBy);
-
-            cmd.ExecuteNonQuery();
+            await _service.CreateAsync(knowledge);
 
             return Ok("Knowledge record added successfully");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteKnowledge(int id)
+        public async Task<IActionResult> DeleteKnowledge(int id)
         {
-            var connStr = _config.GetConnectionString("HrDb");
+            var result = await _service.DeactivateAsync(id);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-        UPDATE knowledge
-        SET status = 'Inactive'
-        WHERE knowledge_id = @id;
-    ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("id", id);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            if (rows == 0)
+            if (!result)
                 return NotFound("Knowledge record not found");
 
             return Ok("Knowledge record deactivated successfully");
         }
-
     }
 }
-

@@ -1,21 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace hr_crm.Entities;
-
-public partial class Attendance
+namespace hr_crm.Entities
 {
-    public int AttendanceId { get; set; }
+    public class Attendance
+    {
+        [Key]
+        public int AttendanceId { get; set; }
 
-    public int EmployeeId { get; set; }
+        [ForeignKey("Employee")]
+        public int EmployeeId { get; set; }
 
-    public DateOnly AttendanceDate { get; set; }
+        public Employee Employee { get; set; }
 
-    public string Status { get; set; } = null!;
+        // 🔥 IMPORTANT: Use DateTime NOT DateOnly
+        public DateTime AttendanceDate { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+        public TimeSpan? CheckInTime { get; set; }
+        public TimeSpan? CheckOutTime { get; set; }
+        public TimeSpan? TotalHours { get; set; }
 
-    public virtual Employee Employee { get; set; } = null!;
-
-    
+        public string? Status { get; set; }
+    }
 }
