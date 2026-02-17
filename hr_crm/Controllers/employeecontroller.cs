@@ -21,7 +21,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetEmployees()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             if (string.IsNullOrEmpty(connStr))
                 return StatusCode(500, "Connection string not found");
@@ -78,7 +78,7 @@ namespace hr_crm.Controllers
         [HttpPost]
         public IActionResult AddEmployee([FromBody] EmployeeCreateDto emp)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             if (string.IsNullOrEmpty(connStr))
                 return StatusCode(500, "Connection string not found");
@@ -116,7 +116,7 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateEmployee(int id, [FromBody] EmployeeCreateDto emp)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             if (string.IsNullOrEmpty(connStr))
                 return StatusCode(500, "Connection string not found");
@@ -162,7 +162,7 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteEmployee(int id)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();

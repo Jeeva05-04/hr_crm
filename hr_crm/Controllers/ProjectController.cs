@@ -21,7 +21,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetProjects()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var projects = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -72,7 +72,7 @@ namespace hr_crm.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -106,7 +106,7 @@ namespace hr_crm.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -141,7 +141,7 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteProject(int id)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();

@@ -21,7 +21,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetKnowledge()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var result = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -82,7 +82,7 @@ namespace hr_crm.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -118,7 +118,7 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteKnowledge(int id)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();

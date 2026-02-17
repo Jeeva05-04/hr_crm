@@ -21,7 +21,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetTasks()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var tasks = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -68,7 +68,7 @@ namespace hr_crm.Controllers
         [HttpPost]
         public IActionResult AddTask([FromBody] TodoCreateDto task)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -98,7 +98,7 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateTask(int id, [FromBody] TodoCreateDto task)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -133,7 +133,7 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteTask(int id)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();

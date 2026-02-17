@@ -19,7 +19,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetCandidates()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var candidates = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -69,7 +69,7 @@ namespace hr_crm.Controllers
 [HttpPost]
     public IActionResult AddCandidate([FromBody] RecruitmentCreateDto candidate)
     {
-        var connStr = _config.GetConnectionString("HR_CRM");
+        var connStr = _config.GetConnectionString("HrDb");
 
         if (string.IsNullOrEmpty(connStr))
             return StatusCode(500, "Connection string not found");
@@ -100,6 +100,7 @@ namespace hr_crm.Controllers
 
         return Ok("Candidate application added successfully");
     }
+
 
 }
 }

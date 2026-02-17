@@ -21,7 +21,7 @@ namespace hr_crm.Controllers
         [HttpGet]
         public IActionResult GetBranches()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var branches = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -56,7 +56,7 @@ namespace hr_crm.Controllers
         [HttpPost]
         public IActionResult AddBranch([FromBody] BranchCreateDto branch)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -82,7 +82,7 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateBranch(int id, [FromBody] BranchCreateDto branch)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -113,7 +113,7 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteBranch(int id)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();

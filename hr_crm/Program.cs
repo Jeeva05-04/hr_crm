@@ -1,6 +1,8 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using hr_crm.Entities;
+using Microsoft.EntityFrameworkCore;
 
-// Add services to the container
+var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -14,27 +16,26 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddDbContext<HrCrmContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("HrDb")));
 
-// 🔹 ADD SWAGGER SERVICES
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 🔹 ENABLE SWAGGER
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var db = scope.ServiceProvider.GetRequiredService<HrCrmContext>();
+    db.Database.Migrate();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseCors("AllowFrontend");
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
-

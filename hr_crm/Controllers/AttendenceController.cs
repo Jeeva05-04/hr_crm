@@ -22,7 +22,7 @@ namespace hr_crm.Controllers
         [HttpPost("daily")]
         public IActionResult MarkDailyAttendance()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -48,7 +48,7 @@ namespace hr_crm.Controllers
         [HttpPut("update")]
         public IActionResult UpdateAttendance(int employeeId, string status)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -79,7 +79,7 @@ namespace hr_crm.Controllers
         [HttpGet("today")]
         public IActionResult GetTodayAttendance()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
             var list = new List<object>();
 
             using var conn = new NpgsqlConnection(connStr);
@@ -118,7 +118,7 @@ namespace hr_crm.Controllers
         [HttpPost("check-in")]
         public IActionResult CheckIn([FromQuery] int employeeId)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
@@ -162,7 +162,7 @@ VALUES
         [HttpPost("check-out")]
         public IActionResult CheckOut([FromQuery] int employeeId)
         {
-            string connStr = _config.GetConnectionString("HR_CRM");
+            string connStr = _config.GetConnectionString("HrDb");
 
             using (var conn = new NpgsqlConnection(connStr))
             {
@@ -193,7 +193,7 @@ VALUES
         [HttpGet("total-hours")]
         public IActionResult GetTotalHours([FromQuery] int employeeId)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var connStr = _config.GetConnectionString("HrDb");
 
             using var conn = new NpgsqlConnection(connStr);
             conn.Open();
