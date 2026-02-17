@@ -1,4 +1,7 @@
-trigger: none
+trigger:
+  branches:
+    include:
+      - user/jeeva
 
 pool:
   vmImage: 'ubuntu-latest'
