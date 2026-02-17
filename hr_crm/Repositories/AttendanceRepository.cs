@@ -15,7 +15,7 @@ namespace hr_crm.Repositories
 
         public async Task MarkDailyAttendanceAsync()
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
             var employees = await _context.Employees.ToListAsync();
 
             foreach (var emp in employees)
@@ -40,7 +40,7 @@ namespace hr_crm.Repositories
 
         public async Task<bool> UpdateAttendanceAsync(int employeeId, string status)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
 
             var attendance = await _context.Attendances
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
@@ -56,7 +56,7 @@ namespace hr_crm.Repositories
 
         public async Task<List<Attendance>> GetTodayAttendanceAsync()
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
 
             return await _context.Attendances
                 .Include(a => a.Employee)
@@ -66,7 +66,7 @@ namespace hr_crm.Repositories
 
         public async Task<bool> CheckInAsync(int employeeId)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
 
             bool exists = await _context.Attendances
                 .AnyAsync(a => a.EmployeeId == employeeId
@@ -89,7 +89,7 @@ namespace hr_crm.Repositories
 
         public async Task<bool> CheckOutAsync(int employeeId)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
 
             var attendance = await _context.Attendances
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
@@ -110,7 +110,7 @@ namespace hr_crm.Repositories
 
         public async Task<Attendance?> GetTodayRecordAsync(int employeeId)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
 
             return await _context.Attendances
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
