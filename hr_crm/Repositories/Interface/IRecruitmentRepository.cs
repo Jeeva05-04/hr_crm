@@ -1,6 +1,6 @@
 ﻿using hr_crm.Entities;
 
-namespace hr_crm.Repositories
+namespace hr_crm.Repositories.Interface
 {
     public interface IRecruitmentRepository
     {

@@ -1,6 +1,8 @@
 ﻿using hr_crm.Data;
 using hr_crm.Entities;
 using hr_crm.Repositories;
+using hr_crm.Repositories.Interface;
+using hr_crm.Service.Interface;
 using hr_crm.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -83,6 +85,8 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Migration error: " + ex.Message);
     }
 }
+
+
 
 app.UseCors("AllowFrontend");
 

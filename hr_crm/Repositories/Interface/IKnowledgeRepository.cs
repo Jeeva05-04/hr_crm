@@ -1,11 +1,11 @@
 ﻿using hr_crm.Entities;
 
-namespace hr_crm.Services
+namespace hr_crm.Repositories.Interface
 {
-    public interface IKnowledgeService
+    public interface IKnowledgeRepository
     {
         Task<List<Knowledge>> GetAllAsync();
-        Task CreateAsync(Knowledge knowledge);
+        Task AddAsync(Knowledge knowledge);
         Task<bool> DeactivateAsync(int id);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using hr_crm.Models;
 using hr_crm.Entities;
-using hr_crm.Services;
 using Microsoft.AspNetCore.Mvc;
+using hr_crm.Service.Interface;
 
 namespace hr_crm.Controllers
 {

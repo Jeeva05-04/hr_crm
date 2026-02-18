@@ -1,12 +1,11 @@
 ﻿using hr_crm.Entities;
 
-namespace hr_crm.Repositories
+namespace hr_crm.Service.Interface
 {
-    public interface ITodoRepository
+    public interface ITodoService
     {
         Task<List<TodoTask>> GetAllAsync();
-        Task<TodoTask?> GetByIdAsync(int id);
-        Task AddAsync(TodoTask task);
+        Task<bool> CreateAsync(TodoTask task);
         Task<bool> UpdateAsync(int id, TodoTask task);
         Task<bool> DeleteAsync(int id);
     }

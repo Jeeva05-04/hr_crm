@@ -1,6 +1,6 @@
 ﻿using hr_crm.Entities;
 
-namespace hr_crm.Repositories
+namespace hr_crm.Repositories.Interface
 {
     public interface IAttendanceRepository
     {
@@ -10,5 +10,8 @@ namespace hr_crm.Repositories
         Task<bool> CheckInAsync(int employeeId);
         Task<bool> CheckOutAsync(int employeeId);
         Task<Attendance?> GetTodayRecordAsync(int employeeId);
+
+        // ✅ Added for attendance history
+        Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId);
     }
 }

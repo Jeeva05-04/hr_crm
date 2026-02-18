@@ -1,5 +1,6 @@
 ﻿using hr_crm.Data;
 using hr_crm.Entities;
+using hr_crm.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace hr_crm.Repositories

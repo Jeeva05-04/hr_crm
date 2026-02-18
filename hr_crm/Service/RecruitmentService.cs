@@ -1,5 +1,6 @@
 ﻿using hr_crm.Entities;
-using hr_crm.Repositories;
+using hr_crm.Repositories.Interface;
+using hr_crm.Service.Interface;
 
 namespace hr_crm.Services
 {

@@ -1,5 +1,6 @@
 ﻿using hr_crm.Entities;
-using hr_crm.Repositories;
+using hr_crm.Repositories.Interface;
+using hr_crm.Service.Interface;
 
 namespace hr_crm.Services
 {
@@ -29,5 +30,9 @@ namespace hr_crm.Services
 
         public Task<Attendance?> GetTodayRecordAsync(int employeeId)
             => _repo.GetTodayRecordAsync(employeeId);
+
+        // ✅ Added for Attendance History
+        public Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId)
+            => _repo.GetAttendanceHistoryAsync(employeeId);
     }
 }
