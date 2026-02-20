@@ -15,42 +15,27 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // Mark Daily Attendance For All Employees
+        // Mark Daily Attendance (Does NOT depend on Employees anymore)
         // =========================================
         public async Task MarkDailyAttendanceAsync()
         {
             var today = DateTime.UtcNow.Date;
-            var employees = await _context.Employees.ToListAsync();
 
-            foreach (var emp in employees)
-            {
-                bool exists = await _context.Attendances
-                    .AnyAsync(a => a.EmployeeId == emp.EmployeeId
-                                && a.AttendanceDate == today);
+            // If you want bulk marking, you must pass user list externally.
+            // Since Users are in CRM database, we cannot auto-fetch them here.
 
-                if (!exists)
-                {
-                    _context.Attendances.Add(new Attendance
-                    {
-                        EmployeeId = emp.EmployeeId,
-                        AttendanceDate = today,
-                        Status = "Present"
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
+            await Task.CompletedTask;
         }
 
         // =========================================
-        // Update Today's Attendance Status
+        // Update Attendance
         // =========================================
-        public async Task<bool> UpdateAttendanceAsync(int employeeId, string status)
+        public async Task<bool> UpdateAttendanceAsync(int userId, string status)
         {
             var today = DateTime.UtcNow.Date;
 
             var attendance = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
+                .FirstOrDefaultAsync(a => a.UserId == userId
                                        && a.AttendanceDate == today);
 
             if (attendance == null)
@@ -62,14 +47,13 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // Get Today's Attendance (All Employees)
+        // Get Today Attendance
         // =========================================
         public async Task<List<Attendance>> GetTodayAttendanceAsync()
         {
             var today = DateTime.UtcNow.Date;
 
             return await _context.Attendances
-                .Include(a => a.Employee)
                 .Where(a => a.AttendanceDate == today)
                 .ToListAsync();
         }
@@ -77,22 +61,22 @@ namespace hr_crm.Repositories
         // =========================================
         // Check-In
         // =========================================
-        public async Task<bool> CheckInAsync(int employeeId)
+        public async Task<bool> CheckInAsync(int userId)
         {
             var today = DateTime.UtcNow.Date;
 
             var attendance = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
+                .FirstOrDefaultAsync(a => a.UserId == userId
                                        && a.AttendanceDate == today);
 
             if (attendance != null && attendance.CheckInTime != null)
-                return false; // Already checked in
+                return false;
 
             if (attendance == null)
             {
                 attendance = new Attendance
                 {
-                    EmployeeId = employeeId,
+                    UserId = userId,
                     AttendanceDate = today,
                     Status = "Present"
                 };
@@ -109,12 +93,12 @@ namespace hr_crm.Repositories
         // =========================================
         // Check-Out
         // =========================================
-        public async Task<bool> CheckOutAsync(int employeeId)
+        public async Task<bool> CheckOutAsync(int userId)
         {
             var today = DateTime.UtcNow.Date;
 
             var attendance = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
+                .FirstOrDefaultAsync(a => a.UserId == userId
                                        && a.AttendanceDate == today);
 
             if (attendance == null || attendance.CheckInTime == null || attendance.CheckOutTime != null)
@@ -130,25 +114,24 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // Get Today's Record For Employee
+        // Get Today Record
         // =========================================
-        public async Task<Attendance?> GetTodayRecordAsync(int employeeId)
+        public async Task<Attendance?> GetTodayRecordAsync(int userId)
         {
             var today = DateTime.UtcNow.Date;
 
             return await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
+                .FirstOrDefaultAsync(a => a.UserId == userId
                                        && a.AttendanceDate == today);
         }
 
         // =========================================
-        // Get Full Attendance History (Past Records)
+        // Attendance History
         // =========================================
-        public async Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId)
+        public async Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
         {
             return await _context.Attendances
-                .Include(a => a.Employee)
-                .Where(a => a.EmployeeId == employeeId)
+                .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.AttendanceDate)
                 .ToListAsync();
         }

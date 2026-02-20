@@ -21,5 +21,5 @@ public partial class Project
 
     public virtual Department Department { get; set; } = null!;
 
-    public virtual Employee Manager { get; set; } = null!;
+   
 }

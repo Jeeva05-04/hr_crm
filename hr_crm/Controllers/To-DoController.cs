@@ -26,7 +26,7 @@ namespace hr_crm.Controllers
                 t.TaskId,
                 t.Title,
                 t.Description,
-                AssignedTo = t.AssignedToNavigation.FirstName,
+                AssignedTo = t.AssignedTo, // Just return ID
                 DueDate = t.DueDate.ToString("yyyy-MM-dd"),
                 t.Status,
                 t.CreatedAt

@@ -4,14 +4,15 @@ namespace hr_crm.Service.Interface
 {
     public interface IAttendanceService
     {
-        Task MarkDailyAttendanceAsync();
-        Task<bool> UpdateAttendanceAsync(int employeeId, string status);
-        Task<List<Attendance>> GetTodayAttendanceAsync();
-        Task<bool> CheckInAsync(int employeeId);
-        Task<bool> CheckOutAsync(int employeeId);
-        Task<Attendance?> GetTodayRecordAsync(int employeeId);
+        Task<bool> CheckInAsync(int userId);
 
-        // ✅ Added for Past Attendance History
-        Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId);
+        Task<bool> CheckOutAsync(int userId);
+
+        Task<Attendance?> GetTodayRecordAsync(int userId);
+
+        Task<bool> UpdateAttendanceAsync(int userId, string status);
+
+        Task<List<Attendance>> GetAttendanceHistoryAsync(int userId);
     }
 }
+

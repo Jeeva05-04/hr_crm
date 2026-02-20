@@ -21,5 +21,5 @@ public partial class TodoTask
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual Employee AssignedToNavigation { get; set; } = null!;
+    
 }

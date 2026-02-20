@@ -17,7 +17,6 @@ namespace hr_crm.Repositories
         public async Task<List<TodoTask>> GetAllAsync()
         {
             return await _context.TodoTasks
-                .Include(t => t.AssignedToNavigation)
                 .OrderBy(t => t.DueDate)
                 .ToListAsync();
         }

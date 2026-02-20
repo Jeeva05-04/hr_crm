@@ -13,26 +13,19 @@ namespace hr_crm.Services
             _repo = repo;
         }
 
-        public Task MarkDailyAttendanceAsync()
-            => _repo.MarkDailyAttendanceAsync();
+        public Task<bool> CheckInAsync(int userId)
+            => _repo.CheckInAsync(userId);
 
-        public Task<bool> UpdateAttendanceAsync(int employeeId, string status)
-            => _repo.UpdateAttendanceAsync(employeeId, status);
+        public Task<bool> CheckOutAsync(int userId)
+            => _repo.CheckOutAsync(userId);
 
-        public Task<List<Attendance>> GetTodayAttendanceAsync()
-            => _repo.GetTodayAttendanceAsync();
+        public Task<Attendance?> GetTodayRecordAsync(int userId)
+            => _repo.GetTodayRecordAsync(userId);
 
-        public Task<bool> CheckInAsync(int employeeId)
-            => _repo.CheckInAsync(employeeId);
+        public Task<bool> UpdateAttendanceAsync(int userId, string status)
+            => _repo.UpdateAttendanceAsync(userId, status);
 
-        public Task<bool> CheckOutAsync(int employeeId)
-            => _repo.CheckOutAsync(employeeId);
-
-        public Task<Attendance?> GetTodayRecordAsync(int employeeId)
-            => _repo.GetTodayRecordAsync(employeeId);
-
-        // ✅ Added for Attendance History
-        public Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId)
-            => _repo.GetAttendanceHistoryAsync(employeeId);
+        public Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
+            => _repo.GetAttendanceHistoryAsync(userId);
     }
 }

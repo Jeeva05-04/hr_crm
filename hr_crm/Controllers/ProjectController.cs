@@ -27,7 +27,7 @@ namespace hr_crm.Controllers
                 p.ProjectName,
                 p.Duration,
                 p.Status,
-                ManagerName = p.Manager.FirstName,
+                ManagerId = p.ManagerId, // Just return ID
                 DepartmentName = p.Department.DepartmentName,
                 p.CreatedDate
             });

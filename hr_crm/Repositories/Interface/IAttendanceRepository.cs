@@ -5,13 +5,11 @@ namespace hr_crm.Repositories.Interface
     public interface IAttendanceRepository
     {
         Task MarkDailyAttendanceAsync();
-        Task<bool> UpdateAttendanceAsync(int employeeId, string status);
+        Task<bool> UpdateAttendanceAsync(int userId, string status);
         Task<List<Attendance>> GetTodayAttendanceAsync();
-        Task<bool> CheckInAsync(int employeeId);
-        Task<bool> CheckOutAsync(int employeeId);
-        Task<Attendance?> GetTodayRecordAsync(int employeeId);
-
-        // ✅ Added for attendance history
-        Task<List<Attendance>> GetAttendanceHistoryAsync(int employeeId);
+        Task<bool> CheckInAsync(int userId);
+        Task<bool> CheckOutAsync(int userId);
+        Task<Attendance?> GetTodayRecordAsync(int userId);
+        Task<List<Attendance>> GetAttendanceHistoryAsync(int userId);
     }
 }

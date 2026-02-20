@@ -1,8 +1,10 @@
 ﻿using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hr_crm.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AttendanceController : ControllerBase
@@ -15,93 +17,55 @@ namespace hr_crm.Controllers
         }
 
         // =========================================
-        // Mark Daily Attendance (For All Employees)
-        // =========================================
-        [HttpPost("daily")]
-        public async Task<IActionResult> MarkDailyAttendance()
-        {
-            await _service.MarkDailyAttendanceAsync();
-            return Ok("Daily attendance marked");
-        }
-
-        // =========================================
-        // Update Attendance Status
-        // =========================================
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateAttendance(int employeeId, string status)
-        {
-            var result = await _service.UpdateAttendanceAsync(employeeId, status);
-
-            if (!result)
-                return BadRequest("Attendance record not found");
-
-            return Ok("Attendance updated successfully");
-        }
-
-        // =========================================
-        // Get Today Attendance (All Employees)
-        // =========================================
-        [HttpGet("today")]
-        public async Task<IActionResult> GetTodayAttendance()
-        {
-            var data = await _service.GetTodayAttendanceAsync();
-
-            var result = data.Select(a => new
-            {
-                a.EmployeeId,
-                a.Employee.FirstName,
-                a.AttendanceDate,
-                a.Status,
-                a.CheckInTime,
-                a.CheckOutTime,
-                a.TotalHours
-            });
-
-            return Ok(result);
-        }
-
-        // =========================================
-        // Check-In
+        // ✅ Check-In
         // =========================================
         [HttpPost("check-in")]
-        public async Task<IActionResult> CheckIn(int employeeId)
+        public async Task<IActionResult> CheckIn(int userId)
         {
-            var success = await _service.CheckInAsync(employeeId);
+            var success = await _service.CheckInAsync(userId);
 
             if (!success)
-                return BadRequest("Already checked in today");
+                return BadRequest("Already checked in or invalid user");
 
-            return Ok("Check-in successful");
+            return Ok(new
+            {
+                Message = "Check-in successful",
+                UserId = userId
+            });
         }
 
         // =========================================
-        // Check-Out
+        // ✅ Check-Out
         // =========================================
         [HttpPost("check-out")]
-        public async Task<IActionResult> CheckOut(int employeeId)
+        public async Task<IActionResult> CheckOut(int userId)
         {
-            var success = await _service.CheckOutAsync(employeeId);
+            var success = await _service.CheckOutAsync(userId);
 
             if (!success)
                 return BadRequest("No active check-in found");
 
-            return Ok("Check-out successful");
+            return Ok(new
+            {
+                Message = "Check-out successful",
+                UserId = userId
+            });
         }
 
         // =========================================
-        // Get Today Total Hours (Single Employee)
+        // ✅ Get Total Hours
         // =========================================
         [HttpGet("total-hours")]
-        public async Task<IActionResult> GetTotalHours(int employeeId)
+        public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var record = await _service.GetTodayRecordAsync(employeeId);
+            var record = await _service.GetTodayRecordAsync(userId);
 
             if (record == null)
-                return NotFound("Attendance record not found for today");
+                return NotFound("No attendance record found");
 
             return Ok(new
             {
-                record.EmployeeId,
+                record.UserId,
                 record.AttendanceDate,
                 record.CheckInTime,
                 record.CheckOutTime,
@@ -110,27 +74,36 @@ namespace hr_crm.Controllers
         }
 
         // =========================================
-        // Get Attendance History (Past Records)
+        // ✅ Update Attendance Status
         // =========================================
-        [HttpGet("history/{employeeId}")]
-        public async Task<IActionResult> GetAttendanceHistory(int employeeId)
+        [HttpPut("update-status")]
+        public async Task<IActionResult> UpdateStatus(int userId, string status)
         {
-            var records = await _service.GetAttendanceHistoryAsync(employeeId);
+            var result = await _service.UpdateAttendanceAsync(userId, status);
+
+            if (!result)
+                return NotFound("Attendance record not found");
+
+            return Ok(new
+            {
+                Message = "Attendance updated successfully",
+                UserId = userId,
+                Status = status
+            });
+        }
+
+        // =========================================
+        // ✅ Get History
+        // =========================================
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetHistory(int userId)
+        {
+            var records = await _service.GetAttendanceHistoryAsync(userId);
 
             if (records == null || !records.Any())
                 return NotFound("No attendance history found");
 
-            var result = records.Select(r => new
-            {
-                r.EmployeeId,
-                r.AttendanceDate,
-                r.Status,
-                r.CheckInTime,
-                r.CheckOutTime,
-                r.TotalHours
-            });
-
-            return Ok(result);
+            return Ok(records);
         }
     }
 }

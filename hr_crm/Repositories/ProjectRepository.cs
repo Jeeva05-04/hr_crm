@@ -17,8 +17,7 @@ namespace hr_crm.Repositories
         public async Task<List<Project>> GetAllAsync()
         {
             return await _context.Projects
-                .Include(p => p.Manager)
-                .Include(p => p.Department)
+                .Include(p => p.Department) // Only department now
                 .OrderByDescending(p => p.CreatedDate)
                 .ToListAsync();
         }
