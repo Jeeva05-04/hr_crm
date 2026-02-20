@@ -1,117 +1,109 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+﻿using hr_crm.Service.Interface;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hr_crm.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AttendanceController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IAttendanceService _service;
 
-        public AttendanceController(IConfiguration config)
+        public AttendanceController(IAttendanceService service)
         {
-            _config = config;
+            _service = service;
         }
 
-        // =====================================================
-        // 1️⃣ AUTO-MARK DAILY ATTENDANCE (ALL EMPLOYEES)
-        // =====================================================
-        // POST: api/attendance/daily
-        [HttpPost("daily")]
-        public IActionResult MarkDailyAttendance()
+        // =========================================
+        // ✅ Check-In
+        // =========================================
+        [HttpPost("check-in")]
+        public async Task<IActionResult> CheckIn(int userId)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var success = await _service.CheckInAsync(userId);
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
+            if (!success)
+                return BadRequest("Already checked in or invalid user");
 
-            var sql = @"
-                INSERT INTO attendance (employee_id, attendance_date, status)
-                SELECT employee_id, CURRENT_DATE, 'Present'
-                FROM employees
-                ON CONFLICT (employee_id, attendance_date)
-                DO NOTHING;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
-
-            return Ok("Daily attendance marked for all employees");
-        }
-
-        // =====================================================
-        // 2️⃣ UPDATE ATTENDANCE (ABSENT / LEAVE)
-        // =====================================================
-        // PUT: api/attendance/update
-        [HttpPut("update")]
-        public IActionResult UpdateAttendance(int employeeId, string status)
-        {
-            var connStr = _config.GetConnectionString("HR_CRM");
-
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                UPDATE attendance
-                SET status = @status
-                WHERE employee_id = @eid
-                AND attendance_date = CURRENT_DATE;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("eid", employeeId);
-            cmd.Parameters.AddWithValue("status", status);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            if (rows == 0)
-                return BadRequest("Attendance not found for today");
-
-            return Ok("Attendance updated successfully");
-        }
-
-        // =====================================================
-        // 3️⃣ GET TODAY’S ATTENDANCE REPORT
-        // =====================================================
-        // GET: api/attendance/today
-        [HttpGet("today")]
-        public IActionResult GetTodayAttendance()
-        {
-            var connStr = _config.GetConnectionString("HR_CRM");
-            var list = new List<object>();
-
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                SELECT 
-                    e.employee_id,
-                    e.first_name,
-                    a.attendance_date,
-                    a.status
-                FROM attendance a
-                JOIN employees e
-                    ON a.employee_id = e.employee_id
-                WHERE a.attendance_date = CURRENT_DATE
-                ORDER BY e.employee_id;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            return Ok(new
             {
-                list.Add(new
-                {
-                    EmployeeId = reader.GetInt32(0),
-                    FirstName = reader.GetString(1),
-                    AttendanceDate = reader.GetDateTime(2),
-                    Status = reader.GetString(3)
-                });
-            }
+                Message = "Check-in successful",
+                UserId = userId
+            });
+        }
 
-            return Ok(list);
+        // =========================================
+        // ✅ Check-Out
+        // =========================================
+        [HttpPost("check-out")]
+        public async Task<IActionResult> CheckOut(int userId)
+        {
+            var success = await _service.CheckOutAsync(userId);
+
+            if (!success)
+                return BadRequest("No active check-in found");
+
+            return Ok(new
+            {
+                Message = "Check-out successful",
+                UserId = userId
+            });
+        }
+
+        // =========================================
+        // ✅ Get Total Hours
+        // =========================================
+        [HttpGet("total-hours")]
+        public async Task<IActionResult> GetTotalHours(int userId)
+        {
+            var record = await _service.GetTodayRecordAsync(userId);
+
+            if (record == null)
+                return NotFound("No attendance record found");
+
+            return Ok(new
+            {
+                record.UserId,
+                record.AttendanceDate,
+                record.CheckInTime,
+                record.CheckOutTime,
+                record.TotalHours
+            });
+        }
+
+        // =========================================
+        // ✅ Update Attendance Status
+        // =========================================
+        [HttpPut("update-status")]
+        public async Task<IActionResult> UpdateStatus(int userId, string status)
+        {
+            var result = await _service.UpdateAttendanceAsync(userId, status);
+
+            if (!result)
+                return NotFound("Attendance record not found");
+
+            return Ok(new
+            {
+                Message = "Attendance updated successfully",
+                UserId = userId,
+                Status = status
+            });
+        }
+
+        // =========================================
+        // ✅ Get History
+        // =========================================
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetHistory(int userId)
+        {
+            var records = await _service.GetAttendanceHistoryAsync(userId);
+
+            if (records == null || !records.Any())
+                return NotFound("No attendance history found");
+
+            return Ok(records);
         }
     }
 }

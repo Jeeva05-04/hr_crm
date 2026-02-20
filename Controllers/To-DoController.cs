@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using hr_crm.Models;
+﻿using hr_crm.Models;
+using hr_crm.Entities;
+using Microsoft.AspNetCore.Mvc;
+using hr_crm.Service.Interface;
 
 namespace hr_crm.Controllers
 {
@@ -8,89 +9,78 @@ namespace hr_crm.Controllers
     [Route("api/[controller]")]
     public class TodoController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly ITodoService _service;
 
-        public TodoController(IConfiguration config)
+        public TodoController(ITodoService service)
         {
-            _config = config;
+            _service = service;
         }
 
-        // =====================================
-        // GET: api/todo
-        // =====================================
         [HttpGet]
-        public IActionResult GetTasks()
+        public async Task<IActionResult> GetTasks()
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
-            var tasks = new List<object>();
+            var tasks = await _service.GetAllAsync();
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                SELECT
-                    t.task_id,
-                    t.title,
-                    t.description,
-                    e.first_name,
-                    t.due_date,
-                    t.status,
-                    t.created_at
-                FROM todo_tasks t
-                JOIN employees e
-                    ON t.assigned_to = e.employee_id
-                ORDER BY t.due_date;
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            var result = tasks.Select(t => new
             {
-                tasks.Add(new
-                {
-                    TaskId = reader.GetInt32(0),
-                    Title = reader.GetString(1),
-                    Description = reader.GetString(2),
-                    AssignedTo = reader.GetString(3),
-                    DueDate = reader.GetDateTime(4),
-                    Status = reader.GetString(5),
-                    CreatedAt = reader.GetDateTime(6)
-                });
-            }
+                t.TaskId,
+                t.Title,
+                t.Description,
+                AssignedTo = t.AssignedTo, // Just return ID
+                DueDate = t.DueDate.ToString("yyyy-MM-dd"),
+                t.Status,
+                t.CreatedAt
+            });
 
-            return Ok(tasks);
+            return Ok(result);
         }
 
-        // =====================================
-        // POST: api/todo
-        // =====================================
         [HttpPost]
-        public IActionResult AddTask([FromBody] TodoCreateDto task)
+        public async Task<IActionResult> AddTask([FromBody] TodoCreateDto dto)
         {
-            var connStr = _config.GetConnectionString("HR_CRM");
+            var task = new TodoTask
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                AssignedTo = dto.AssignedTo,
+                DueDate = DateOnly.FromDateTime(dto.DueDate),
+                Status = dto.Status
+            };
 
-            using var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-
-            var sql = @"
-                INSERT INTO todo_tasks
-                (title, description, assigned_to, due_date, status)
-                VALUES
-                (@title, @desc, @assigned, @due, @status);
-            ";
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("title", task.Title);
-            cmd.Parameters.AddWithValue("desc", task.Description);
-            cmd.Parameters.AddWithValue("assigned", task.AssignedTo);
-            cmd.Parameters.AddWithValue("due", task.DueDate);
-            cmd.Parameters.AddWithValue("status", task.Status);
-
-            cmd.ExecuteNonQuery();
+            await _service.CreateAsync(task);
 
             return Ok("To-Do task added successfully");
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] TodoCreateDto dto)
+        {
+            var task = new TodoTask
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                AssignedTo = dto.AssignedTo,
+                DueDate = DateOnly.FromDateTime(dto.DueDate),
+                Status = dto.Status
+            };
+
+            var result = await _service.UpdateAsync(id, task);
+
+            if (!result)
+                return NotFound("Task not found");
+
+            return Ok("To-Do task updated successfully");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            var result = await _service.DeleteAsync(id);
+
+            if (!result)
+                return NotFound("Task not found");
+
+            return Ok("Task deleted successfully");
+        }
     }
 }
-
