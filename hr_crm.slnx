@@ -1,6 +1,0 @@
-<Solution>
-  <Folder Name="/Models/">
-    <File Path="LoginResponse.cs" />
-  </Folder>
-  <Project Path="hr_crm/hr_crm.csproj" />
-</Solution>
