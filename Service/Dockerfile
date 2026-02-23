@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY hr_crm.csproj .
+COPY hr_crm/hr_crm.csproj .
 RUN dotnet restore
 
 COPY . .
