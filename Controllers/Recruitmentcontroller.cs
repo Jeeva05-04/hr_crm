@@ -16,6 +16,9 @@ namespace hr_crm.Controllers
             _service = service;
         }
 
+        // =========================================
+        // ✅ GET ALL
+        // =========================================
         [HttpGet]
         public async Task<IActionResult> GetCandidates()
         {
@@ -38,6 +41,9 @@ namespace hr_crm.Controllers
             return Ok(result);
         }
 
+        // =========================================
+        // ✅ CREATE
+        // =========================================
         [HttpPost]
         public async Task<IActionResult> AddCandidate([FromBody] RecruitmentCreateDto dto)
         {
@@ -56,7 +62,49 @@ namespace hr_crm.Controllers
 
             await _service.CreateAsync(recruitment);
 
-            return Ok("Candidate application added successfully");
+            return Ok(new { Message = "Candidate application added successfully" });
+        }
+
+        // =========================================
+        // ✅ UPDATE
+        // =========================================
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCandidate(int id, [FromBody] RecruitmentCreateDto dto)
+        {
+            var existing = await _service.GetByIdAsync(id);
+
+            if (existing == null)
+                return NotFound("Candidate not found");
+
+            existing.FirstName = dto.FirstName;
+            existing.LastName = dto.LastName;
+            existing.Email = dto.Email;
+            existing.Phone = dto.Phone;
+            existing.AppliedPosition = dto.AppliedPosition;
+            existing.DepartmentId = dto.DepartmentId;
+            existing.ApplicationDate = DateOnly.FromDateTime(dto.ApplicationDate);
+            existing.Status = dto.Status;
+            existing.Source = dto.Source;
+
+            await _service.UpdateAsync(existing);
+
+            return Ok(new { Message = "Candidate updated successfully" });
+        }
+
+        // =========================================
+        // ✅ DELETE
+        // =========================================
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCandidate(int id)
+        {
+            var existing = await _service.GetByIdAsync(id);
+
+            if (existing == null)
+                return NotFound("Candidate not found");
+
+            await _service.DeleteAsync(id);
+
+            return Ok(new { Message = "Candidate deleted successfully" });
         }
     }
 }

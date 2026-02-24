@@ -8,11 +8,8 @@ namespace hr_crm.Service.Interface
 
         Task<bool> CheckOutAsync(int userId);
 
-        Task<Attendance?> GetTodayRecordAsync(int userId);
-
-        Task<bool> UpdateAttendanceAsync(int userId, string status);
+        Task<TimeSpan> CalculateTodayTotalHoursAsync(int userId);
 
         Task<List<Attendance>> GetAttendanceHistoryAsync(int userId);
     }
 }
-

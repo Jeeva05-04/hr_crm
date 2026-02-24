@@ -13,19 +13,48 @@ namespace hr_crm.Services
             _repo = repo;
         }
 
-        public Task<bool> CheckInAsync(int userId)
-            => _repo.CheckInAsync(userId);
+        // =========================================
+        // ✅ Check-In (Create new session)
+        // =========================================
+        public async Task<bool> CheckInAsync(int userId)
+        {
+            return await _repo.CheckInAsync(userId);
+        }
 
-        public Task<bool> CheckOutAsync(int userId)
-            => _repo.CheckOutAsync(userId);
+        // =========================================
+        // ✅ Check-Out (Close open session)
+        // =========================================
+        public async Task<bool> CheckOutAsync(int userId)
+        {
+            return await _repo.CheckOutAsync(userId);
+        }
 
-        public Task<Attendance?> GetTodayRecordAsync(int userId)
-            => _repo.GetTodayRecordAsync(userId);
+        // =========================================
+        // ✅ Calculate Today's Total Hours
+        // =========================================
+        public async Task<TimeSpan> CalculateTodayTotalHoursAsync(int userId)
+        {
+            var sessions = await _repo.GetTodaySessionsAsync(userId);
 
-        public Task<bool> UpdateAttendanceAsync(int userId, string status)
-            => _repo.UpdateAttendanceAsync(userId, status);
+            TimeSpan total = TimeSpan.Zero;
 
-        public Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
-            => _repo.GetAttendanceHistoryAsync(userId);
+            foreach (var session in sessions)
+            {
+                if (session.CheckOutTime != null)
+                {
+                    total += session.CheckOutTime.Value - session.CheckInTime;
+                }
+            }
+
+            return total;
+        }
+
+        // =========================================
+        // ✅ Get Full History
+        // =========================================
+        public async Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
+        {
+            return await _repo.GetAttendanceHistoryAsync(userId);
+        }
     }
 }

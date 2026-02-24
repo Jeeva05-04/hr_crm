@@ -17,83 +17,61 @@ namespace hr_crm.Controllers
         }
 
         // =========================================
-        // ✅ Check-In
+        // ✅ Check-In (Creates New Session)
         // =========================================
         [HttpPost("check-in")]
         public async Task<IActionResult> CheckIn(int userId)
         {
-            var success = await _service.CheckInAsync(userId);
+            var result = await _service.CheckInAsync(userId);
 
-            if (!success)
-                return BadRequest("Already checked in or invalid user");
+            if (!result)
+                return BadRequest("User already has active session");
 
             return Ok(new
             {
                 Message = "Check-in successful",
-                UserId = userId
+                UserId = userId,
+                Time = DateTime.UtcNow
             });
         }
 
         // =========================================
-        // ✅ Check-Out
+        // ✅ Check-Out (Closes Active Session)
         // =========================================
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
-            var success = await _service.CheckOutAsync(userId);
+            var result = await _service.CheckOutAsync(userId);
 
-            if (!success)
+            if (!result)
                 return BadRequest("No active check-in found");
 
             return Ok(new
             {
                 Message = "Check-out successful",
-                UserId = userId
+                UserId = userId,
+                Time = DateTime.UtcNow
             });
         }
 
         // =========================================
-        // ✅ Get Total Hours
+        // ✅ Get Today's Total Hours (Sum of Sessions)
         // =========================================
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var record = await _service.GetTodayRecordAsync(userId);
-
-            if (record == null)
-                return NotFound("No attendance record found");
+            var totalHours = await _service.CalculateTodayTotalHoursAsync(userId);
 
             return Ok(new
             {
-                record.UserId,
-                record.AttendanceDate,
-                record.CheckInTime,
-                record.CheckOutTime,
-                record.TotalHours
-            });
-        }
-
-        // =========================================
-        // ✅ Update Attendance Status
-        // =========================================
-        [HttpPut("update-status")]
-        public async Task<IActionResult> UpdateStatus(int userId, string status)
-        {
-            var result = await _service.UpdateAttendanceAsync(userId, status);
-
-            if (!result)
-                return NotFound("Attendance record not found");
-
-            return Ok(new
-            {
-                Message = "Attendance updated successfully",
                 UserId = userId,
-                Status = status
+                Date = DateTime.UtcNow.Date,
+                TotalHours = totalHours
             });
         }
 
         // =========================================
-        // ✅ Get History
+        // ✅ Get Full History
         // =========================================
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
