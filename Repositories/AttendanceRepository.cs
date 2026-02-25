@@ -15,13 +15,48 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Check-In (Create New Session)
+        // ✅ Check-In (STRICT SHIFT VALIDATION)
         // =========================================
         public async Task<bool> CheckInAsync(int userId)
         {
             var today = DateTime.UtcNow.Date;
 
-            // Check if already checked-in and not checked-out
+            // =====================================
+            // 🔒 STRICT SHIFT VALIDATION
+            // =====================================
+
+            var userShift = await _context.UserShifts
+                .Include(us => us.Shift)
+                .FirstOrDefaultAsync(us => us.UserId == userId);
+
+            if (userShift == null)
+                return false; // Shift not assigned
+
+            var now = DateTime.UtcNow.TimeOfDay;
+
+            var shiftStart = userShift.Shift.StartTime;
+            var shiftEnd = userShift.Shift.EndTime;
+
+            bool insideShift;
+
+            // Normal shift (09:00 – 18:00)
+            if (shiftStart < shiftEnd)
+            {
+                insideShift = now >= shiftStart && now <= shiftEnd;
+            }
+            // Night shift (21:00 – 06:00)
+            else
+            {
+                insideShift = now >= shiftStart || now <= shiftEnd;
+            }
+
+            if (!insideShift)
+                return false; // Completely block outside shift
+
+            // =====================================
+            // 🔁 Check if already active session
+            // =====================================
+
             var openSession = await _context.Attendances
                 .FirstOrDefaultAsync(a =>
                     a.UserId == userId &&
@@ -30,6 +65,10 @@ namespace hr_crm.Repositories
 
             if (openSession != null)
                 return false; // Already active session
+
+            // =====================================
+            // ✅ Create new session
+            // =====================================
 
             var newSession = new Attendance
             {

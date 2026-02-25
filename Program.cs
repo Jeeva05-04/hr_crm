@@ -3,6 +3,8 @@ using hr_crm.Repositories;
 using hr_crm.Repositories.Interface;
 using hr_crm.Service.Interface;
 using hr_crm.Services;
+using hr_crm.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +35,9 @@ builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
 builder.Services.AddControllers();
 

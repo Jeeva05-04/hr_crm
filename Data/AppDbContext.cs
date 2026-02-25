@@ -13,6 +13,8 @@ namespace hr_crm.Data
         public DbSet<Branch> Branches { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Shift> Shifts { get; set; }
+        public DbSet<UserShift> UserShifts { get; set; }
         public DbSet<Knowledge> Knowledges { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }
