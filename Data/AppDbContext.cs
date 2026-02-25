@@ -15,6 +15,9 @@ namespace hr_crm.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<UserShift> UserShifts { get; set; }
+        public DbSet<OvertimePolicy> OvertimePolicies { get; set; }
+        public DbSet<OvertimeApproval> OvertimeApprovals { get; set; }
+        public DbSet<OvertimeRecord> OvertimeRecords { get; set; }
         public DbSet<Knowledge> Knowledges { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }

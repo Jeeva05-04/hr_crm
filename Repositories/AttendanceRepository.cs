@@ -21,41 +21,26 @@ namespace hr_crm.Repositories
         {
             var today = DateTime.UtcNow.Date;
 
-            // =====================================
-            // 🔒 STRICT SHIFT VALIDATION
-            // =====================================
-
             var userShift = await _context.UserShifts
                 .Include(us => us.Shift)
                 .FirstOrDefaultAsync(us => us.UserId == userId);
 
             if (userShift == null)
-                return false; // Shift not assigned
+                return false;
 
             var now = DateTime.UtcNow.TimeOfDay;
-
             var shiftStart = userShift.Shift.StartTime;
             var shiftEnd = userShift.Shift.EndTime;
 
             bool insideShift;
 
-            // Normal shift (09:00 – 18:00)
             if (shiftStart < shiftEnd)
-            {
                 insideShift = now >= shiftStart && now <= shiftEnd;
-            }
-            // Night shift (21:00 – 06:00)
             else
-            {
                 insideShift = now >= shiftStart || now <= shiftEnd;
-            }
 
             if (!insideShift)
-                return false; // Completely block outside shift
-
-            // =====================================
-            // 🔁 Check if already active session
-            // =====================================
+                return false;
 
             var openSession = await _context.Attendances
                 .FirstOrDefaultAsync(a =>
@@ -64,11 +49,7 @@ namespace hr_crm.Repositories
                     a.CheckOutTime == null);
 
             if (openSession != null)
-                return false; // Already active session
-
-            // =====================================
-            // ✅ Create new session
-            // =====================================
+                return false;
 
             var newSession = new Attendance
             {
@@ -86,7 +67,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Check-Out (Close Active Session)
+        // ✅ Check-Out (Close Active Session + Overtime Engine)
         // =========================================
         public async Task<bool> CheckOutAsync(int userId)
         {
@@ -102,6 +83,66 @@ namespace hr_crm.Repositories
                 return false;
 
             openSession.CheckOutTime = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            // ================= OVERTIME ENGINE =================
+
+            var todaySessions = await _context.Attendances
+                .Where(a => a.UserId == userId &&
+                            a.AttendanceDate == today &&
+                            a.CheckOutTime != null)
+                .ToListAsync();
+
+            double totalWorkedHours = todaySessions
+                .Sum(s => (s.CheckOutTime.Value - s.CheckInTime).TotalHours);
+
+            var userShift = await _context.UserShifts
+                .Include(us => us.Shift)
+                .FirstOrDefaultAsync(us => us.UserId == userId);
+
+            if (userShift == null)
+                return true;
+
+            var departmentId = userShift.Shift.DepartmentId;
+
+            var policy = await _context.OvertimePolicies
+                .FirstOrDefaultAsync(p => p.DepartmentId == departmentId);
+
+            if (policy == null)
+                return true;
+
+            double overtimeHours = totalWorkedHours - policy.StandardDailyHours;
+
+            if (overtimeHours <= 0)
+                return true;
+
+            var approval = await _context.OvertimeApprovals
+                .FirstOrDefaultAsync(a =>
+                    a.UserId == userId &&
+                    a.IsApproved &&
+                    a.ValidFrom <= today &&
+                    a.ValidTo >= today);
+
+            if (approval == null)
+                return true;
+
+            var weekStart = today.AddDays(-(int)today.DayOfWeek);
+
+            double weeklyOvertime = await _context.OvertimeRecords
+                .Where(o => o.UserId == userId &&
+                            o.Date >= weekStart &&
+                            o.Date <= today)
+                .SumAsync(o => o.OvertimeHours);
+
+            if (weeklyOvertime + overtimeHours > policy.MaxWeeklyOvertimeHours)
+                return true;
+
+            _context.OvertimeRecords.Add(new OvertimeRecord
+            {
+                UserId = userId,
+                Date = today,
+                OvertimeHours = overtimeHours
+            });
 
             await _context.SaveChangesAsync();
 
@@ -123,7 +164,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Attendance History (All Sessions)
+        // ✅ Attendance History
         // =========================================
         public async Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
         {
