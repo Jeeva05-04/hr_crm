@@ -23,7 +23,7 @@ namespace hr_crm.Controllers
         // ✅ APPROVE OVERTIME
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Approve")]
+        [HasPermission("OVERTIME_APPROVE")]
         [HttpPost]
         public async Task<IActionResult> ApproveOvertime([FromBody] OvertimeApprovalCreateDto dto)
         {
@@ -58,7 +58,7 @@ namespace hr_crm.Controllers
         // ✅ VIEW APPROVALS
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Approve")]
+        [HasPermission("OVERTIME_APPROVE")]
         [HttpGet]
         public async Task<IActionResult> GetApprovals()
         {
@@ -80,7 +80,7 @@ namespace hr_crm.Controllers
         // ✅ UPDATE APPROVAL
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Approve")]
+        [HasPermission("OVERTIME_APPROVE")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateApproval(int id, [FromBody] OvertimeApprovalUpdateDto dto)
         {

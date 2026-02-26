@@ -23,7 +23,7 @@ namespace hr_crm.Controllers
         // ✅ GET ALL SHIFTS
         // =====================================
         [Authorize]
-        [HasPermission("Shift.View")]
+        [HasPermission("SHIFT_VIEW")]
         [HttpGet]
         public async Task<IActionResult> GetAllShifts()
         {
@@ -42,36 +42,36 @@ namespace hr_crm.Controllers
         }
 
         // =====================================
-        // ✅ GET SHIFT BY ID
+        // ✅ GET ALL USERS WITH THEIR SHIFTS
         // =====================================
         [Authorize]
-        [HasPermission("Shift.View")]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetShiftById(int id)
+        [HasPermission("SHIFT_VIEW")]
+        [HttpGet("assigned-users")]
+        public async Task<IActionResult> GetAllAssignedUsers()
         {
-            var shift = await _context.Shifts
-                .Where(s => s.ShiftId == id)
-                .Select(s => new
+            var data = await _context.UserShifts
+                .Include(us => us.Shift)
+                .Select(us => new
                 {
-                    s.ShiftId,
-                    s.ShiftName,
-                    s.StartTime,
-                    s.EndTime,
-                    s.DepartmentId
+                    us.UserId,
+                    us.Shift.ShiftId,
+                    us.Shift.ShiftName,
+                    us.Shift.StartTime,
+                    us.Shift.EndTime
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (shift == null)
-                return NotFound("Shift not found");
+            if (!data.Any())
+                return NotFound("No shift assignments found");
 
-            return Ok(shift);
+            return Ok(data);
         }
 
         // =====================================
         // ✅ GET USER ASSIGNED SHIFT
         // =====================================
         [Authorize]
-        [HasPermission("Shift.View")]
+        [HasPermission("SHIFT_VIEW")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserShift(int userId)
         {
@@ -98,7 +98,7 @@ namespace hr_crm.Controllers
         // ✅ CREATE SHIFT
         // =====================================
         [Authorize]
-        [HasPermission("Shift.Create")]
+        [HasPermission("SHIFT_CREATE")]
         [HttpPost]
         public async Task<IActionResult> CreateShift(ShiftCreateDto dto)
         {
@@ -125,7 +125,7 @@ namespace hr_crm.Controllers
         // ✅ ASSIGN SHIFT
         // =====================================
         [Authorize]
-        [HasPermission("Shift.Assign")]
+        [HasPermission("SHIFT_ASSIGN")]
         [HttpPost("assign")]
         public async Task<IActionResult> AssignShift(int userId, int shiftId)
         {

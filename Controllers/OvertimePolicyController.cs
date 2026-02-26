@@ -23,7 +23,7 @@ namespace hr_crm.Controllers
         // ✅ CREATE POLICY (HR only)
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Policy.Create")]
+        [HasPermission("OVERTIME_POLICY_CREATE")]
         [HttpPost]
         public async Task<IActionResult> CreatePolicy([FromBody] OvertimePolicyCreateDto dto)
         {
@@ -54,7 +54,7 @@ namespace hr_crm.Controllers
         // ✅ GET ALL POLICIES
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Policy.View")]
+        [HasPermission("OVERTIME_POLICY_VIEW")]
         [HttpGet]
         public async Task<IActionResult> GetPolicies()
         {
@@ -76,7 +76,7 @@ namespace hr_crm.Controllers
         // ✅ UPDATE POLICY
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.Policy.Create")]
+        [HasPermission("OVERTIME_POLICY_CREATE")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePolicy(int id, [FromBody] OvertimePolicyUpdateDto dto)
         {

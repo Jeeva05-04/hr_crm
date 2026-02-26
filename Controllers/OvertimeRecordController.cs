@@ -22,7 +22,7 @@ namespace hr_crm.Controllers
         // ✅ GET USER OVERTIME HISTORY
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.View")]
+        [HasPermission("OVERTIME_VIEW")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserOvertime(int userId)
         {
@@ -45,7 +45,7 @@ namespace hr_crm.Controllers
         // ✅ WEEKLY SUMMARY
         // ===============================
         [Authorize]
-        [HasPermission("Overtime.View")]
+        [HasPermission("OVERTIME_VIEW")]
         [HttpGet("weekly/{userId}")]
         public async Task<IActionResult> GetWeeklyOvertime(int userId)
         {
