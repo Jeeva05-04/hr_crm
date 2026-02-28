@@ -33,6 +33,9 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
+builder.Services.AddScoped<IDepartmentBudgetRepository, DepartmentBudgetRepository>();
+builder.Services.AddScoped<IDepartmentBudgetService, DepartmentBudgetService>();
+
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 

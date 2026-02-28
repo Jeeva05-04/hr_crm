@@ -20,6 +20,9 @@ namespace hr_crm.Data
         public DbSet<OvertimeRecord> OvertimeRecords { get; set; }
         public DbSet<DepartmentRole> DepartmentRoles { get; set; }
         public DbSet<UserDepartmentRole> UserDepartmentRoles { get; set; }
+        public DbSet<DepartmentBudget> DepartmentBudgets { get; set; }
+        public DbSet<BudgetChangeRequest> BudgetChangeRequests { get; set; }
+        public DbSet<BudgetGuideline> BudgetGuidelines { get; set; }
         public DbSet<Knowledge> Knowledges { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }

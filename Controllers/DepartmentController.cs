@@ -1,6 +1,8 @@
 ﻿using hr_crm.Models;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using hr_crm.Authorization;
 
 namespace hr_crm.Controllers
 {
@@ -58,6 +60,22 @@ namespace hr_crm.Controllers
                 return NotFound("Department not found");
 
             return Ok("Department deleted successfully");
+        }
+
+        // =====================================
+        // ✅ GET USERS IN A DEPARTMENT
+        // =====================================
+        [Authorize]
+        [HasPermission("ROLE_VIEW")]
+        [HttpGet("{departmentId}/users")]
+        public async Task<IActionResult> GetUsersInDepartment(int departmentId)
+        {
+            var result = await _service.GetUsersInDepartmentAsync(departmentId);
+
+            if (result == null)
+                return NotFound("Department not found");
+
+            return Ok(result);
         }
     }
 }

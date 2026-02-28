@@ -41,5 +41,9 @@ namespace hr_crm.Services
 
         public Task<bool> DeleteAsync(int id)
             => _repo.DeleteAsync(id);
+
+        // ✅ NEW METHOD
+        public Task<object?> GetUsersInDepartmentAsync(int departmentId)
+            => _repo.GetUsersInDepartmentAsync(departmentId);
     }
 }

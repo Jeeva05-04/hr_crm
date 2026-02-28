@@ -9,5 +9,6 @@ namespace hr_crm.Repositories.Interface
         Task AddAsync(Department department);
         Task<bool> UpdateAsync(int id, Department department);
         Task<bool> DeleteAsync(int id);
+        Task<object?> GetUsersInDepartmentAsync(int departmentId);
     }
 }
