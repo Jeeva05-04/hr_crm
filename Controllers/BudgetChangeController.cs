@@ -1,41 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using hr_crm.Data;
-using hr_crm.DTO;
 using hr_crm.Entities;
+using hr_crm.Service.Interface;
 using hr_crm.Authorization;
 
-namespace hr_crm.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class BudgetChangeController : ControllerBase
+namespace hr_crm.Controllers
 {
-    private readonly AppDbContext _context;
-
-    public BudgetChangeController(AppDbContext context)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BudgetChangeController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly IBudgetChangeRequestService _service;
 
-    // ======================================
-    // ✅ REQUEST BUDGET CHANGE
-    // ======================================
-    [Authorize]
-    [HasPermission("BUDGET_REQUEST")]
-    [HttpPost("request")]
-    public async Task<IActionResult> RequestBudgetChange(BudgetRequestDto dto)
-    {
-        var request = new BudgetChangeRequest
+        public BudgetChangeController(IBudgetChangeRequestService service)
         {
-            DepartmentId = dto.DepartmentId,
-            RequestedAmount = dto.RequestedAmount,
-            Reason = dto.Reason
-        };
+            _service = service;
+        }
 
-        _context.BudgetChangeRequests.Add(request);
-        await _context.SaveChangesAsync();
+        // ✅ CREATE REQUEST
+        [Authorize]
+        [HasPermission("BUDGET_REQUEST")]
+        [HttpPost]
+        public async Task<IActionResult> CreateRequest([FromBody] BudgetChangeRequest request)
+        {
+            request.Status = "Pending";
+            request.RequestDate = DateTime.UtcNow;
 
-        return Ok("Budget change request submitted");
+            var created = await _service.CreateAsync(request);
+
+            return Ok(created);
+        }
+
+        // ✅ GET ALL REQUESTS
+        [Authorize]
+        [HasPermission("BUDGET_VIEW")]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var requests = await _service.GetAllAsync();
+            return Ok(requests);
+        }
+
+        // ✅ GET BY ID
+        [Authorize]
+        [HasPermission("BUDGET_VIEW")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var request = await _service.GetByIdAsync(id);
+
+            if (request == null)
+                return NotFound("Request not found");
+
+            return Ok(request);
+        }
     }
 }

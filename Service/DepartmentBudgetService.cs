@@ -14,28 +14,21 @@ namespace hr_crm.Services
         }
 
         public async Task<List<DepartmentBudget>> GetAllAsync()
-        {
-            return await _repository.GetAllAsync();
-        }
+            => await _repository.GetAllAsync();
 
         public async Task<DepartmentBudget?> GetByIdAsync(int id)
-        {
-            return await _repository.GetByIdAsync(id);
-        }
+            => await _repository.GetByIdAsync(id);
+
+        public async Task<List<DepartmentBudget>> GetByDepartmentIdAsync(int departmentId)
+            => await _repository.GetByDepartmentIdAsync(departmentId);
 
         public async Task<DepartmentBudget> CreateAsync(DepartmentBudget budget)
-        {
-            return await _repository.CreateAsync(budget);
-        }
+            => await _repository.CreateAsync(budget);
 
         public async Task<bool> ApproveByHeadAsync(int budgetId, int headUserId)
-        {
-            return await _repository.ApproveByHeadAsync(budgetId, headUserId);
-        }
+            => await _repository.ApproveByHeadAsync(budgetId, headUserId);
 
         public async Task<bool> ApproveByFinanceAsync(int budgetId, int financeUserId, decimal approvedAmount)
-        {
-            return await _repository.ApproveByFinanceAsync(budgetId, financeUserId, approvedAmount);
-        }
+            => await _repository.ApproveByFinanceAsync(budgetId, financeUserId, approvedAmount);
     }
 }

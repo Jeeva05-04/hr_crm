@@ -25,5 +25,8 @@
         public DateTime? FinanceApprovedDate { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        // 🔥 ADD THIS
+        public Department? Department { get; set; }
     }
 }

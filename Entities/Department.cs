@@ -18,4 +18,6 @@ public partial class Department
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 
     public virtual ICollection<Recruitment> Recruitments { get; set; } = new List<Recruitment>();
+
+    public ICollection<DepartmentBudget> Budgets { get; set; } = new List<DepartmentBudget>();
 }

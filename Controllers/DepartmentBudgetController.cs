@@ -34,9 +34,37 @@ namespace hr_crm.Controllers
                 Year = dto.Year
             };
 
-            await _service.CreateAsync(budget);
+            var created = await _service.CreateAsync(budget);
 
-            return Ok("Budget created successfully");
+            return Ok(created);
+        }
+
+        // ✅ GET ALL BUDGETS
+        [HttpGet]
+        public async Task<IActionResult> GetAllBudgets()
+        {
+            var budgets = await _service.GetAllAsync();
+            return Ok(budgets);
+        }
+
+        // ✅ GET BUDGET BY DEPARTMENT
+        [HttpGet("department/{departmentId}")]
+        public async Task<IActionResult> GetByDepartment(int departmentId)
+        {
+            var budgets = await _service.GetByDepartmentIdAsync(departmentId);
+            return Ok(budgets);
+        }
+
+        // ✅ GET BUDGET BY ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var budget = await _service.GetByIdAsync(id);
+
+            if (budget == null)
+                return NotFound("Budget not found");
+
+            return Ok(budget);
         }
     }
 }

@@ -14,16 +14,29 @@ namespace hr_crm.Repositories
             _context = context;
         }
 
+        // ✅ GET ALL BUDGETS
         public async Task<List<DepartmentBudget>> GetAllAsync()
         {
-            return await _context.DepartmentBudgets.ToListAsync();
+            return await _context.DepartmentBudgets
+                .ToListAsync();
         }
 
+        // ✅ GET BY ID
         public async Task<DepartmentBudget?> GetByIdAsync(int id)
         {
-            return await _context.DepartmentBudgets.FindAsync(id);
+            return await _context.DepartmentBudgets
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
+        // ✅ GET BY DEPARTMENT ID
+        public async Task<List<DepartmentBudget>> GetByDepartmentIdAsync(int departmentId)
+        {
+            return await _context.DepartmentBudgets
+                .Where(b => b.DepartmentId == departmentId)
+                .ToListAsync();
+        }
+
+        // ✅ CREATE
         public async Task<DepartmentBudget> CreateAsync(DepartmentBudget budget)
         {
             budget.Status = "Draft";
@@ -35,6 +48,7 @@ namespace hr_crm.Repositories
             return budget;
         }
 
+        // ✅ APPROVE BY HEAD
         public async Task<bool> ApproveByHeadAsync(int budgetId, int headUserId)
         {
             var budget = await _context.DepartmentBudgets.FindAsync(budgetId);
@@ -50,6 +64,7 @@ namespace hr_crm.Repositories
             return true;
         }
 
+        // ✅ APPROVE BY FINANCE
         public async Task<bool> ApproveByFinanceAsync(int budgetId, int financeUserId, decimal approvedAmount)
         {
             var budget = await _context.DepartmentBudgets.FindAsync(budgetId);

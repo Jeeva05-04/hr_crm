@@ -14,4 +14,6 @@ public class BudgetChangeRequest
     // Pending / ApprovedByHead / ApprovedByFinance / Rejected
 
     public DateTime RequestedDate { get; set; } = DateTime.UtcNow;
+
+    public DateTime RequestDate { get; set; }
 }

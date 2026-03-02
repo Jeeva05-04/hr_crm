@@ -12,10 +12,13 @@ namespace hr_crm.Authorization
 
         public override Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
+            // Remove "Permission:" prefix if exists
+            var permission = policyName.Replace("Permission:", "");
+
             var policy = new AuthorizationPolicyBuilder()
                 .RequireAssertion(context =>
                     context.User.HasClaim("perm", "CRM_FULL_ACCESS") ||
-                    context.User.HasClaim("perm", policyName)
+                    context.User.HasClaim("perm", permission)
                 )
                 .Build();
 

@@ -36,6 +36,9 @@ builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 builder.Services.AddScoped<IDepartmentBudgetRepository, DepartmentBudgetRepository>();
 builder.Services.AddScoped<IDepartmentBudgetService, DepartmentBudgetService>();
 
+builder.Services.AddScoped<IBudgetChangeRequestRepository, BudgetChangeRequestRepository>();
+builder.Services.AddScoped<IBudgetChangeRequestService, BudgetChangeRequestService>();
+
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 
@@ -127,7 +130,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("AllowFrontend");
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
