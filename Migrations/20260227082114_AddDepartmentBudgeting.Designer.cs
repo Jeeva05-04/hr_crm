@@ -194,7 +194,7 @@ namespace hr_crm.Migrations
                     b.Property<decimal>("RequestedAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("RequestedDate")
+                    b.Property<DateTime>("RequestDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")

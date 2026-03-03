@@ -1,6 +1,4 @@
-﻿namespace hr_crm.Entities;
-
-public class BudgetChangeRequest
+﻿public class BudgetChangeRequest
 {
     public int BudgetChangeRequestId { get; set; }
 
@@ -8,12 +6,13 @@ public class BudgetChangeRequest
 
     public decimal RequestedAmount { get; set; }
 
-    public string Reason { get; set; } = string.Empty;
+    public string Reason { get; set; }
 
     public string Status { get; set; } = "Pending";
-    // Pending / ApprovedByHead / ApprovedByFinance / Rejected
-
-    public DateTime RequestedDate { get; set; } = DateTime.UtcNow;
 
     public DateTime RequestDate { get; set; }
+
+    public int? ApprovedBy { get; set; }
+
+    public DateTime? ApprovedDate { get; set; }
 }

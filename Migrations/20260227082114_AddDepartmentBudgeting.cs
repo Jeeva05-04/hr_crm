@@ -22,7 +22,7 @@ namespace hr_crm.Migrations
                     RequestedAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
-                    RequestedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    RequestDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
