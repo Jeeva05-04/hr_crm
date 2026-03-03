@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260303070035_AddEmployeeOnboardingModule")]
+    partial class AddEmployeeOnboardingModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,9 +245,6 @@ namespace hr_crm.Migrations
                     b.Property<string>("AadharCardPath")
                         .HasColumnType("text");
 
-                    b.Property<string>("AcceptanceLetterPath")
-                        .HasColumnType("text");
-
                     b.Property<string>("BankPassbookPath")
                         .HasColumnType("text");
 
@@ -254,16 +254,13 @@ namespace hr_crm.Migrations
                     b.Property<int>("EmployeeOnboardingId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ExperienceLetterPath")
-                        .HasColumnType("text");
-
                     b.Property<string>("HighestQualificationDocumentPath")
                         .HasColumnType("text");
 
                     b.Property<string>("PANCardPath")
                         .HasColumnType("text");
 
-                    b.Property<string>("ParentAadharPaths")
+                    b.Property<string>("ParentAadharPath")
                         .HasColumnType("text");
 
                     b.HasKey("EmployeeOnboardingDocumentsId");

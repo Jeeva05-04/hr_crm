@@ -27,6 +27,9 @@ namespace hr_crm.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
+        public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; }
+        public DbSet<EmployeeOnboardingWorkExperience> EmployeeOnboardingWorkExperiences { get; set; }
+        public DbSet<EmployeeOnboardingDocuments> EmployeeOnboardingDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

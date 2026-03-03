@@ -5,6 +5,7 @@ using hr_crm.Service.Interface;
 using hr_crm.Services;
 using hr_crm.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using hr_crm.Mappings;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -42,9 +43,11 @@ builder.Services.AddScoped<IBudgetChangeRequestService, BudgetChangeRequestServi
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-
+builder.Services.AddAutoMapper(typeof(OnboardingMappingProfile));
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
