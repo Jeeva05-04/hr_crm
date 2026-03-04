@@ -8,6 +8,6 @@ namespace hr_crm.Repositories.Interface
         Task<Branch?> GetByIdAsync(int id);
         Task AddAsync(Branch branch);
         Task<bool> UpdateAsync(int id, Branch branch);
-        Task<bool> DeactivateAsync(int id);
+        Task<bool> DeleteAsync(int id);
     }
 }

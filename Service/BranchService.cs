@@ -41,7 +41,9 @@ namespace hr_crm.Services
             return _repo.UpdateAsync(id, branch);
         }
 
-        public Task<bool> DeactivateAsync(int id)
-            => _repo.DeactivateAsync(id);
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _repo.DeleteAsync(id);
+        }
     }
 }
