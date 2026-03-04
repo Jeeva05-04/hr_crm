@@ -7,6 +7,7 @@ namespace hr_crm.Repositories.Interface
         Task<BudgetChangeRequest> CreateAsync(BudgetChangeRequest request);
         Task<List<BudgetChangeRequest>> GetAllAsync();
         Task<BudgetChangeRequest?> GetByIdAsync(int id);
+        Task<bool> DeleteAsync(int id);
 
         Task<bool> ApproveAsync(int requestId, int approverId);
         Task<bool> RejectAsync(int requestId, int approverId);

@@ -14,5 +14,6 @@ namespace hr_crm.Service.Interface
 
         Task<bool> ApproveByHeadAsync(int budgetId, int headUserId);
         Task<bool> ApproveByFinanceAsync(int budgetId, int financeUserId, decimal approvedAmount);
+        Task<bool> DeleteAsync(int id);
     }
 }

@@ -64,6 +64,20 @@ namespace hr_crm.Repositories
             return true;
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var request = await _context.BudgetChangeRequests
+                .FirstOrDefaultAsync(x => x.BudgetChangeRequestId == id);
+
+            if (request == null)
+                return false;
+
+            _context.BudgetChangeRequests.Remove(request);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         // ✅ REJECT
         public async Task<bool> RejectAsync(int requestId, int approverId)
         {

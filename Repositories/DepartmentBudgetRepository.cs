@@ -64,6 +64,21 @@ namespace hr_crm.Repositories
             return true;
         }
 
+        // ✅ DELETE
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var budget = await _context.DepartmentBudgets
+                .FirstOrDefaultAsync(x => x.Id == id);   // ✅ FIXED HERE
+
+            if (budget == null)
+                return false;
+
+            _context.DepartmentBudgets.Remove(budget);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         // ✅ APPROVE BY FINANCE
         public async Task<bool> ApproveByFinanceAsync(int budgetId, int financeUserId, decimal approvedAmount)
         {

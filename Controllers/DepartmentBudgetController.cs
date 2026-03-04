@@ -55,6 +55,20 @@ namespace hr_crm.Controllers
             return Ok(budgets);
         }
 
+        // ✅ DELETE BUDGET
+        [Authorize]
+        [HasPermission("BUDGET_DELETE")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _service.DeleteAsync(id);
+
+            if (!result)
+                return NotFound("Budget not found");
+
+            return Ok("Budget deleted successfully");
+        }
+
         // ✅ GET BUDGET BY ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

@@ -30,5 +30,10 @@ namespace hr_crm.Services
 
         public async Task<bool> ApproveByFinanceAsync(int budgetId, int financeUserId, decimal approvedAmount)
             => await _repository.ApproveByFinanceAsync(budgetId, financeUserId, approvedAmount);
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _repository.DeleteAsync(id);
+        }
     }
 }

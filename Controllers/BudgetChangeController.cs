@@ -51,7 +51,7 @@ namespace hr_crm.Controllers
         }
 
         // ======================================
-        // ✅ GET BY ID
+        // ✅ GET REQUEST BY ID
         // ======================================
         [Authorize]
         [HasPermission("BUDGET_VIEW")]
@@ -72,7 +72,6 @@ namespace hr_crm.Controllers
         [Authorize]
         [HasPermission("BUDGET_APPROVE")]
         [HttpPut("approve/{id}")]
-       
         public async Task<IActionResult> Approve(int id)
         {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
@@ -91,7 +90,7 @@ namespace hr_crm.Controllers
         }
 
         // ======================================
-        // ✅ REJECT REQUEST
+        // ❌ REJECT REQUEST
         // ======================================
         [Authorize]
         [HasPermission("BUDGET_APPROVE")]
@@ -105,12 +104,28 @@ namespace hr_crm.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
-            var result = await _repository.RejectAsync(id, userId);  // ✅ Correct method
+            var result = await _repository.RejectAsync(id, userId);
 
             if (!result)
                 return BadRequest("Invalid request");
 
             return Ok("Budget change rejected");
+        }
+
+        // ======================================
+        // 🗑 DELETE REQUEST
+        // ======================================
+        [Authorize]
+        [HasPermission("BUDGET_DELETE")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _repository.DeleteAsync(id);
+
+            if (!result)
+                return NotFound("Request not found");
+
+            return Ok("Budget change request deleted successfully");
         }
     }
 }
