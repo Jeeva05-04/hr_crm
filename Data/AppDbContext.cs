@@ -28,12 +28,22 @@ namespace hr_crm.Data
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
         public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; }
-        public DbSet<EmployeeOnboardingWorkExperience> EmployeeOnboardingWorkExperiences { get; set; }
+        public DbSet<WorkExperience> WorkExperiences { get; set; }
         public DbSet<EmployeeOnboardingDocuments> EmployeeOnboardingDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<EmployeeOnboarding>()
+       .Property(e => e.IsFatherDeceased)
+       .HasConversion<string>();
+
+            modelBuilder.Entity<EmployeeOnboarding>()
+                .Property(e => e.IsMotherDeceased)
+                .HasConversion<string>();
+
             base.OnModelCreating(modelBuilder);
+
+
 
             // ✅ Unique attendance per user per day
             modelBuilder.Entity<Attendance>()

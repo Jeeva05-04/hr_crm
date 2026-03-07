@@ -5,6 +5,8 @@ using hr_crm.Service.Interface;
 using hr_crm.Services;
 using hr_crm.Authorization;
 using Microsoft.AspNetCore.Authorization;
+
+using System.Text.Json.Serialization;
 using hr_crm.Mappings;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,9 +48,13 @@ builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddHttpClient();
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddAutoMapper(typeof(OnboardingMappingProfile));
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<RolePermissionFilter>();
+});
 
 builder.Services.AddCors(options =>
 {
@@ -86,6 +92,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserAccess", policy =>
+        policy.RequireRole("USER", "HR_MANAGER"));
+
+    options.AddPolicy("HrManagerOnly", policy =>
+        policy.RequireRole("HR_MANAGER"));
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -132,6 +147,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors("AllowFrontend");
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

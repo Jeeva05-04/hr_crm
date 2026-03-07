@@ -17,7 +17,7 @@ namespace hr_crm.Repositories
         // =========================================
         // ✅ Check-In (STRICT SHIFT VALIDATION)
         // =========================================
-        public async Task<bool> CheckInAsync(int userId)
+        public async Task<bool> CheckInAsync(int userId, string? ipAddress, double? latitude, double? longitude, string? deviceInfo)
         {
             var today = DateTime.UtcNow.Date;
 
@@ -57,7 +57,13 @@ namespace hr_crm.Repositories
                 AttendanceDate = today,
                 CheckInTime = DateTime.UtcNow,
                 CheckOutTime = null,
-                Status = "Present"
+                Status = "Present",
+
+                // 🌐 New Tracking Fields
+                IPAddress = ipAddress,
+                Latitude = latitude,
+                Longitude = longitude,
+                DeviceInfo = deviceInfo
             };
 
             _context.Attendances.Add(newSession);
@@ -84,8 +90,6 @@ namespace hr_crm.Repositories
 
             openSession.CheckOutTime = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-
-            // ================= OVERTIME ENGINE =================
 
             var todaySessions = await _context.Attendances
                 .Where(a => a.UserId == userId &&

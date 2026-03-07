@@ -4,7 +4,13 @@ namespace hr_crm.Repositories.Interface
 {
     public interface IAttendanceRepository
     {
-        Task<bool> CheckInAsync(int userId);
+        Task<bool> CheckInAsync(
+            int userId,
+            string? ipAddress,
+            double? latitude,
+            double? longitude,
+            string? deviceInfo
+        );
 
         Task<bool> CheckOutAsync(int userId);
 

@@ -1,39 +1,28 @@
 ﻿using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using hr_crm.DTO;
 
 namespace hr_crm.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class AttendanceController : ControllerBase
+    public class AttendenceController : ControllerBase
     {
-        private readonly IAttendanceService _service;
+        private readonly IAttendanceService _attendanceService;
 
-        public AttendanceController(IAttendanceService service)
+        public AttendenceController(IAttendanceService attendanceService)
         {
-            _service = service;
+            _attendanceService = attendanceService;
         }
 
-        // =========================================
-        // ✅ Check-In (Creates New Session)
-        // =========================================
-        [HttpPost("check-in")]
-        public async Task<IActionResult> CheckIn(int userId)
+        [HttpPost("checkin")]
+        public async Task<IActionResult> CheckIn([FromBody] AttendanceCheckInDto dto)
         {
-            var result = await _service.CheckInAsync(userId);
-
-            if (!result)
-                return BadRequest("User already has active session");
-
-            return Ok(new
-            {
-                Message = "Check-in successful",
-                UserId = userId,
-                Time = DateTime.UtcNow
-            });
+            var result = await _attendanceService.CheckInAsync(dto, HttpContext);
+            return Ok(result);
         }
+
 
         // =========================================
         // ✅ Check-Out (Closes Active Session)
@@ -41,7 +30,7 @@ namespace hr_crm.Controllers
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
-            var result = await _service.CheckOutAsync(userId);
+            var result = await _attendanceService.CheckOutAsync(userId);
 
             if (!result)
                 return BadRequest("No active check-in found");
@@ -60,7 +49,7 @@ namespace hr_crm.Controllers
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var totalHours = await _service.CalculateTodayTotalHoursAsync(userId);
+            var totalHours = await _attendanceService.CalculateTodayTotalHoursAsync(userId);
 
             return Ok(new
             {
@@ -76,7 +65,7 @@ namespace hr_crm.Controllers
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
         {
-            var records = await _service.GetAttendanceHistoryAsync(userId);
+            var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
 
             if (records == null || !records.Any())
                 return NotFound("No attendance history found");

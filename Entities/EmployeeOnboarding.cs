@@ -2,7 +2,7 @@
 {
     public int EmployeeOnboardingId { get; set; }
 
-    // ===== PAGE 1 - PERSONAL =====
+    // PAGE 1
     public string FullName { get; set; }
     public DateTime DateOfJoining { get; set; }
     public DateTime DateOfBirth { get; set; }
@@ -17,13 +17,13 @@
 
     public string FatherName { get; set; }
     public DateTime FatherDOB { get; set; }
-    public bool IsFatherDeceased { get; set; }
+    public string IsFatherDeceased { get; set; }
     public DateTime? FatherDOD { get; set; }
     public int? FatherAge { get; set; }
 
     public string MotherName { get; set; }
     public DateTime MotherDOB { get; set; }
-    public bool IsMotherDeceased { get; set; }
+    public string IsMotherDeceased { get; set; }
     public DateTime? MotherDOD { get; set; }
     public int? MotherAge { get; set; }
 
@@ -36,19 +36,18 @@
     public string TemporaryAddress { get; set; }
     public string PermanentAddress { get; set; }
 
-    // ===== PAGE 3 - BANK =====
+    // PAGE 3
     public string BankName { get; set; }
     public string AccountNumber { get; set; }
     public string IFSC { get; set; }
     public string BranchName { get; set; }
 
-    // ===== PAGE 5 - OFFICE =====
+    // PAGE 5
     public string OfficeEmail { get; set; }
     public string OfficeMobileNumber { get; set; }
     public string LaptopSerialNumber { get; set; }
     public string? LaptopImagePath { get; set; }
 
-    // SYSTEM
     public string Status { get; set; } = "Submitted";
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }
