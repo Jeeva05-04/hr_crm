@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using hr_crm.Entities;
+﻿using hr_crm.Entities;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace hr_crm.Data
 {
@@ -22,6 +23,17 @@ namespace hr_crm.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
+        public DbSet<Payroll> Payrolls { get; set; }
+        public DbSet<Leave> Leaves { get; set; }
+        public DbSet<DigitalSignature> DigitalSignatures { get; set; }
+     
+        public DbSet<ExitInterview> ExitInterviews { get; set; }
+        
+        public DbSet<OffBoarding> OffBoardings { get; set; }
+        public DbSet<EmployeeTraining> EmployeeTrainings { get; set; }
+         public DbSet<LearningCourse> LearningCourses { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
