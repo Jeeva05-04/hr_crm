@@ -8,6 +8,7 @@ namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _service;
@@ -62,9 +63,6 @@ namespace hr_crm.Controllers
             return Ok("Department deleted successfully");
         }
 
-        // =====================================
-        // ✅ GET USERS IN A DEPARTMENT
-        // =====================================
         [Authorize]
         [HasPermission("ROLE_VIEW")]
         [HttpGet("{departmentId}/users")]

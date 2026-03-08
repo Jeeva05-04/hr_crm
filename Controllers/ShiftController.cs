@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using hr_crm.Authorization;
-using hr_crm.Entities;
-using hr_crm.DTO;
 using hr_crm.Data;
+using hr_crm.DTO;
+using hr_crm.Entities;
 
 namespace hr_crm.Controllers
 {
@@ -19,9 +19,6 @@ namespace hr_crm.Controllers
             _context = context;
         }
 
-        // =====================================
-        // ✅ GET ALL SHIFTS
-        // =====================================
         [Authorize]
         [HasPermission("SHIFT_VIEW")]
         [HttpGet]
@@ -41,9 +38,6 @@ namespace hr_crm.Controllers
             return Ok(shifts);
         }
 
-        // =====================================
-        // ✅ GET ALL USERS WITH THEIR SHIFTS
-        // =====================================
         [Authorize]
         [HasPermission("SHIFT_VIEW")]
         [HttpGet("assigned-users")]
@@ -67,14 +61,16 @@ namespace hr_crm.Controllers
             return Ok(data);
         }
 
-        // =====================================
-        // ✅ GET USER ASSIGNED SHIFT
-        // =====================================
         [Authorize]
         [HasPermission("SHIFT_VIEW")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserShift(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You can only view your own shift.");
+
             var userShift = await _context.UserShifts
                 .Include(us => us.Shift)
                 .Where(us => us.UserId == userId)
@@ -94,9 +90,6 @@ namespace hr_crm.Controllers
             return Ok(userShift);
         }
 
-        // =====================================
-        // ✅ CREATE SHIFT
-        // =====================================
         [Authorize]
         [HasPermission("SHIFT_CREATE")]
         [HttpPost]
@@ -113,17 +106,9 @@ namespace hr_crm.Controllers
             _context.Shifts.Add(shift);
             await _context.SaveChangesAsync();
 
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"{claim.Type} : {claim.Value}");
-            }
-
             return Ok("Shift created successfully");
         }
 
-        // =====================================
-        // ✅ ASSIGN SHIFT
-        // =====================================
         [Authorize]
         [HasPermission("SHIFT_ASSIGN")]
         [HttpPost("assign")]

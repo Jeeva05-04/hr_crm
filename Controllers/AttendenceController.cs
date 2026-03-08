@@ -19,6 +19,11 @@ namespace hr_crm.Controllers
         [HttpPost("checkin")]
         public async Task<IActionResult> CheckIn([FromBody] AttendanceCheckInDto dto)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (dto.UserId != tokenUserId)
+                return Forbid("You cannot check-in for another user.");
+
             var result = await _attendanceService.CheckInAsync(dto, HttpContext);
             return Ok(result);
         }
@@ -30,6 +35,11 @@ namespace hr_crm.Controllers
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You cannot check-out another user.");
+
             var result = await _attendanceService.CheckOutAsync(userId);
 
             if (!result)
@@ -44,11 +54,16 @@ namespace hr_crm.Controllers
         }
 
         // =========================================
-        // ✅ Get Today's Total Hours (Sum of Sessions)
+        // ✅ Get Today's Total Hours
         // =========================================
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You can only view your own data.");
+
             var totalHours = await _attendanceService.CalculateTodayTotalHoursAsync(userId);
 
             return Ok(new
@@ -65,6 +80,11 @@ namespace hr_crm.Controllers
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You can only view your own attendance history.");
+
             var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
 
             if (records == null || !records.Any())

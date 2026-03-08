@@ -2,11 +2,13 @@
 using hr_crm.Models;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class KnowledgeController : ControllerBase
     {
         private readonly IKnowledgeService _service;

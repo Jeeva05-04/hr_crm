@@ -97,11 +97,17 @@ public class DepartmentRoleController : ControllerBase
     // =====================================
     // ✅ GET USER ROLE
     // =====================================
+    
     [Authorize]
     [HasPermission("ROLE_VIEW")]
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetUserRole(int userId)
     {
+        var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+        if (userId != tokenUserId)
+            return Forbid("You can only view your own role.");
+
         var userRole = await _context.UserDepartmentRoles
             .Include(ur => ur.DepartmentRole)
             .ThenInclude(r => r.Department)

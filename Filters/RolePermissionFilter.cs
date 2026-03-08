@@ -15,6 +15,7 @@ public class RolePermissionFilter : IAuthorizationFilter
 
         var role = user.FindFirst("role")?.Value;
         var method = context.HttpContext.Request.Method;
+        var path = context.HttpContext.Request.Path.Value;
 
         // HR Manager → full access
         if (role == "HR_MANAGER")
@@ -22,16 +23,29 @@ public class RolePermissionFilter : IAuthorizationFilter
 
         if (role == "USER")
         {
-            var path = context.HttpContext.Request.Path.Value;
-
             // allow attendance actions
             if (path.Contains("check-in") || path.Contains("check-out"))
                 return;
 
-            // allow GET only
+            // USER → only GET allowed
             if (method != "GET")
             {
                 context.Result = new ForbidResult();
+                return;
+            }
+
+            // Prevent accessing other users data
+            var tokenUserId = user.FindFirst("sub")?.Value;
+
+            if (context.RouteData.Values.ContainsKey("userId"))
+            {
+                var routeUserId = context.RouteData.Values["userId"]?.ToString();
+
+                if (routeUserId != tokenUserId)
+                {
+                    context.Result = new ForbidResult();
+                    return;
+                }
             }
         }
     }

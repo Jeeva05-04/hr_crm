@@ -2,11 +2,13 @@
 using hr_crm.Entities;
 using Microsoft.AspNetCore.Mvc;
 using hr_crm.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class RecruitmentController : ControllerBase
     {
         private readonly IRecruitmentService _service;

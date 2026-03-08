@@ -19,18 +19,22 @@ namespace hr_crm.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTasks()
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
             var tasks = await _service.GetAllAsync();
 
-            var result = tasks.Select(t => new
-            {
-                t.TaskId,
-                t.Title,
-                t.Description,
-                AssignedTo = t.AssignedTo, // Just return ID
-                DueDate = t.DueDate.ToString("yyyy-MM-dd"),
-                t.Status,
-                t.CreatedAt
-            });
+            var result = tasks
+                .Where(t => t.AssignedTo == tokenUserId)
+                .Select(t => new
+                {
+                    t.TaskId,
+                    t.Title,
+                    t.Description,
+                    AssignedTo = t.AssignedTo,
+                    DueDate = t.DueDate.ToString("yyyy-MM-dd"),
+                    t.Status,
+                    t.CreatedAt
+                });
 
             return Ok(result);
         }
@@ -38,6 +42,11 @@ namespace hr_crm.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTask([FromBody] TodoCreateDto dto)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (dto.AssignedTo != tokenUserId)
+                return Forbid("You cannot create tasks for another user.");
+
             var task = new TodoTask
             {
                 Title = dto.Title,
@@ -55,6 +64,11 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, [FromBody] TodoCreateDto dto)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (dto.AssignedTo != tokenUserId)
+                return Forbid("You cannot update another user's task.");
+
             var task = new TodoTask
             {
                 Title = dto.Title,
