@@ -85,7 +85,11 @@ namespace hr_crm.Controllers
 
             var tokenUserId = int.Parse(userIdClaim.Value);
 
-            if (userId != tokenUserId)
+            // Check if user is HR
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+
+            // Employees can only view their own hours
+            if (!isHR && userId != tokenUserId)
                 return Forbid("You can only view your own data.");
 
             var totalHours = await _attendanceService.CalculateTodayTotalHoursAsync(userId);
@@ -112,7 +116,11 @@ namespace hr_crm.Controllers
 
             var tokenUserId = int.Parse(userIdClaim.Value);
 
-            if (userId != tokenUserId)
+            // Check if user is HR
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+
+            // Employees can only see their own data
+            if (!isHR && userId != tokenUserId)
                 return Forbid("You can only view your own attendance history.");
 
             var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
