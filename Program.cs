@@ -1,19 +1,25 @@
-﻿using hr_crm.Data;
+﻿using System.Text;
+using hr_crm.Authorization;
+using hr_crm.Data;
 using hr_crm.Repositories;
 using hr_crm.Repositories.Interface;
+using hr_crm.Service;
 using hr_crm.Service.Interface;
 using hr_crm.Services;
+//<<<<<<< HEAD
 using hr_crm.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
 using System.Text.Json.Serialization;
 using hr_crm.Mappings;
 
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +51,33 @@ builder.Services.AddScoped<IBudgetChangeRequestService, BudgetChangeRequestServi
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 
+
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
+builder.Services.AddScoped<IPayrollService, PayrollService>();
+
+builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
+
+builder.Services.AddScoped<IDigitalSignatureRepository, DigitalSignatureRespository>();
+builder.Services.AddScoped<IDigitalSignatureService, DigitalSignatureService>();
+
+builder.Services.AddScoped<IExitInterviewRepository, ExitInterviewRepository>();
+builder.Services.AddScoped<IExitInterviewService, ExitInterviewService>();
+
+builder.Services.AddScoped<IOffBoardingRespository, OffBoardingRepository>();
+builder.Services.AddScoped<IOffBoardingService, OffBoardingService>();
+
+builder.Services.AddScoped<IEmployeeTrainingRepository, EmployeeTrainingRepository>();
+builder.Services.AddScoped<IEmployeeTrainingService, EmployeeTrainingService>();
+
+builder.Services.AddScoped<ILearningRepository, LearningRespository>();
+builder.Services.AddScoped<ILearningService, LearningService>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
@@ -145,6 +177,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");
 
