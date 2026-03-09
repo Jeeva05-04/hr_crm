@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using hr_crm.DTO;
+using System.Security.Claims;
 
 namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // ensure only logged-in users can access
     public class AttendenceController : ControllerBase
     {
         private readonly IAttendanceService _attendanceService;
@@ -16,26 +18,42 @@ namespace hr_crm.Controllers
             _attendanceService = attendanceService;
         }
 
+        // =========================================
+        // Check-In
+        // =========================================
         [HttpPost("checkin")]
         public async Task<IActionResult> CheckIn([FromBody] AttendanceCheckInDto dto)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            // Prevent checking in for another user
             if (dto.UserId != tokenUserId)
                 return Forbid("You cannot check-in for another user.");
 
+            // HttpContext will be used to capture IP & Device info
             var result = await _attendanceService.CheckInAsync(dto, HttpContext);
+
             return Ok(result);
         }
 
 
         // =========================================
-        // ✅ Check-Out (Closes Active Session)
+        // Check-Out
         // =========================================
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             if (userId != tokenUserId)
                 return Forbid("You cannot check-out another user.");
@@ -53,13 +71,19 @@ namespace hr_crm.Controllers
             });
         }
 
+
         // =========================================
-        // ✅ Get Today's Total Hours
+        // Total Hours Today
         // =========================================
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             if (userId != tokenUserId)
                 return Forbid("You can only view your own data.");
@@ -74,13 +98,19 @@ namespace hr_crm.Controllers
             });
         }
 
+
         // =========================================
-        // ✅ Get Full History
+        // Attendance History
         // =========================================
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             if (userId != tokenUserId)
                 return Forbid("You can only view your own attendance history.");

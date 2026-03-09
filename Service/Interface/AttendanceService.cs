@@ -19,8 +19,22 @@ namespace hr_crm.Services
         // =========================================
         public async Task<Attendance> CheckInAsync(AttendanceCheckInDto dto, HttpContext httpContext)
         {
+            // Get IP Address
             var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+
+            // If behind proxy (Azure / Nginx)
+            if (httpContext.Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            }
+
+            // Get Device Info
             var deviceInfo = httpContext.Request.Headers["User-Agent"].ToString();
+
+            if (string.IsNullOrEmpty(deviceInfo))
+            {
+                deviceInfo = "Unknown Device";
+            }
 
             await _repo.CheckInAsync(
                 dto.UserId,
@@ -33,9 +47,9 @@ namespace hr_crm.Services
             return new Attendance
             {
                 UserId = dto.UserId,
-                IPAddress = ipAddress,
-                DeviceInfo = deviceInfo,
-                CheckInTime = DateTime.UtcNow
+                CheckInTime = DateTime.UtcNow,
+                IpAddress = ipAddress,
+                DeviceInfo = deviceInfo
             };
         }
 

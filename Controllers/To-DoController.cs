@@ -2,6 +2,7 @@
 using hr_crm.Entities;
 using Microsoft.AspNetCore.Mvc;
 using hr_crm.Service.Interface;
+using System.Security.Claims;
 
 namespace hr_crm.Controllers
 {
@@ -19,7 +20,12 @@ namespace hr_crm.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTasks()
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             var tasks = await _service.GetAllAsync();
 
@@ -42,7 +48,12 @@ namespace hr_crm.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTask([FromBody] TodoCreateDto dto)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             if (dto.AssignedTo != tokenUserId)
                 return Forbid("You cannot create tasks for another user.");
@@ -64,7 +75,12 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, [FromBody] TodoCreateDto dto)
         {
-            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
 
             if (dto.AssignedTo != tokenUserId)
                 return Forbid("You cannot update another user's task.");

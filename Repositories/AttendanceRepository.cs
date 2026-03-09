@@ -15,7 +15,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Check-In (STRICT SHIFT VALIDATION)
+        // Check-In (STRICT SHIFT VALIDATION)
         // =========================================
         public async Task<bool> CheckInAsync(int userId, string? ipAddress, double? latitude, double? longitude, string? deviceInfo)
         {
@@ -42,6 +42,7 @@ namespace hr_crm.Repositories
             if (!insideShift)
                 return false;
 
+            // Check if open session exists
             var openSession = await _context.Attendances
                 .FirstOrDefaultAsync(a =>
                     a.UserId == userId &&
@@ -59,10 +60,8 @@ namespace hr_crm.Repositories
                 CheckOutTime = null,
                 Status = "Present",
 
-                // 🌐 New Tracking Fields
-                IPAddress = ipAddress,
-                Latitude = latitude,
-                Longitude = longitude,
+                // Store IP and Device Info
+                IpAddress = ipAddress,
                 DeviceInfo = deviceInfo
             };
 
@@ -73,7 +72,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Check-Out (Close Active Session + Overtime Engine)
+        // Check-Out (Close Active Session + Overtime Engine)
         // =========================================
         public async Task<bool> CheckOutAsync(int userId)
         {
@@ -89,6 +88,7 @@ namespace hr_crm.Repositories
                 return false;
 
             openSession.CheckOutTime = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
             var todaySessions = await _context.Attendances
@@ -98,7 +98,7 @@ namespace hr_crm.Repositories
                 .ToListAsync();
 
             double totalWorkedHours = todaySessions
-                .Sum(s => (s.CheckOutTime.Value - s.CheckInTime).TotalHours);
+                .Sum(s => (s.CheckOutTime!.Value - s.CheckInTime).TotalHours);
 
             var userShift = await _context.UserShifts
                 .Include(us => us.Shift)
@@ -154,7 +154,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Get Today's All Sessions
+        // Get Today's All Sessions
         // =========================================
         public async Task<List<Attendance>> GetTodaySessionsAsync(int userId)
         {
@@ -168,7 +168,7 @@ namespace hr_crm.Repositories
         }
 
         // =========================================
-        // ✅ Attendance History
+        // Attendance History
         // =========================================
         public async Task<List<Attendance>> GetAttendanceHistoryAsync(int userId)
         {

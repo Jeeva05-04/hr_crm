@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309073937_AddAttendanceTracking")]
+    partial class AddAttendanceTracking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -384,12 +387,6 @@ namespace hr_crm.Migrations
 
                     b.Property<DateTime?>("CheckOutTime")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceInfo")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
