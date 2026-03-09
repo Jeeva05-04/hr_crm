@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306111728_LearningCourse")]
+    partial class LearningCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,13 +25,16 @@ namespace hr_crm.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AttendanceTracking", b =>
+            modelBuilder.Entity("Attendance", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("AttendanceId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AttendanceId"));
+
+                    b.Property<DateTime>("AttendanceDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CheckInTime")
                         .HasColumnType("timestamp with time zone");
@@ -36,240 +42,18 @@ namespace hr_crm.Migrations
                     b.Property<DateTime?>("CheckOutTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("DeviceInfo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
+                    b.Property<string>("Status")
                         .HasColumnType("text");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("AttendanceId");
 
-                    b.ToTable("AttendanceTracking");
-                });
+                    b.HasIndex("UserId", "AttendanceDate")
+                        .IsUnique();
 
-            modelBuilder.Entity("BudgetChangeRequest", b =>
-                {
-                    b.Property<int>("BudgetChangeRequestId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BudgetChangeRequestId"));
-
-                    b.Property<int?>("ApprovedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("RequestDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("RequestedAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("BudgetChangeRequestId");
-
-                    b.ToTable("BudgetChangeRequests");
-                });
-
-            modelBuilder.Entity("EmployeeOnboarding", b =>
-                {
-                    b.Property<int>("EmployeeOnboardingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EmployeeOnboardingId"));
-
-                    b.Property<string>("AadharNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BloodGroup")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BranchName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ChildrenDetails")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DateOfJoining")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EmergencyContactName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EmergencyContactRelationship")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("FatherAge")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("FatherDOB")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("FatherDOD")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FatherName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IFSC")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IsFatherDeceased")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IsMotherDeceased")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LaptopImagePath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LaptopSerialNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MaritalStatus")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("MotherAge")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("MotherDOB")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("MotherDOD")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("MotherName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OfficeEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OfficeMobileNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PAN")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PermanentAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("SpouseDOB")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SpouseName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TemporaryAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("EmployeeOnboardingId");
-
-                    b.ToTable("EmployeeOnboardings");
-                });
-
-            modelBuilder.Entity("EmployeeOnboardingDocuments", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AadharCardPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AcceptanceLetterPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankPassbookPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankStatementPath")
-                        .HasColumnType("text");
-
-                    b.Property<int>("EmployeeOnboardingId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ExperienceLetterPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("HighestQualificationDocumentPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PANCardPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ParentAadharPath")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EmployeeOnboardingDocuments");
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("OvertimeApproval", b =>
@@ -368,43 +152,6 @@ namespace hr_crm.Migrations
                     b.ToTable("UserShifts");
                 });
 
-            modelBuilder.Entity("hr_crm.Entities.Attendance", b =>
-                {
-                    b.Property<int>("AttendanceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AttendanceId"));
-
-                    b.Property<DateTime>("AttendanceDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CheckInTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("CheckOutTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceInfo")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("AttendanceId");
-
-                    b.HasIndex("UserId", "AttendanceDate")
-                        .IsUnique();
-
-                    b.ToTable("Attendances");
-                });
-
             modelBuilder.Entity("hr_crm.Entities.Branch", b =>
                 {
                     b.Property<int>("BranchId")
@@ -429,28 +176,6 @@ namespace hr_crm.Migrations
                     b.ToTable("Branches");
                 });
 
-            modelBuilder.Entity("hr_crm.Entities.BudgetGuideline", b =>
-                {
-                    b.Property<int>("BudgetGuidelineId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BudgetGuidelineId"));
-
-                    b.Property<decimal>("MaxAnnualBudget")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MaxResourcePercentage")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MaxTrainingPercentage")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("BudgetGuidelineId");
-
-                    b.ToTable("BudgetGuidelines");
-                });
-
             modelBuilder.Entity("hr_crm.Entities.Department", b =>
                 {
                     b.Property<int>("DepartmentId")
@@ -473,9 +198,6 @@ namespace hr_crm.Migrations
                     b.ToTable("Departments");
                 });
 
-//<<<<<<< HEAD
-            modelBuilder.Entity("hr_crm.Entities.DepartmentBudget", b =>
-//=======
             modelBuilder.Entity("hr_crm.Entities.DigitalSignature", b =>
                 {
                     b.Property<int>("SignatureId")
@@ -520,41 +242,15 @@ namespace hr_crm.Migrations
                     b.HasKey("SignatureId");
 
                     b.ToTable("DigitalSignatures");
-                }));
+                });
 
             modelBuilder.Entity("hr_crm.Entities.EmployeeTraining", b =>
-
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-
-                    b.Property<decimal?>("ApprovedAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("FinanceApprovedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("FinanceApprovedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("HeadApprovedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("HeadApprovedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("ResourceBudget")
-                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("AssignedDate")
                         .HasColumnType("timestamp with time zone");
@@ -572,59 +268,9 @@ namespace hr_crm.Migrations
                     b.Property<bool>("IsMandatory")
                         .HasColumnType("boolean");
 
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
-
-
-                    b.Property<decimal>("TotalAnnualBudget")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TrainingBudget")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("UsedBudget")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.ToTable("DepartmentBudgets");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.DepartmentRole", b =>
-                {
-                    b.Property<int>("DepartmentRoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DepartmentRoleId"));
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PerformanceLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RequiredSkillLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("DepartmentRoleId");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.ToTable("DepartmentRoles");
 
                     b.Property<string>("TrainingName")
                         .IsRequired()
@@ -665,7 +311,6 @@ namespace hr_crm.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ExitInterviews");
-
                 });
 
             modelBuilder.Entity("hr_crm.Entities.Knowledge", b =>
@@ -1022,75 +667,6 @@ namespace hr_crm.Migrations
                     b.ToTable("TodoTasks");
                 });
 
-            modelBuilder.Entity("hr_crm.Entities.UserDepartmentRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DepartmentRoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DepartmentRoleId");
-
-                    b.ToTable("UserDepartmentRoles");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.WorkExperience", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EmployeeOnboardingId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("LastCompanyPFNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastCompanyUAN")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OfferedDesignation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("OfferedMonthlyCTC")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("OfferedSalaryNTH")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("OfferedYearlyCTC")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("PreviousCompanyDetails")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PreviousCompanyPayslipPath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TotalExperience")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WorkExperiences");
-                });
-
             modelBuilder.Entity("Shift", b =>
                 {
                     b.HasOne("hr_crm.Entities.Department", "Department")
@@ -1120,28 +696,6 @@ namespace hr_crm.Migrations
                         .HasForeignKey("BranchId");
 
                     b.Navigation("Branch");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.DepartmentBudget", b =>
-                {
-                    b.HasOne("hr_crm.Entities.Department", "Department")
-                        .WithMany("Budgets")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.DepartmentRole", b =>
-                {
-                    b.HasOne("hr_crm.Entities.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("hr_crm.Entities.Knowledge", b =>
@@ -1188,17 +742,6 @@ namespace hr_crm.Migrations
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("hr_crm.Entities.UserDepartmentRole", b =>
-                {
-                    b.HasOne("hr_crm.Entities.DepartmentRole", "DepartmentRole")
-                        .WithMany("UserDepartmentRoles")
-                        .HasForeignKey("DepartmentRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DepartmentRole");
-                });
-
             modelBuilder.Entity("hr_crm.Entities.Branch", b =>
                 {
                     b.Navigation("Departments");
@@ -1206,16 +749,9 @@ namespace hr_crm.Migrations
 
             modelBuilder.Entity("hr_crm.Entities.Department", b =>
                 {
-                    b.Navigation("Budgets");
-
                     b.Navigation("Projects");
 
                     b.Navigation("Recruitments");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.DepartmentRole", b =>
-                {
-                    b.Navigation("UserDepartmentRoles");
                 });
 #pragma warning restore 612, 618
         }
