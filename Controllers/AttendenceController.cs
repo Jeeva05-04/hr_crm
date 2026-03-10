@@ -92,13 +92,28 @@ namespace hr_crm.Controllers
             if (!isHR && userId != tokenUserId)
                 return Forbid("You can only view your own data.");
 
-            var totalHours = await _attendanceService.CalculateTodayTotalHoursAsync(userId);
+            // Get attendance history
+            var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
+
+            if (records == null || !records.Any())
+                return NotFound("No attendance history found");
+
+            var result = records
+                .GroupBy(r => r.AttendanceDate)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    TotalHours = g
+                        .Where(x => x.CheckOutTime != null)
+                        .Sum(x => (x.CheckOutTime.Value - x.CheckInTime).TotalHours)
+                })
+                .OrderByDescending(x => x.Date)
+                .ToList();
 
             return Ok(new
             {
                 UserId = userId,
-                Date = DateTime.UtcNow.Date,
-                TotalHours = totalHours
+                TotalHoursHistory = result
             });
         }
 
