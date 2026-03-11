@@ -78,6 +78,11 @@ builder.Services.AddScoped<ILearningService, LearningService>();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
+builder.Services.AddScoped<NotificationRepository>();
+
+
+builder.Services.AddScoped<NotificationService>();
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();

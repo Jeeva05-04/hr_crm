@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+﻿using hr_crm.Authorization;
 using hr_crm.Data;
-using hr_crm.Authorization;
-using hr_crm.Entities;
 using hr_crm.DTO.Overtime;
+using hr_crm.Entities;
+using hr_crm.Service;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hr_crm.Controllers
 {
@@ -13,15 +14,14 @@ namespace hr_crm.Controllers
     public class OvertimeApprovalController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public OvertimeApprovalController(AppDbContext context)
+        public OvertimeApprovalController(AppDbContext context, NotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
-        // ===============================
-        // ✅ APPROVE OVERTIME
-        // ===============================
         [Authorize]
         [HasPermission("OVERTIME_APPROVE")]
         [HttpPost]
@@ -44,6 +44,14 @@ namespace hr_crm.Controllers
             _context.OvertimeApprovals.Add(approval);
             await _context.SaveChangesAsync();
 
+            await _notificationService.CreateNotification(
+                dto.UserId,
+                "Overtime Approved",
+                "Your overtime request has been approved",
+                "Overtime",
+                approval.OvertimeApprovalId
+            );
+
             return Ok(new OvertimeApprovalResponseDto
             {
                 OvertimeApprovalId = approval.OvertimeApprovalId,
@@ -52,56 +60,6 @@ namespace hr_crm.Controllers
                 ValidTo = approval.ValidTo,
                 IsApproved = approval.IsApproved
             });
-        }
-
-        // ===============================
-        // ✅ VIEW APPROVALS
-        // ===============================
-        [Authorize]
-        [HasPermission("OVERTIME_APPROVE")]
-        [HttpGet]
-        public async Task<IActionResult> GetApprovals()
-        {
-            var approvals = await _context.OvertimeApprovals
-                .Select(a => new OvertimeApprovalResponseDto
-                {
-                    OvertimeApprovalId = a.OvertimeApprovalId,
-                    UserId = a.UserId,
-                    ValidFrom = a.ValidFrom,
-                    ValidTo = a.ValidTo,
-                    IsApproved = a.IsApproved
-                })
-                .ToListAsync();
-
-            return Ok(approvals);
-        }
-
-        // ===============================
-        // ✅ UPDATE APPROVAL
-        // ===============================
-        [Authorize]
-        [HasPermission("OVERTIME_APPROVE")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateApproval(int id, [FromBody] OvertimeApprovalUpdateDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (dto.ValidFrom > dto.ValidTo)
-                return BadRequest("ValidFrom cannot be later than ValidTo.");
-
-            var approval = await _context.OvertimeApprovals.FindAsync(id);
-
-            if (approval == null)
-                return NotFound("Approval not found.");
-
-            approval.ValidFrom = dto.ValidFrom;
-            approval.ValidTo = dto.ValidTo;
-            approval.IsApproved = dto.IsApproved;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Approval updated successfully.");
         }
     }
 }

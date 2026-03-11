@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 
 public class RolePermissionFilter : IAuthorizationFilter
 {
@@ -13,39 +14,25 @@ public class RolePermissionFilter : IAuthorizationFilter
             return;
         }
 
-        var role = user.FindFirst("role")?.Value;
+        var role = user.FindFirst(ClaimTypes.Role)?.Value;
         var method = context.HttpContext.Request.Method;
-        var path = context.HttpContext.Request.Path.Value;
 
-        // HR Manager → full access
+        Console.WriteLine("ROLE: " + role);
+
+        // ADMIN → full access
+        if (role == "ADMIN")
+            return;
+
+        // HR_MANAGER → full access
         if (role == "HR_MANAGER")
             return;
 
-        if (role == "USER")
+        // HR_USER → only GET
+        if (role == "HR_USER")
         {
-            // allow attendance actions
-            if (path.Contains("check-in") || path.Contains("check-out"))
-                return;
-
-            // USER → only GET allowed
             if (method != "GET")
             {
                 context.Result = new ForbidResult();
-                return;
-            }
-
-            // Prevent accessing other users data
-            var tokenUserId = user.FindFirst("sub")?.Value;
-
-            if (context.RouteData.Values.ContainsKey("userId"))
-            {
-                var routeUserId = context.RouteData.Values["userId"]?.ToString();
-
-                if (routeUserId != tokenUserId)
-                {
-                    context.Result = new ForbidResult();
-                    return;
-                }
             }
         }
     }

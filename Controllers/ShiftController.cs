@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using hr_crm.Authorization;
+﻿using hr_crm.Authorization;
 using hr_crm.Data;
 using hr_crm.DTO;
 using hr_crm.Entities;
+using hr_crm.Service;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hr_crm.Controllers
 {
@@ -13,10 +14,12 @@ namespace hr_crm.Controllers
     public class ShiftController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public ShiftController(AppDbContext context)
+        public ShiftController(AppDbContext context, NotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [Authorize]
@@ -131,6 +134,14 @@ namespace hr_crm.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            await _notificationService.CreateNotification(
+                userId,
+                "Shift Assigned",
+                "A shift has been assigned to you",
+                "Shift",
+                shiftId
+            );
 
             return Ok("Shift assigned successfully");
         }

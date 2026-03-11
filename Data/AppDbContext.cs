@@ -30,23 +30,25 @@ namespace hr_crm.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
-// HEAD
+
         public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; }
         public DbSet<WorkExperience> WorkExperiences { get; set; }
         public DbSet<EmployeeOnboardingDocuments> EmployeeOnboardingDocuments { get; set; }
-//=======
+
         public DbSet<Payroll> Payrolls { get; set; }
         public DbSet<Leave> Leaves { get; set; }
         public DbSet<DigitalSignature> DigitalSignatures { get; set; }
      
         public DbSet<ExitInterview> ExitInterviews { get; set; }
-        
+
+        public DbSet<Notification> Notifications { get; set; }
+
         public DbSet<OffBoarding> OffBoardings { get; set; }
         public DbSet<EmployeeTraining> EmployeeTrainings { get; set; }
          public DbSet<LearningCourse> LearningCourses { get; set; }
 
 
-//>>>>>>> 1158f6b5dc0c1e20a6017c90e476d55beb767129
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

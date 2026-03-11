@@ -2,20 +2,21 @@
 using hr_crm.Entities;
 using Microsoft.AspNetCore.Mvc;
 using hr_crm.Service.Interface;
-using Microsoft.AspNetCore.Authorization;
+using hr_crm.Service;
 
 namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _service;
+        private readonly NotificationService _notificationService;
 
-        public ProjectController(IProjectService service)
+        public ProjectController(IProjectService service, NotificationService notificationService)
         {
             _service = service;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -29,7 +30,7 @@ namespace hr_crm.Controllers
                 p.ProjectName,
                 p.Duration,
                 p.Status,
-                ManagerId = p.ManagerId, // Just return ID
+                ManagerId = p.ManagerId,
                 DepartmentName = p.Department.DepartmentName,
                 p.CreatedDate
             });
@@ -53,6 +54,15 @@ namespace hr_crm.Controllers
             };
 
             await _service.CreateAsync(project);
+
+            // 🔔 Notification
+            await _notificationService.CreateNotification(
+                dto.ManagerId,
+                "Project Assigned",
+                $"You have been assigned to project {dto.ProjectName}",
+                "Project",
+                project.ProjectId
+            );
 
             return Ok("Project created successfully");
         }
