@@ -36,10 +36,10 @@ namespace hr_crm.Repositories
                 return signature;
             }
 
-            public async Task<IEnumerable<DigitalSignature>> GetByEmployeeIdAsync(int employeeId)
+            public async Task<IEnumerable<DigitalSignature>> GetByUserIdAsync(int userId)
             {
                 return await _context.DigitalSignatures
-                    .Where(s => s.EmployeeId == employeeId)
+                    .Where(s => s.UserId == userId)
                     .OrderByDescending(s => s.RequestedAt)
                     .ToListAsync();
             }

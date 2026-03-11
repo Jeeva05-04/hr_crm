@@ -5,45 +5,72 @@ using hr_crm.Service.Interface;
 
 namespace hr_crm.Service
 {
-    public class LeaveService :ILeaveService
+    public class LeaveService : ILeaveService
     {
-            private readonly ILeaveRepository _repo;
+        private readonly ILeaveRepository _repo;
 
-            public LeaveService(ILeaveRepository repo)
+        public LeaveService(ILeaveRepository repo)
+        {
+            _repo = repo;
+        }
+
+        public async Task ApplyLeaveAsync(LeaveCreateDto dto)
+        {
+            var leave = new Leave
             {
-                _repo = repo;
-            }
+                UserId = dto.UserId,
+                LeaveType = dto.LeaveType,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                Reason = dto.Reason,
+                Status = string.IsNullOrWhiteSpace(dto.Status) ? "Pending" : dto.Status,
+                ApprovedBY = dto.ApprovedBY,
+                AppliedOn = DateTime.UtcNow
+            };
 
-            public async Task<bool> ApplyLeaveAsync(LeaveCreateDto dto)
+            await _repo.AddAsync(leave);
+        }
+
+        public async Task<List<LeaveResponseDto>> GetAllLeavesAsync()
+        {
+            var leaves = await _repo.GetAllAsync();
+
+            return leaves.Select(l => new LeaveResponseDto
             {
-                var leave = new Leave
-                {
-                    EmployeeId = dto.EmployeeId,
-                    LeaveType = dto.LeaveType,
-                    StartDate = dto.StartDate,
-                    EndDate = dto.EndDate,
-                    Reason = dto.Reason,
-                    Status = dto.Status,
-                    ApprovedBY = dto.ApprovedBY,
-                    AppliedOn = DateTime.UtcNow
-                };
+                LeaveId = l.LeaveId,
+                UserId = l.UserId,
+                LeaveType = l.LeaveType,
+                StartDate = l.StartDate,
+                EndDate = l.EndDate,
+                Reason = l.Reason,
+                Status = l.Status,
+                ApprovedBY = l.ApprovedBY,
+                AppliedOn = l.AppliedOn
+            }).ToList();
+        }
 
-                await _repo.AddAsync(leave);
-                return true;
-            }
+        public async Task<List<LeaveResponseDto>> GetLeavesByUserAsync(int userId)
+        {
+            var leaves = await _repo.GetByUserIdAsync(userId);
 
-            public Task<List<Leave>> GetAllLeavesAsync()
-                => _repo.GetAllAsync();
+            return leaves.Select(l => new LeaveResponseDto
+            {
+                LeaveId = l.LeaveId,
+                UserId = l.UserId,
+                LeaveType = l.LeaveType,
+                StartDate = l.StartDate,
+                EndDate = l.EndDate,
+                Reason = l.Reason,
+                Status = l.Status,
+                ApprovedBY = l.ApprovedBY,
+                AppliedOn = l.AppliedOn
+            }).ToList();
+        }
 
-            public Task<List<Leave>> GetLeavesByEmployeeAsync(int employeeId)
-                => _repo.GetByEmployeeIdAsync(employeeId);
+        public Task<bool> UpdateLeaveStatusAsync(int leaveId, LeaveStatusDto dto)
+            => _repo.UpdateStatusAsync(leaveId, dto.Status, dto.ApprovedBY);
 
-            public Task<bool> UpdateLeaveStatusAsync(int leaveId, LeaveStatusDto dto)
-                => _repo.UpdateStatusAsync(leaveId, dto.Status,dto.ApprovedBY);
-
-            public Task<bool> DeleteLeaveAsync(int leaveId)
-                => _repo.DeleteAsync(leaveId);
-        
+        public Task<bool> DeleteLeaveAsync(int leaveId)
+            => _repo.DeleteAsync(leaveId);
     }
 }
-

@@ -21,10 +21,10 @@ namespace hr_crm.Repositories
                 return training;
             }
 
-            public async Task<List<EmployeeTraining>> GetByEmployeeIdAsync(int employeeId)
+            public async Task<List<EmployeeTraining>> GetByUserIdAsync(int userId)
             {
                 return await _context.EmployeeTrainings
-                    .Where(x => x.EmployeeId == employeeId)
+                    .Where(x => x.UserId == userId)
                     .ToListAsync();
             }
 

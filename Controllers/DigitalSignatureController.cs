@@ -25,7 +25,7 @@ namespace hr_crm.Controllers
         /// <summary>Manager requests an employee to sign a document.</summary>
         [HttpPost("request")]
         [Consumes("multipart/form-data")] // Forces Swagger to show the file upload UI
-        [HasPermission("DigitalSignature_request")]
+        [HasPermission("DIGITALSIGNATURE_REQUEST")]
         public async Task<IActionResult> RequestSignature([FromForm] DigitalSignatureRequestCreateDto dto)
         {
             var result = await _service.RequestSignatureAsync(dto);
@@ -38,7 +38,7 @@ namespace hr_crm.Controllers
         // ── 2. POST /api/digitalsignature/sign/{id} ───────────────────────────
         /// <summary>Employee signs the document.</summary>
         [HttpPost("sign/{id}")]
-        [HasPermission("DigitalSignature_sign/{id}")]
+        [HasPermission("DIGITALSIGNATURE_CREATE")]
         public async Task<IActionResult> SignDocument(int id, [FromForm] DigitalSignatureSignCreateDto dto)
         {
             try
@@ -63,7 +63,7 @@ namespace hr_crm.Controllers
         // ── 3. GET /api/digitalsignature/status/{id} ──────────────────────────
         /// <summary>Check the status of a signature request.</summary>
         [HttpGet("status/{id}")]
-        [HasPermission("DigitalSignature_status/{id}")]
+        [HasPermission("DIGITALSIGNATURE_VIEW")]
         public async Task<IActionResult> GetStatus(int id)
         {
             var result = await _service.GetStatusAsync(id);
@@ -75,16 +75,16 @@ namespace hr_crm.Controllers
 
         // ── 4. GET /api/digitalsignature/history/{employeeId} ─────────────────
         /// <summary>Get all signature history for an employee.</summary>
-        [HttpGet("history/{employeeId}")]
-            [HasPermission("DigitalSignature_history/{employeeId}")]
-        public async Task<IActionResult> GetHistory(int employeeId)
+        [HttpGet("history/{userId}")]
+            [HasPermission("DIGITALSIGNATURE_VIEW")]
+        public async Task<IActionResult> GetHistory(int userId)
         {
-            var result = await _service.GetHistoryAsync(employeeId);
+            var result = await _service.GetHistoryAsync(userId);
             return Ok(result);
         }
         // ── 5. PUT /api/digitalsignature/update/{id} ─────────────────────────
         [HttpPut("update/{id}")]
-        [HasPermission("DigitalSignature_Update")]
+        [HasPermission("DIGITALSIGNATURE_UPDATE")]
         public async Task<IActionResult> UpdateRequest(int id, [FromForm] DigitalSignatureRequestCreateDto dto)
         {
             try
@@ -103,7 +103,7 @@ namespace hr_crm.Controllers
         }
         // ── 7. GET /api/digitalsignature/all ─────────────────────────
         [HttpGet("all")]
-        [HasPermission("DigitalSignature_View")]
+        [HasPermission("DIGITALSIGNATURE_VIEW")]
         public async Task<IActionResult> GetAllSignatures()
         {
             var result = await _service.GetAllAsync();
@@ -111,7 +111,7 @@ namespace hr_crm.Controllers
         }
         // ── 6. DELETE /api/digitalsignature/delete/{id} ───────────────────────
         [HttpDelete("delete/{id}")]
-        [HasPermission("DigitalSignature_Delete")]
+        [HasPermission("DIGITALSIGNATURE_DELETE")]
         public async Task<IActionResult> DeleteRequest(int id)
         {
             try

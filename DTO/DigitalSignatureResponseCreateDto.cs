@@ -4,7 +4,7 @@
     {
    
             public int SignatureId { get; set; }
-            public int EmployeeId { get; set; }
+            public int UserId { get; set; }
             public int RequestedBy { get; set; }
             public string DocumentName { get; set; } = string.Empty;
             public string DocumentType { get; set; } = string.Empty;

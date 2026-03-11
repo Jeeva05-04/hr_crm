@@ -1,7 +1,5 @@
-﻿
-using hr_crm.Authorization;
+﻿using hr_crm.Authorization;
 using hr_crm.DTO;
-using hr_crm.Entities;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +19,7 @@ namespace hr_crm.Controllers
         }
 
         [HttpPost("schedule")]
-        [HasPermission("ExitInterview_Schedule")]
+        [HasPermission("EXITINTERVIEW_SCHEDULE")]
         public async Task<IActionResult> ScheduleInterview(ExitInterviewRequestDto dto)
         {
             var result = await _service.ScheduleInterview(dto);
@@ -29,37 +27,39 @@ namespace hr_crm.Controllers
         }
 
         [HttpPost("submit-feedback")]
-        [HasPermission("ExitInterview_SubmitFeedback")]
+        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
         public async Task<IActionResult> SubmitFeedback(ExitInterviewFeedbackDto dto)
         {
             var result = await _service.SubmitFeedback(dto);
             return Ok(result);
         }
 
-        [HttpGet("employee/{employeeId}")]
-         [HasPermission("ExitInterview_employee/{employeeId}")]
-        public async Task<IActionResult> GetByEmployee(int employeeId)
+        [HttpGet("user/{userId}")]
+        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
+        public async Task<IActionResult> GetByUser(int userId)
         {
-            var result = await _service.GetByEmployeeId(employeeId);
+            var result = await _service.GetByUserId(userId);
             return Ok(result);
         }
 
         [HttpGet("all")]
-        [HasPermission("ExitInterview_View")]
+        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAll();
             return Ok(result);
         }
+
         [HttpPut("update/{id}")]
-        [HasPermission("ExitInterview_Update")]
+        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
         public async Task<IActionResult> UpdateInterview(int id, ExitInterviewResponseDto dto)
         {
             var result = await _service.UpdateInterview(id, dto);
             return Ok(result);
         }
+
         [HttpDelete("delete/{id}")]
-        [HasPermission("ExitInterview_Delete")]
+        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
         public async Task<IActionResult> DeleteInterview(int id)
         {
             await _service.DeleteInterview(id);
@@ -67,4 +67,3 @@ namespace hr_crm.Controllers
         }
     }
 }
-

@@ -22,10 +22,10 @@ namespace hr_crm.Repositories
                     .ToListAsync();
             }
 
-            public async Task<List<Leave>> GetByEmployeeIdAsync(int employeeId)
+            public async Task<List<Leave>> GetByUserIdAsync(int userId)
             {
                 return await _context.Leaves
-                    .Where(l => l.EmployeeId == employeeId)
+                    .Where(l => l.UserId == userId)
                     .OrderByDescending(l => l.AppliedOn)
                     .ToListAsync();
             }

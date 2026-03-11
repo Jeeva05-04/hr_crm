@@ -7,79 +7,120 @@ namespace hr_crm.Service
 {
     public class EmployeeTrainingService : IEmployeeTrainingService
     {
-       
-            private readonly IEmployeeTrainingRepository _repo;
+        private readonly IEmployeeTrainingRepository _repo;
 
-            public EmployeeTrainingService(IEmployeeTrainingRepository repo)
+        public EmployeeTrainingService(IEmployeeTrainingRepository repo)
+        {
+            _repo = repo;
+        }
+
+        // Assign training
+        public async Task<TrainingResponseDto> AssignTrainingAsync(AssignTrainingDto dto)
+        {
+            var training = new EmployeeTraining
             {
-                _repo = repo;
-            }
+                UserId = dto.UserId,
+                TrainingName = dto.TrainingName,
+                Description = dto.Description,
+                IsMandatory = dto.IsMandatory,
 
-            public async Task<TrainingResponseDto> AssignTrainingAsync(AssignTrainingDto dto)
-            {
-                var training = new EmployeeTraining
-                {
-                    EmployeeId = dto.EmployeeId,
-                    TrainingName = dto.TrainingName,
-                    Description = dto.Description,
-                    IsMandatory = dto.IsMandatory
-                };
+                TrainingProvider = dto.TrainingProvider,
+                Category = dto.Category,
+                DurationHours = dto.DurationHours,
+                AssignedBy = dto.AssignedBy,
+                DueDate = dto.DueDate,
 
-                var result = await _repo.AddAsync(training);
+                Status = "Assigned",
+                Progress = 0,
+                AssignedDate = DateTime.UtcNow,
+                CompletionDate = null,
+                IsCertified = false,
+                Feedback = null,
+                Score = null,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null
+            };
 
-                return MapToDTO(result);
-            }
+            var result = await _repo.AddAsync(training);
+            return MapToDTO(result);
+        }
 
-            public async Task<List<TrainingResponseDto>> GetByEmployeeAsync(int employeeId)
-            {
-                var list = await _repo.GetByEmployeeIdAsync(employeeId);
-                return list.Select(MapToDTO).ToList();
-            }
+        // Get trainings by user
+        public async Task<List<TrainingResponseDto>> GetByUserAsync(int userId)
+        {
+            var list = await _repo.GetByUserIdAsync(userId);
+            return list.Select(MapToDTO).ToList();
+        }
+
+        // Get all trainings
         public async Task<List<TrainingResponseDto>> GetAllAsync()
         {
             var list = await _repo.GetAllAsync();
             return list.Select(MapToDTO).ToList();
-        }   
+        }
 
+        // Update training status
         public async Task<bool> UpdateStatusAsync(int id, UpdateTrainingStatusCreateDto dto)
+        {
+            var training = await _repo.GetByIdAsync(id);
+
+            if (training == null)
+                return false;
+
+            training.Status = dto.Status;
+            training.Progress = dto.Progress;
+            training.IsCertified = dto.IsCertified;
+            training.Score = dto.Score;
+            training.Feedback = dto.Feedback;
+            training.UpdatedAt = DateTime.UtcNow;
+
+            if (dto.Status == "Completed")
             {
-                var training = await _repo.GetByIdAsync(id);
-                if (training == null) return false;
-
-                training.Status = dto.Status;
-
-                if (dto.Status == "Completed")
-                    training.CompletionDate = DateTime.UtcNow;
-
-                await _repo.UpdateAsync(training);
-                return true;
+                training.CompletionDate = dto.CompletionDate ?? DateTime.UtcNow;
+                training.Progress = 100;
             }
 
-            public async Task<bool> DeleteAsync(int id)
-            {
-                var training = await _repo.GetByIdAsync(id);
-                if (training == null) return false;
+            await _repo.UpdateAsync(training);
+            return true;
+        }
 
-                await _repo.DeleteAsync(training);
-                return true;
-            }
+        // Delete training
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var training = await _repo.GetByIdAsync(id);
 
-            private TrainingResponseDto MapToDTO(EmployeeTraining t)
+            if (training == null)
+                return false;
+
+            await _repo.DeleteAsync(training);
+            return true;
+        }
+
+        // Mapping Entity -> DTO
+        private TrainingResponseDto MapToDTO(EmployeeTraining t)
+        {
+            return new TrainingResponseDto
             {
-                return new TrainingResponseDto
-                {
-                    Id = t.Id,
-                    EmployeeId = t.EmployeeId,
-                    TrainingName = t.TrainingName,
-                    Description = t.Description,
-                    IsMandatory = t.IsMandatory,
-                    Status = t.Status,
-                    AssignedDate = t.AssignedDate,
-                    CompletionDate = t.CompletionDate
-                };
-            }     
+                Id = t.Id,
+                UserId = t.UserId,
+                TrainingName = t.TrainingName,
+                Description = t.Description,
+                IsMandatory = t.IsMandatory,
+                Status = t.Status,
+                Progress = t.Progress,
+                AssignedDate = t.AssignedDate,
+                DueDate = t.DueDate,
+                CompletionDate = t.CompletionDate,
+                TrainingProvider = t.TrainingProvider,
+                Category = t.Category,
+                DurationHours = t.DurationHours,
+                AssignedBy = t.AssignedBy,
+                IsCertified = t.IsCertified,
+                Feedback = t.Feedback,
+                Score = t.Score,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt
+            };
+        }
     }
 }
-        
-
-

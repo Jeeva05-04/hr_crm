@@ -7,7 +7,7 @@ namespace hr_crm.Repositories.Interface
 
           
              Task<EmployeeTraining> AddAsync(EmployeeTraining training);
-            Task<List<EmployeeTraining>> GetByEmployeeIdAsync(int employeeId);
+            Task<List<EmployeeTraining>> GetByUserIdAsync(int userId);
             Task<EmployeeTraining> GetByIdAsync(int id);
              Task<List<EmployeeTraining>> GetAllAsync();
              Task UpdateAsync(EmployeeTraining training);

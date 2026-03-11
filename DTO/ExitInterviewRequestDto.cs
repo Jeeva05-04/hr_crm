@@ -3,7 +3,7 @@
     public class ExitInterviewRequestDto
     {
        
-            public int EmployeeId { get; set; }
+            public int  UserId { get; set; }
 
             public DateTime ScheduledDate { get; set; }
             public string? ReasonForLeaving { get; set; }

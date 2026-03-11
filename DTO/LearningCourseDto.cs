@@ -2,7 +2,7 @@
 {
     public class LearningCourseDto
     {
-            public int EmployeeId { get; set; }
+            public int UserId { get; set; }
 
             public string?   CourseName { get; set; }
 
@@ -14,6 +14,10 @@
 
             public DateTime DueDate { get; set; }
         
+           public int Progress { get; set; }
+
+           public string? Status { get; set; }
+
     }
 }
 

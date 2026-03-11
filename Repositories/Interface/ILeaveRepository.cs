@@ -7,7 +7,7 @@ namespace hr_crm.Repositories.Interface
 
 
             Task<List<Leave>> GetAllAsync();
-            Task<List<Leave>> GetByEmployeeIdAsync(int employeeId);
+            Task<List<Leave>> GetByUserIdAsync(int userId);
             Task<Leave?> GetByIdAsync(int leaveId);
             Task AddAsync(Leave leave);
             Task<bool> UpdateStatusAsync(int leaveId, string status, string approvedby);

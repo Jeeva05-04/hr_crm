@@ -4,12 +4,15 @@
     {
       
             public int PayrollId { get; set; }
-            public int EmployeeId { get; set; }
+            public int UserId { get; set; }
             public decimal BasicSalary { get; set; }
-            public decimal Allowances { get; set; }
-            public decimal Deductions { get; set; }
-            public decimal GrossSalary { get; set; }
+            public string UserName { get; set; } = string.Empty;
+            public decimal TotalAllowances { get; set; }
+            public decimal TotalDeductions { get; set; }
             public decimal NetSalary { get; set; }
-            public DateTime PayrollMonth { get; set; }
+            public DateTime Month { get; set; }
+            public int Year { get; set; }
+            public string Status { get; set; } = string.Empty;
+            public DateTime CreatedDate { get; set; }
     }
 }

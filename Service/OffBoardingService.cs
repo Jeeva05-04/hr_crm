@@ -19,7 +19,7 @@ namespace hr_crm.Service
             {
                 var offboarding = new OffBoarding
                 {
-                    EmployeeId = dto.EmployeeId,
+                    UserId = dto.UserId,
                     ResignationDate = dto.ResignationDate,
                     LastWorkingDate = dto.LastWorkingDate,
                     Reason = dto.Reason,

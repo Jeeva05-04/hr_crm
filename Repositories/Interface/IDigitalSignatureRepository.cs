@@ -8,7 +8,7 @@ namespace hr_crm.Repositories.Interface
             Task<DigitalSignature> CreateRequestAsync(DigitalSignature signature);
             Task<DigitalSignature?> GetByIdAsync(int signatureId);
             Task<DigitalSignature> UpdateAsync(DigitalSignature signature);
-            Task<IEnumerable<DigitalSignature>> GetByEmployeeIdAsync(int employeeId);
+            Task<IEnumerable<DigitalSignature>> GetByUserIdAsync(int userId);
             Task<IEnumerable<DigitalSignature>> GetAllAsync();
             Task DeleteAsync(DigitalSignature signature);
 
