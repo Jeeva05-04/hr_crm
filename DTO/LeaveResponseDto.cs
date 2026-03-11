@@ -1,7 +1,6 @@
-﻿using System;
-namespace hr_crm.Entities
+﻿namespace hr_crm.DTO
 {
-    public class Leave
+    public class LeaveResponseDto
     {
         public int LeaveId { get; set; }
         public int UserId { get; set; }
@@ -11,6 +10,6 @@ namespace hr_crm.Entities
         public string Reason { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public string ApprovedBY { get; set; } = string.Empty;
-        public DateTime AppliedOn { get; set; } = DateTime.UtcNow;
+        public DateTime AppliedOn { get; set; }
     }
 }

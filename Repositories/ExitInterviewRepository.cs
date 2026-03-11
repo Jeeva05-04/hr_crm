@@ -33,10 +33,10 @@ namespace hr_crm.Repositories
             return interview;
         }
 
-        public async Task<ExitInterview> GetByEmployeeId(int employeeId)
+        public async Task<ExitInterview> GetByUserId(int userId)
         {
             return await _context.ExitInterviews
-                .FirstOrDefaultAsync(x => x.EmployeeId == employeeId);
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<List<ExitInterview>> GetAll()

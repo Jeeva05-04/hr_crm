@@ -22,10 +22,10 @@ namespace hr_crm.Repositories
                 return course;
             }
 
-            public async Task<List<LearningCourse>> GetEmployeeCourses(int employeeId)
+            public async Task<List<LearningCourse>> GetUserCourses(int userId)
             {
                 return await _context.LearningCourses
-                    .Where(x => x.EmployeeId == employeeId)
+                    .Where(x => x.UserId == userId)
                     .ToListAsync();
             }
 

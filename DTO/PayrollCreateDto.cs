@@ -3,11 +3,10 @@
     public class PayrollCreateDto
     {
        
-            public int EmployeeId { get; set; }
+            public int UserId { get; set; }
             public decimal BasicSalary { get; set; }
-            public decimal Allowances { get; set; }
-            public decimal Deductions { get; set; }
-            public DateTime PayrollMonth { get; set; }
-        
+        public string  UserName { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+          
     }
 }

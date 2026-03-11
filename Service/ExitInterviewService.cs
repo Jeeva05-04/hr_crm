@@ -1,5 +1,4 @@
-﻿
-using hr_crm.DTO;
+﻿using hr_crm.DTO;
 using hr_crm.Entities;
 using hr_crm.Repositories.Interface;
 using hr_crm.Service.Interface;
@@ -19,7 +18,7 @@ namespace hr_crm.Services
         {
             var interview = new ExitInterview
             {
-                EmployeeId = dto.EmployeeId,
+                UserId = dto.UserId,
                 ScheduledDate = dto.ScheduledDate,
                 Status = "Scheduled"
             };
@@ -31,7 +30,10 @@ namespace hr_crm.Services
 
         public async Task<ExitInterviewResponseDto> SubmitFeedback(ExitInterviewFeedbackDto dto)
         {
-            var interview = await _repo.GetByEmployeeId(dto.EmployeeId);
+            var interview = await _repo.GetByUserId(dto.UserId);
+
+            if (interview == null)
+                throw new Exception("Exit interview not found");
 
             interview.ReasonForLeaving = dto.ReasonForLeaving;
             interview.Feedback = dto.Feedback;
@@ -43,9 +45,12 @@ namespace hr_crm.Services
             return MapToResponse(result);
         }
 
-        public async Task<ExitInterviewResponseDto> GetByEmployeeId(int employeeId)
+        public async Task<ExitInterviewResponseDto> GetByUserId(int userId)
         {
-            var interview = await _repo.GetByEmployeeId(employeeId);
+            var interview = await _repo.GetByUserId(userId);
+
+            if (interview == null)
+                throw new Exception("Exit interview not found");
 
             return MapToResponse(interview);
         }
@@ -62,7 +67,7 @@ namespace hr_crm.Services
             return new ExitInterviewResponseDto
             {
                 Id = interview.Id,
-                EmployeeId = interview.EmployeeId,
+                UserId = interview.UserId,
                 ScheduledDate = interview.ScheduledDate,
                 ReasonForLeaving = interview.ReasonForLeaving,
                 Feedback = interview.Feedback,
@@ -70,11 +75,15 @@ namespace hr_crm.Services
                 Status = interview.Status
             };
         }
+
         public async Task<ExitInterviewResponseDto> UpdateInterview(int id, ExitInterviewResponseDto dto)
         {
             var interview = await _repo.GetById(id);
 
-            interview.EmployeeId = dto.EmployeeId;
+            if (interview == null)
+                throw new Exception("Exit interview not found");
+
+            interview.UserId = dto.UserId;
             interview.ScheduledDate = dto.ScheduledDate;
             interview.ReasonForLeaving = dto.ReasonForLeaving;
             interview.Feedback = dto.Feedback;
@@ -85,6 +94,7 @@ namespace hr_crm.Services
 
             return MapToResponse(result);
         }
+
         public async Task DeleteInterview(int id)
         {
             await _repo.Delete(id);

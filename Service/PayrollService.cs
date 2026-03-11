@@ -9,58 +9,204 @@ namespace hr_crm.Service
     {
         private readonly IPayrollRepository _repo;
 
-            public PayrollService(IPayrollRepository repo)
+        public PayrollService(IPayrollRepository repo)
+        {
+            _repo = repo;
+        }
+
+        private DateTime GetCurrentPayrollMonth()
+        {
+            var now = DateTime.UtcNow;
+            return new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        }
+
+        public async Task<PayrollResponseDto> GeneratePayrollAsync(PayrollCreateDto dto)
+        {
+            var currentMonth = GetCurrentPayrollMonth();
+            var currentYear = currentMonth.Year;
+
+            var allowances = await _repo.GetAllowancesAsync(dto.UserId, currentMonth, currentYear);
+            var deductions = await _repo.GetDeductionsAsync(dto.UserId, currentMonth, currentYear);
+
+            decimal totalAllowances = allowances.Sum(a => a.Amount);
+            decimal totalDeductions = deductions.Sum(d => d.Amount);
+            decimal netSalary = dto.BasicSalary + totalAllowances - totalDeductions;
+
+            var payroll = new Payroll
             {
-                _repo = repo;
-            }
+                UserId = dto.UserId,
+                UserName = dto.UserName,
+                BasicSalary = dto.BasicSalary,
+                TotalAllowances = totalAllowances,
+                TotalDeductions = totalDeductions,
+                NetSalary = netSalary,
+                Month = currentMonth,
+                Year = currentYear,
+                Status = dto.Status,
+                CreatedDate = DateTime.UtcNow
+            };
 
-            public async Task<bool> GeneratePayrollAsync(PayrollCreateDto dto)
+            var result = await _repo.GeneratePayrollAsync(payroll);
+
+            return new PayrollResponseDto
             {
-                var gross = dto.BasicSalary + dto.Allowances;
-                var net = gross - dto.Deductions;
+                PayrollId = result.PayrollId,
+                UserId = result.UserId,
+                BasicSalary = result.BasicSalary,
+                TotalAllowances = result.TotalAllowances,
+                TotalDeductions = result.TotalDeductions,
+                NetSalary = result.NetSalary,
+                Month = result.Month,
+                Year = result.Year,
+                Status = result.Status,
+                CreatedDate = result.CreatedDate
+            };
+        }
 
-                var payroll = new Payroll
-                {
-                    EmployeeId = dto.EmployeeId,
-                    BasicSalary = dto.BasicSalary,
-                    Allowances = dto.Allowances,
-                    Deductions = dto.Deductions,
-                    GrossSalary = gross,
-                    NetSalary = net,
-                    PayrollMonth = dto.PayrollMonth
-                };
+        public async Task<List<PayrollResponseDto>> GetAllPayrollAsync()
+        {
+            var payrolls = await _repo.GetAllPayrollAsync();
 
-                await _repo.AddAsync(payroll);
-                return true;
-            }
-        public Task<List<Payroll>> GetPayrollAsync()
-         => _repo.GetPayrollAsync();
-
-        public Task<List<Payroll>> GetPayrollAsync(int employeeId)
-                => _repo.GetPayrollAsync(employeeId);
-
-            public async Task<bool> UpdatePayrollAsync(int payrollId, PayrollCreateDto dto)
+            return payrolls.Select(p => new PayrollResponseDto
             {
-                var gross = dto.BasicSalary + dto.Allowances;
-                var net = gross - dto.Deductions;
+                PayrollId = p.PayrollId,
+                UserId = p.UserId,
+                BasicSalary = p.BasicSalary,
+                TotalAllowances = p.TotalAllowances,
+                TotalDeductions = p.TotalDeductions,
+                NetSalary = p.NetSalary,
+                Month = p.Month,
+                Year = p.Year,
+                Status = p.Status,
+                CreatedDate = p.CreatedDate
+            }).ToList();
+        }
 
-                var payroll = new Payroll
-                {
-                    EmployeeId = dto.EmployeeId,
-                    BasicSalary = dto.BasicSalary,
-                    Allowances = dto.Allowances,
-                    Deductions = dto.Deductions,
-                    GrossSalary = gross,
-                    NetSalary = net,
-                    PayrollMonth = dto.PayrollMonth
-                };
+        public async Task<List<PayrollResponseDto>> GetPayrollByUserIdAsync(int userId)
+        {
+            var payrolls = await _repo.GetPayrollByUserIdAsync(userId);
 
-                return await _repo.UpdateAsync(payrollId, payroll);
-            }
+            return payrolls.Select(p => new PayrollResponseDto
+            {
+                PayrollId = p.PayrollId,
+                UserId = p.UserId,
+                BasicSalary = p.BasicSalary,
+                TotalAllowances = p.TotalAllowances,
+                TotalDeductions = p.TotalDeductions,
+                NetSalary = p.NetSalary,
+                Month = p.Month,
+                Year = p.Year,
+                Status = p.Status,
+                CreatedDate = p.CreatedDate
+            }).ToList();
+        }
 
-            public Task<bool> DeletePayrollAsync(int payrollId)
-                => _repo.DeleteAsync(payrollId);
-        
+        public async Task<PayrollResponseDto?> UpdatePayrollAsync(int payrollId, PayrollCreateDto dto)
+        {
+            var existing = await _repo.GetPayrollByIdAsync(payrollId);
+            if (existing == null)
+                return null;
+
+            var currentMonth = GetCurrentPayrollMonth();
+            var currentYear = currentMonth.Year;
+
+            var allowances = await _repo.GetAllowancesAsync(dto.UserId, currentMonth, currentYear);
+            var deductions = await _repo.GetDeductionsAsync(dto.UserId, currentMonth, currentYear);
+
+            decimal totalAllowances = allowances.Sum(a => a.Amount);
+            decimal totalDeductions = deductions.Sum(d => d.Amount);
+            decimal netSalary = dto.BasicSalary + totalAllowances - totalDeductions;
+
+            existing.UserId = dto.UserId;
+            existing.UserName = dto.UserName;
+            existing.BasicSalary = dto.BasicSalary;
+            existing.TotalAllowances = totalAllowances;
+            existing.TotalDeductions = totalDeductions;
+            existing.NetSalary = netSalary;
+            existing.Month = currentMonth;
+            existing.Year = currentYear;
+            existing.Status = dto.Status;
+
+            var updated = await _repo.UpdatePayrollAsync(existing);
+            if (updated == null)
+                return null;
+
+            return new PayrollResponseDto
+            {
+                PayrollId = updated.PayrollId,
+                UserId = updated.UserId,
+                BasicSalary = updated.BasicSalary,
+                TotalAllowances = updated.TotalAllowances,
+                TotalDeductions = updated.TotalDeductions,
+                NetSalary = updated.NetSalary,
+                Month = updated.Month,
+                Year = updated.Year,
+                Status = updated.Status,
+                CreatedDate = updated.CreatedDate
+            };
+        }
+
+        public async Task<bool> DeletePayrollAsync(int payrollId)
+        {
+            return await _repo.DeletePayrollAsync(payrollId);
+        }
+
+        public async Task AddAllowanceAsync(AllowanceCreateDto dto)
+        {
+            var currentMonth = GetCurrentPayrollMonth();
+            var currentYear = currentMonth.Year;
+
+            var allowance = new Allowance
+            {
+                UserId = dto.UserId,
+                AllowanceType = dto.AllowanceType,
+                Amount = dto.Amount,
+                Month = currentMonth,
+                Year = currentYear
+            };
+
+            await _repo.AddAllowanceAsync(allowance);
+        }
+
+        public async Task AddDeductionAsync(DeductionCreateDto dto)
+        {
+            var currentMonth = GetCurrentPayrollMonth();
+            var currentYear = currentMonth.Year;
+
+            var deduction = new Deduction
+            {
+                UserId = dto.UserId,
+                DeductionType = dto.DeductionType,
+                Amount = dto.Amount,
+                Month = currentMonth,
+                Year = currentYear
+            };
+
+            await _repo.AddDeductionAsync(deduction);
+        }
+
+        public async Task<PayslipDto?> GetCurrentPayslipAsync(int userId)
+        {
+            var currentMonth = GetCurrentPayrollMonth();
+            var currentYear = currentMonth.Year;
+
+            var payroll = await _repo.GetPayrollByUserMonthYearAsync(userId, currentMonth, currentYear);
+
+            if (payroll == null)
+                return null;
+
+            return new PayslipDto
+            {
+                UserId = payroll.UserId,
+                UserName = payroll.UserName,
+                Month = payroll.Month,
+                Year = payroll.Year,
+                BasicSalary = payroll.BasicSalary,
+                TotalAllowances = payroll.TotalAllowances,
+                TotalDeductions = payroll.TotalDeductions,
+                NetSalary = payroll.NetSalary,
+                GeneratedDate = DateTime.UtcNow
+            };
+        }
     }
 }
-

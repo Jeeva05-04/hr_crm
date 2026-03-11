@@ -24,6 +24,8 @@ namespace hr_crm.Data
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
         public DbSet<Payroll> Payrolls { get; set; }
+        public DbSet<Allowance> Allowances { get; set; }
+        public DbSet<Deduction> Deductions { get; set; }    
         public DbSet<Leave> Leaves { get; set; }
         public DbSet<DigitalSignature> DigitalSignatures { get; set; }
      

@@ -9,7 +9,7 @@ namespace hr_crm.Repositories.Interface
 
         Task<LearningCourse> AssignCourse(LearningCourse course);
 
-        Task<List<LearningCourse>> GetEmployeeCourses(int employeeId);
+        Task<List<LearningCourse>> GetUserCourses(int userId);
 
         Task<LearningCourse?> GetById(int id);
 

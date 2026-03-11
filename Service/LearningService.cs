@@ -22,22 +22,22 @@ namespace hr_crm.Service
             {
                 var course = new LearningCourse
                 {
-                    EmployeeId = dto.EmployeeId,
+                    UserId = dto.UserId,
                     CourseName = dto.CourseName,
                     Description = dto.Description,
                     Role = dto.Role,
                     AssignedDate = dto.AssignedDate,
                     DueDate = dto.DueDate,
-                    Progress = 0,
+                    Progress = dto.Progress,
                     Status = "Assigned"
                 };
 
                 return await _repo.AssignCourse(course);
             }
 
-            public async Task<List<LearningCourse>> GetEmployeeCourses(int employeeId)
+            public async Task<List<LearningCourse>> GetUserCourses(int  userId)
             {
-                return await _repo.GetEmployeeCourses(employeeId);
+                return await _repo.GetUserCourses(userId);
             }
 
             public async Task UpdateProgress(int id, LearningUpdateProgressDto dto)

@@ -4,19 +4,18 @@ namespace hr_crm.Repositories.Interface
 {
     public interface IPayrollRepository
     {
+        Task<Payroll> GeneratePayrollAsync(Payroll payroll);
+        Task<List<Payroll>> GetAllPayrollAsync();
+        Task<List<Payroll>> GetPayrollByUserIdAsync(int userId);
+        Task<Payroll?> GetPayrollByIdAsync(int payrollId);
+        Task<Payroll?> UpdatePayrollAsync(Payroll payroll);
+        Task<bool> DeletePayrollAsync(int payrollId);
 
-        Task<List<Payroll>> GetPayrollAsync();
+        Task AddAllowanceAsync(Allowance allowance);
+        Task AddDeductionAsync(Deduction deduction);
+        Task<List<Allowance>> GetAllowancesAsync(int userId, DateTime month, int year);
+        Task<List<Deduction>> GetDeductionsAsync(int userId, DateTime month, int year);
 
-        Task<List<Payroll>> GetPayrollAsync(int employeeId);
-
-            Task<Payroll?> GetByIdAsync(int payrollId);
-
-            Task AddAsync(Payroll payroll);
-
-            Task<bool> UpdateAsync(int payrollId, Payroll payroll);
-
-            Task<bool> DeleteAsync(int payrollId);
-        
+        Task<Payroll?> GetPayrollByUserMonthYearAsync(int userId, DateTime month, int year);
     }
 }
-

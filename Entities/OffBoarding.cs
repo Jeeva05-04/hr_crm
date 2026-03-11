@@ -6,7 +6,7 @@ namespace hr_crm.Entities
     {
         
             public int Id { get; set; }
-            public int EmployeeId { get; set; }
+            public int UserId { get; set; }
             public DateTime ResignationDate { get; set; }
             public DateTime LastWorkingDate { get; set; }
             public string Reason { get; set; }

@@ -10,7 +10,7 @@ namespace hr_crm.Repositories.Interface
 
         Task<ExitInterview> SubmitFeedback(ExitInterview interview);
 
-        Task<ExitInterview> GetByEmployeeId(int employeeId);
+        Task<ExitInterview> GetByUserId(int  userId);
 
         Task<List<ExitInterview>> GetAll();
         Task<ExitInterview> GetById(int id);

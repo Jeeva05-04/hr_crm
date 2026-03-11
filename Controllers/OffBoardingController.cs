@@ -18,7 +18,7 @@ namespace hr_crm.Controllers
             }
 
             [HttpPost("create")]
-            [HasPermission("OffBoarding_Create")]
+            [HasPermission("OFFBOARDING_CREATE")]
             public async Task<IActionResult> Create(OffBoardingDto dto)
             {
                 var result = await _service.CreateOffboarding(dto);
@@ -26,7 +26,7 @@ namespace hr_crm.Controllers
             }
 
             [HttpGet("{id}")]
-                [HasPermission("OffBoarding_Get/{id}")]
+                [HasPermission("OFFBOARDING_VIEW")]
         public async Task<IActionResult> Get(int id)
             {
                 var result = await _service.GetOffboarding(id);
@@ -36,7 +36,7 @@ namespace hr_crm.Controllers
                 return Ok(result);
             }
              [HttpGet]
-                [HasPermission("OffBoarding_View")]  
+                [HasPermission("OFFBOARDING_VIEW")]  
         public async Task<IActionResult> GetAll()
              {
                  var result = await _service.GetAllOffboardings();
@@ -44,7 +44,7 @@ namespace hr_crm.Controllers
                }
 
               [HttpPut("update-status/{id}")]
-                [HasPermission("OffBoarding_Update")]
+                [HasPermission("OFFBOARDING_UPDATE")]
         public async Task<IActionResult> UpdateStatus(int id, UpdateOffboardingStatusDTO dto)
             {
                 var result = await _service.UpdateStatus(id, dto);
@@ -55,7 +55,7 @@ namespace hr_crm.Controllers
             }
 
             [HttpDelete("delete/{id}")]
-            [HasPermission("OffBoarding_Delete")]
+            [HasPermission("OFFBOARDING_DELETE")]
         public async Task<IActionResult> Delete(int id)
             {
                 var result = await _service.DeleteOffboarding(id);

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311052659_UpdateEmployeeTrainingModule")]
+    partial class UpdateEmployeeTrainingModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -314,6 +317,7 @@ namespace hr_crm.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Category")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("CompletionDate")
@@ -329,10 +333,11 @@ namespace hr_crm.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DurationHours")
+                    b.Property<int>("DurationHours")
                         .HasColumnType("integer");
 
                     b.Property<string>("Feedback")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsCertified")
@@ -356,6 +361,7 @@ namespace hr_crm.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TrainingProvider")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
