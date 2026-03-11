@@ -1323,7 +1323,7 @@ namespace hr_crm.Migrations
             modelBuilder.Entity("hr_crm.Entities.DepartmentRole", b =>
                 {
                     b.Navigation("UserDepartmentRoles");
-                });
+             });
 
         
     
