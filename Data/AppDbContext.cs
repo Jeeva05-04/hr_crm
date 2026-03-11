@@ -30,11 +30,11 @@ namespace hr_crm.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<TodoTask> TodoTasks { get; set; }
         public DbSet<Recruitment> Recruitments { get; set; }
-// HEAD
+
         public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; }
         public DbSet<WorkExperience> WorkExperiences { get; set; }
         public DbSet<EmployeeOnboardingDocuments> EmployeeOnboardingDocuments { get; set; }
-//=======
+
         public DbSet<Payroll> Payrolls { get; set; }
         public DbSet<Allowance> Allowances { get; set; }
         public DbSet<Deduction> Deductions { get; set; }    
@@ -48,7 +48,7 @@ namespace hr_crm.Data
          public DbSet<LearningCourse> LearningCourses { get; set; }
 
 
-//>>>>>>> 1158f6b5dc0c1e20a6017c90e476d55beb767129
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
