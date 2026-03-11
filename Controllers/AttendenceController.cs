@@ -1,47 +1,64 @@
 ﻿using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using hr_crm.DTO;
+using System.Security.Claims;
 
 namespace hr_crm.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class AttendanceController : ControllerBase
+    [Authorize] // ensure only logged-in users can access
+    public class AttendenceController : ControllerBase
     {
-        private readonly IAttendanceService _service;
+        private readonly IAttendanceService _attendanceService;
 
-        public AttendanceController(IAttendanceService service)
+        public AttendenceController(IAttendanceService attendanceService)
         {
-            _service = service;
+            _attendanceService = attendanceService;
         }
 
         // =========================================
-        // ✅ Check-In (Creates New Session)
+        // Check-In
         // =========================================
-        [HttpPost("check-in")]
-        public async Task<IActionResult> CheckIn(int userId)
+        [HttpPost("checkin")]
+        public async Task<IActionResult> CheckIn([FromBody] AttendanceCheckInDto dto)
         {
-            var result = await _service.CheckInAsync(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (!result)
-                return BadRequest("User already has active session");
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
 
-            return Ok(new
-            {
-                Message = "Check-in successful",
-                UserId = userId,
-                Time = DateTime.UtcNow
-            });
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            // Prevent checking in for another user
+            if (dto.UserId != tokenUserId)
+                return Forbid("You cannot check-in for another user.");
+
+            // HttpContext will be used to capture IP & Device info
+            var result = await _attendanceService.CheckInAsync(dto, HttpContext);
+
+            return Ok(result);
         }
 
+
         // =========================================
-        // ✅ Check-Out (Closes Active Session)
+        // Check-Out
         // =========================================
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
-            var result = await _service.CheckOutAsync(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You cannot check-out another user.");
+
+            var result = await _attendanceService.CheckOutAsync(userId);
 
             if (!result)
                 return BadRequest("No active check-in found");
@@ -54,29 +71,74 @@ namespace hr_crm.Controllers
             });
         }
 
+
         // =========================================
-        // ✅ Get Today's Total Hours (Sum of Sessions)
+        // Total Hours Today
         // =========================================
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var totalHours = await _service.CalculateTodayTotalHoursAsync(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            // Check if user is HR
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+
+            // Employees can only view their own hours
+            if (!isHR && userId != tokenUserId)
+                return Forbid("You can only view your own data.");
+
+            // Get attendance history
+            var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
+
+            if (records == null || !records.Any())
+                return NotFound("No attendance history found");
+
+            var result = records
+                .GroupBy(r => r.AttendanceDate)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    TotalHours = g
+                        .Where(x => x.CheckOutTime != null)
+                        .Sum(x => (x.CheckOutTime.Value - x.CheckInTime).TotalHours)
+                })
+                .OrderByDescending(x => x.Date)
+                .ToList();
 
             return Ok(new
             {
                 UserId = userId,
-                Date = DateTime.UtcNow.Date,
-                TotalHours = totalHours
+                TotalHoursHistory = result
             });
         }
 
+
         // =========================================
-        // ✅ Get Full History
+        // Attendance History
         // =========================================
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
         {
-            var records = await _service.GetAttendanceHistoryAsync(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            // Check if user is HR
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+
+            // Employees can only see their own data
+            if (!isHR && userId != tokenUserId)
+                return Forbid("You can only view your own attendance history.");
+
+            var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
 
             if (records == null || !records.Any())
                 return NotFound("No attendance history found");

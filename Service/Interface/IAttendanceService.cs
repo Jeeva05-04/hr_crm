@@ -1,10 +1,11 @@
 ﻿using hr_crm.Entities;
+using hr_crm.DTO;
 
 namespace hr_crm.Service.Interface
 {
     public interface IAttendanceService
     {
-        Task<bool> CheckInAsync(int userId);
+        Task<Attendance> CheckInAsync(AttendanceCheckInDto dto, HttpContext httpContext);  
 
         Task<bool> CheckOutAsync(int userId);
 

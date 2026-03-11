@@ -47,14 +47,16 @@ namespace hr_crm.Repositories
             return true;
         }
 
-        public async Task<bool> DeactivateAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var branch = await _context.Branches.FindAsync(id);
+
             if (branch == null)
                 return false;
 
-            branch.Status = "Inactive";
+            _context.Branches.Remove(branch);
             await _context.SaveChangesAsync();
+
             return true;
         }
     }

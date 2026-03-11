@@ -7,6 +7,6 @@ namespace hr_crm.Service.Interface
         Task<List<Branch>> GetAllAsync();
         Task<bool> CreateAsync(string name, string location, string status);
         Task<bool> UpdateAsync(int id, string name, string location, string status);
-        Task<bool> DeactivateAsync(int id);
+        Task<bool> DeleteAsync(int id);
     }
 }

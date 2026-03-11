@@ -12,10 +12,22 @@ namespace hr_crm.Authorization
 
         public override Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
+<<<<<<< HEAD
             // Only handle policies that start with "Permission:"
             if (policyName.StartsWith("Permission:", StringComparison.OrdinalIgnoreCase))
             {
                 var permission = policyName.Substring("Permission:".Length);
+=======
+            // Remove "Permission:" prefix if exists
+            var permission = policyName.Replace("Permission:", "");
+
+            var policy = new AuthorizationPolicyBuilder()
+                .RequireAssertion(context =>
+                    context.User.HasClaim("perm", "CRM_FULL_ACCESS") ||
+                    context.User.HasClaim("perm", permission)
+                )
+                .Build();
+>>>>>>> e5fee282b88d1907a82b4f5d75d3f2fd6f82ce59
 
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()

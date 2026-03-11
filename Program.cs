@@ -8,6 +8,14 @@ using hr_crm.Repositories.Interface;
 using hr_crm.Service;
 using hr_crm.Service.Interface;
 using hr_crm.Services;
+
+using hr_crm.Authorization;
+using Microsoft.AspNetCore.Authorization;
+
+using System.Text.Json.Serialization;
+using hr_crm.Mappings;
+
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -38,8 +46,17 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
+builder.Services.AddScoped<IDepartmentBudgetRepository, DepartmentBudgetRepository>();
+builder.Services.AddScoped<IDepartmentBudgetService, DepartmentBudgetService>();
+
+builder.Services.AddScoped<IBudgetChangeRequestRepository, BudgetChangeRequestRepository>();
+builder.Services.AddScoped<IBudgetChangeRequestService, BudgetChangeRequestService>();
+
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
+
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
 builder.Services.AddScoped<IPayrollService, PayrollService>();
@@ -64,7 +81,15 @@ builder.Services.AddScoped<ILearningService, LearningService>();
 
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
-builder.Services.AddControllers();
+
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddAutoMapper(typeof(OnboardingMappingProfile));
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<RolePermissionFilter>();
+});
 
 builder.Services.AddCors(options =>
 {
@@ -148,6 +173,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserAccess", policy =>
+        policy.RequireRole("USER", "HR_MANAGER"));
+
+    options.AddPolicy("HrManagerOnly", policy =>
+        policy.RequireRole("HR_MANAGER"));
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -195,7 +229,13 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseCors("AllowFrontend");
 
-// app.UseHttpsRedirection();
+
+ app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -2,6 +2,7 @@
 using hr_crm.Entities;
 using Microsoft.AspNetCore.Mvc;
 using hr_crm.Service.Interface;
+using System.Security.Claims;
 
 namespace hr_crm.Controllers
 {
@@ -19,18 +20,27 @@ namespace hr_crm.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTasks()
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
             var tasks = await _service.GetAllAsync();
 
-            var result = tasks.Select(t => new
-            {
-                t.TaskId,
-                t.Title,
-                t.Description,
-                AssignedTo = t.AssignedTo, // Just return ID
-                DueDate = t.DueDate.ToString("yyyy-MM-dd"),
-                t.Status,
-                t.CreatedAt
-            });
+            var result = tasks
+                .Where(t => t.AssignedTo == tokenUserId)
+                .Select(t => new
+                {
+                    t.TaskId,
+                    t.Title,
+                    t.Description,
+                    AssignedTo = t.AssignedTo,
+                    DueDate = t.DueDate.ToString("yyyy-MM-dd"),
+                    t.Status,
+                    t.CreatedAt
+                });
 
             return Ok(result);
         }
@@ -38,6 +48,16 @@ namespace hr_crm.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTask([FromBody] TodoCreateDto dto)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            if (dto.AssignedTo != tokenUserId)
+                return Forbid("You cannot create tasks for another user.");
+
             var task = new TodoTask
             {
                 Title = dto.Title,
@@ -55,6 +75,16 @@ namespace hr_crm.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, [FromBody] TodoCreateDto dto)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("User ID missing in token");
+
+            var tokenUserId = int.Parse(userIdClaim.Value);
+
+            if (dto.AssignedTo != tokenUserId)
+                return Forbid("You cannot update another user's task.");
+
             var task = new TodoTask
             {
                 Title = dto.Title,

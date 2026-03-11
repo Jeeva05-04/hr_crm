@@ -1,11 +1,13 @@
 ﻿using hr_crm.Models;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace hr_crm.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BranchController : ControllerBase
     {
         private readonly IBranchService _service;
@@ -43,12 +45,12 @@ namespace hr_crm.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBranch(int id)
         {
-            var result = await _service.DeactivateAsync(id);
+            var result = await _service.DeleteAsync(id);
 
             if (!result)
                 return NotFound("Branch not found");
 
-            return Ok("Branch deactivated successfully");
+            return Ok("Branch deleted successfully");
         }
     }
 }

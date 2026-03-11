@@ -14,26 +14,30 @@ namespace hr_crm.Repositories
             _context = context;
         }
 
+        // ✅ GET ALL
         public async Task<List<Department>> GetAllAsync()
         {
             return await _context.Departments
                 .Include(d => d.Branch)
-                .OrderBy(d => d.DepartmentName)
                 .ToListAsync();
         }
 
+        // ✅ GET BY ID  ← THIS WAS MISSING
         public async Task<Department?> GetByIdAsync(int id)
         {
             return await _context.Departments
+                .Include(d => d.Branch)
                 .FirstOrDefaultAsync(d => d.DepartmentId == id);
         }
 
+        // ✅ ADD
         public async Task AddAsync(Department department)
         {
             _context.Departments.Add(department);
             await _context.SaveChangesAsync();
         }
 
+        // ✅ UPDATE
         public async Task<bool> UpdateAsync(int id, Department department)
         {
             var existing = await _context.Departments.FindAsync(id);
@@ -47,6 +51,7 @@ namespace hr_crm.Repositories
             return true;
         }
 
+        // ✅ DELETE
         public async Task<bool> DeleteAsync(int id)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -56,6 +61,36 @@ namespace hr_crm.Repositories
             _context.Departments.Remove(department);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // ✅ GET USERS IN A DEPARTMENT
+        public async Task<object?> GetUsersInDepartmentAsync(int departmentId)
+        {
+            var departmentExists = await _context.Departments
+                .AnyAsync(d => d.DepartmentId == departmentId);
+
+            if (!departmentExists)
+                return null;
+
+            var users = await _context.UserDepartmentRoles
+                .Include(ur => ur.DepartmentRole)
+                .Where(ur => ur.DepartmentRole.DepartmentId == departmentId)
+                .Select(ur => new
+                {
+                    ur.UserId,
+                    ur.DepartmentRole.DepartmentRoleId,
+                    ur.DepartmentRole.RoleName,
+                    ur.DepartmentRole.RequiredSkillLevel,
+                    ur.DepartmentRole.PerformanceLevel
+                })
+                .ToListAsync();
+
+            return new
+            {
+                DepartmentId = departmentId,
+                TotalUsers = users.Select(u => u.UserId).Distinct().Count(),
+                Users = users
+            };
         }
     }
 }

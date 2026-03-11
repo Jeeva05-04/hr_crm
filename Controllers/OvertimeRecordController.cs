@@ -26,6 +26,11 @@ namespace hr_crm.Controllers
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserOvertime(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You can only view your own overtime.");
+
             var records = await _context.OvertimeRecords
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.Date)
@@ -49,6 +54,11 @@ namespace hr_crm.Controllers
         [HttpGet("weekly/{userId}")]
         public async Task<IActionResult> GetWeeklyOvertime(int userId)
         {
+            var tokenUserId = int.Parse(User.FindFirst("sub")!.Value);
+
+            if (userId != tokenUserId)
+                return Forbid("You can only view your own overtime.");
+
             var today = DateTime.UtcNow.Date;
             var weekStart = today.AddDays(-(int)today.DayOfWeek);
 

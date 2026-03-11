@@ -1,6 +1,7 @@
 ﻿using hr_crm.Entities;
 using hr_crm.Repositories.Interface;
 using hr_crm.Service.Interface;
+using hr_crm.DTO;
 
 namespace hr_crm.Services
 {
@@ -16,9 +17,40 @@ namespace hr_crm.Services
         // =========================================
         // ✅ Check-In (Create new session)
         // =========================================
-        public async Task<bool> CheckInAsync(int userId)
+        public async Task<Attendance> CheckInAsync(AttendanceCheckInDto dto, HttpContext httpContext)
         {
-            return await _repo.CheckInAsync(userId);
+            // Get IP Address
+            var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+
+            // If behind proxy (Azure / Nginx)
+            if (httpContext.Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            }
+
+            // Get Device Info
+            var deviceInfo = httpContext.Request.Headers["User-Agent"].ToString();
+
+            if (string.IsNullOrEmpty(deviceInfo))
+            {
+                deviceInfo = "Unknown Device";
+            }
+
+            await _repo.CheckInAsync(
+                dto.UserId,
+                ipAddress,
+                null,   // latitude not used
+                null,   // longitude not used
+                deviceInfo
+            );
+
+            return new Attendance
+            {
+                UserId = dto.UserId,
+                CheckInTime = DateTime.UtcNow,
+                IpAddress = ipAddress,
+                DeviceInfo = deviceInfo
+            };
         }
 
         // =========================================
