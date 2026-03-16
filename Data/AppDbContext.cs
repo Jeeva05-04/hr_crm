@@ -49,6 +49,17 @@ namespace hr_crm.Data
         public DbSet<EmployeeTraining> EmployeeTrainings { get; set; }
          public DbSet<LearningCourse> LearningCourses { get; set; }
 
+        public DbSet<EmployeeLocationTrail> EmployeeLocationTrails { get; set; }
+
+        public DbSet<Bonus> Bonuses { get; set; }
+
+        public DbSet<SalaryConfiguration> SalaryConfigurations { get; set; }
+
+        public DbSet<LeaveBalance> LeaveBalances { get; set; }
+        public DbSet<Holiday> Holidays { get; set; }
+        public DbSet<LeaveEncashment> LeaveEncashments { get; set; }
+        public DbSet<OnboardingInvite> OnboardingInvites { get; set; }
+
 
 
 
@@ -66,9 +77,13 @@ namespace hr_crm.Data
 
 
 
-            // ✅ Unique attendance per user per day
-            modelBuilder.Entity<Attendance>()
-                .HasIndex(a => new { a.UserId, a.AttendanceDate })
+            // Index for fast location trail lookups
+            modelBuilder.Entity<EmployeeLocationTrail>()
+                .HasIndex(t => new { t.UserId, t.RecordedAt });
+
+            // Unique index on onboarding invite token
+            modelBuilder.Entity<OnboardingInvite>()
+                .HasIndex(i => i.Token)
                 .IsUnique();
         }
     }

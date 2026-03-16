@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using hr_crm.Authorization;
 using hr_crm.DTO;
+using hr_crm.Service;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,17 +14,31 @@ namespace hr_crm.Controllers
     public class EmployeeTrainingController : ControllerBase
     {
         private readonly IEmployeeTrainingService _service;
+        private readonly NotificationService _notification;
 
-        public EmployeeTrainingController(IEmployeeTrainingService service)
+        public EmployeeTrainingController(IEmployeeTrainingService service, NotificationService notification)
         {
             _service = service;
+            _notification = notification;
         }
 
         [HttpPost("assign")]
         [HasPermission("EMPLOYEETRAINING_ASSIGN")]
         public async Task<IActionResult> AssignTraining([FromBody] AssignTrainingDto dto)
         {
-            var result = await _service.AssignTrainingAsync(dto);
+            var (result, error) = await _service.AssignTrainingAsync(dto);
+
+            if (result == null)
+                return BadRequest(new { Message = error });
+
+            await _notification.CreateNotification(
+                dto.UserId,
+                "Training Assigned",
+                $"You have been assigned a new training: {dto.TrainingName}.",
+                "Training",
+                0
+            );
+
             return Ok(result);
         }
 

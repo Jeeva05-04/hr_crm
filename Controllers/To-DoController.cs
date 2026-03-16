@@ -2,7 +2,6 @@
 using hr_crm.Entities;
 using Microsoft.AspNetCore.Mvc;
 using hr_crm.Service.Interface;
-using hr_crm.Service;
 using System.Security.Claims;
 
 namespace hr_crm.Controllers
@@ -12,12 +11,10 @@ namespace hr_crm.Controllers
     public class TodoController : ControllerBase
     {
         private readonly ITodoService _service;
-        private readonly NotificationService _notificationService;
 
-        public TodoController(ITodoService service, NotificationService notificationService)
+        public TodoController(ITodoService service)
         {
             _service = service;
-            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -92,15 +89,11 @@ namespace hr_crm.Controllers
                 Status = dto.Status
             };
 
-            await _service.CreateAsync(task);
+            var assignerName = User.FindFirst("name")?.Value
+                            ?? User.FindFirst(ClaimTypes.Name)?.Value
+                            ?? "HR Manager";
 
-            await _notificationService.CreateNotification(
-                dto.AssignedTo,
-                "New Task Assigned",
-                "A new task has been assigned to you",
-                "Todo",
-                0
-            );
+            await _service.CreateAsync(task, assignerName);
 
             return Ok("To-Do task added successfully");
         }

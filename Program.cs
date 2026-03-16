@@ -1,35 +1,35 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using hr_crm.Authorization;
+using hr_crm.Service;
+using hr_crm.BackgroundServices;
 using hr_crm.Data;
+using hr_crm.Hubs;
+using hr_crm.Mappings;
 using hr_crm.Repositories;
 using hr_crm.Repositories.Interface;
 using hr_crm.Service;
 using hr_crm.Service.Interface;
 using hr_crm.Services;
-
-using hr_crm.Authorization;
-using Microsoft.AspNetCore.Authorization;
-
-using System.Text.Json.Serialization;
-using hr_crm.Mappings;
-
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Prevent automatic claim remapping
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
+
+// =======================
 // Services
+// =======================
+
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddHttpClient<IIpGeolocationService, IpGeolocationService>();
 
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<IBranchService, BranchService>();
@@ -55,11 +55,9 @@ builder.Services.AddScoped<IBudgetChangeRequestService, BudgetChangeRequestServi
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 
-
-builder.Services.AddHttpClient();
-
 builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
 builder.Services.AddScoped<IPayrollService, PayrollService>();
+builder.Services.AddHostedService<PayrollAutoGenerationService>();
 
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
@@ -79,115 +77,162 @@ builder.Services.AddScoped<IEmployeeTrainingService, EmployeeTrainingService>();
 builder.Services.AddScoped<ILearningRepository, LearningRespository>();
 builder.Services.AddScoped<ILearningService, LearningService>();
 
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
 
 builder.Services.AddScoped<NotificationRepository>();
-
-
 builder.Services.AddScoped<NotificationService>();
 
-
-builder.Services.AddAuthorization();
-builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+
 builder.Services.AddAutoMapper(typeof(OnboardingMappingProfile));
+
+builder.Services.AddHttpClient();
+
+
+// =======================
+// Controllers
+// =======================
+
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<RolePermissionFilter>();
 });
 
+builder.Services.AddSignalR();
+
+
+// =======================
+// CORS
+// =======================
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .WithExposedHeaders("WWW-Authenticate"); // required for SignalR + JWT challenge
     });
 });
+
+
+// =======================
+// Database
+// =======================
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("HrDb")));
 
-// JWT
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("HrDb")), ServiceLifetime.Scoped);
+
+
+// =======================
+// JWT Authentication
+// =======================
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
 
-        options.TokenValidationParameters = new TokenValidationParameters
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role,
+
+        ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        // Allow SignalR to pass token via query string
+        OnMessageReceived = context =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-
-            NameClaimType = ClaimTypes.NameIdentifier,
-            RoleClaimType = ClaimTypes.Role,
-            ClockSkew = TimeSpan.Zero
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = context =>
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
             {
-                var identity = context.Principal?.Identity as ClaimsIdentity;
-                if (identity == null)
-                    return Task.CompletedTask;
-
-                // Map user id claim
-                var userId =
-                    identity.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-                    identity.FindFirst("id")?.Value ??
-                    identity.FindFirst("userId")?.Value ??
-                    identity.FindFirst("userid")?.Value ??
-                    identity.FindFirst("sub")?.Value;
-
-                if (!string.IsNullOrEmpty(userId) &&
-                    identity.FindFirst(ClaimTypes.NameIdentifier) == null)
-                {
-                    identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
-                }
-
-                // Map role claim
-                var existingRoles = identity.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
-
-                var roles = identity.FindAll("role").Select(x => x.Value)
-                    .Concat(identity.FindAll("roles").Select(x => x.Value))
-                    .Distinct()
-                    .ToList();
-
-                foreach (var role in roles)
-                {
-                    if (!existingRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
-                    {
-                        identity.AddClaim(new Claim(ClaimTypes.Role, role.ToUpper()));
-                    }
-                }
-
-                return Task.CompletedTask;
+                context.Token = accessToken;
             }
-        };
-    });
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("JWT AUTH FAILED: " + context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            Console.WriteLine("JWT CHALLENGE: " + context.Error + " | " + context.ErrorDescription);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            var identity = context.Principal?.Identity as ClaimsIdentity;
+            if (identity == null)
+                return Task.CompletedTask;
 
-builder.Services.AddAuthorization();
+            var userId =
+                identity.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                identity.FindFirst("sub")?.Value;
+
+            if (!string.IsNullOrEmpty(userId) &&
+                identity.FindFirst(ClaimTypes.NameIdentifier) == null)
+            {
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
+            }
+
+            var roles = identity.FindAll("role")
+                                .Select(x => x.Value)
+                                .Distinct()
+                                .ToList();
+
+            foreach (var role in roles)
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Role, role.ToUpper()));
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+});
+
+
+// =======================
+// Authorization
+// =======================
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("UserAccess", policy =>
-        policy.RequireRole("USER", "HR_MANAGER"));
+        policy.RequireRole("HR_USER", "HR_MANAGER"));
 
     options.AddPolicy("HrManagerOnly", policy =>
         policy.RequireRole("HR_MANAGER"));
 });
 
+
+// =======================
+// Swagger
+// =======================
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -197,7 +242,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter JWT like: Bearer {your token}"
+        Description = "Enter your JWT token (without Bearer prefix)"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -216,14 +261,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+// =======================
+// App
+// =======================
+
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HR CRM API v1");
-    c.RoutePrefix = "swagger";
-});
+app.UseSwaggerUI();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -232,19 +278,17 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseStaticFiles();
+
 app.UseCors("AllowFrontend");
 
-
- app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
 app.UseHttpsRedirection();
-
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<LocationHub>("/hubs/location");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

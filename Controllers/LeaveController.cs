@@ -1,8 +1,10 @@
-﻿using hr_crm.Authorization;
+using hr_crm.Authorization;
 using hr_crm.DTO;
+using hr_crm.Service;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace hr_crm.Controllers
 {
@@ -12,43 +14,53 @@ namespace hr_crm.Controllers
     public class LeaveController : ControllerBase
     {
         private readonly ILeaveService _service;
+        private readonly NotificationService _notification;
 
-        public LeaveController(ILeaveService service)
+        public LeaveController(ILeaveService service, NotificationService notification)
         {
             _service = service;
+            _notification = notification;
         }
 
         [HttpPost("apply")]
         [HasPermission("LEAVE_APPLY")]
         public async Task<IActionResult> ApplyLeave([FromBody] LeaveCreateDto dto)
         {
-            await _service.ApplyLeaveAsync(dto);
-            return Ok("Leave applied successfully");
+            var (success, error) = await _service.ApplyLeaveAsync(dto);
+            if (!success) return BadRequest(new { Message = error });
+            return Ok(new { Message = "Leave applied successfully. Pending manager approval." });
         }
 
         [HttpGet]
         [HasPermission("LEAVE_VIEW")]
         public async Task<IActionResult> GetAllLeaves()
-        {
-            var data = await _service.GetAllLeavesAsync();
-            return Ok(data);
-        }
+            => Ok(await _service.GetAllLeavesAsync());
 
         [HttpGet("{userId}")]
         [HasPermission("LEAVE_VIEW")]
         public async Task<IActionResult> GetLeavesByUser(int userId)
-        {
-            var data = await _service.GetLeavesByUserAsync(userId);
-            return Ok(data);
-        }
+            => Ok(await _service.GetLeavesByUserAsync(userId));
 
         [HttpPut("{leaveId}/status")]
         [HasPermission("LEAVE_UPDATE")]
         public async Task<IActionResult> UpdateStatus(int leaveId, [FromBody] LeaveStatusDto dto)
         {
-            var result = await _service.UpdateLeaveStatusAsync(leaveId, dto);
-            if (!result) return NotFound("Leave not found");
-            return Ok("Leave status updated successfully");
+            var (success, error) = await _service.UpdateLeaveStatusAsync(leaveId, dto);
+            if (!success) return BadRequest(new { Message = error });
+
+            var leaves = await _service.GetAllLeavesAsync();
+            var leave = leaves.FirstOrDefault(l => l.LeaveId == leaveId);
+            if (leave != null)
+            {
+                var label = dto.Status?.ToLower() == "approved" ? "Approved" : "Rejected";
+                await _notification.CreateNotification(
+                    leave.UserId,
+                    $"Leave {label}",
+                    $"Your leave ({leave.StartDate:dd MMM yyyy} – {leave.EndDate:dd MMM yyyy}) has been {label.ToLower()}.",
+                    "Leave", leaveId);
+            }
+
+            return Ok(new { Message = $"Leave status updated to {dto.Status}." });
         }
 
         [HttpDelete("{leaveId}")]
@@ -56,8 +68,98 @@ namespace hr_crm.Controllers
         public async Task<IActionResult> DeleteLeave(int leaveId)
         {
             var result = await _service.DeleteLeaveAsync(leaveId);
-            if (!result) return NotFound("Leave not found");
-            return Ok("Leave deleted successfully");
+            if (!result) return NotFound(new { Message = "Leave not found." });
+            return Ok(new { Message = "Leave deleted." });
         }
+
+        // =============================================
+        // Leave Balance
+        // =============================================
+        [HttpGet("balance/{userId}")]
+        [HasPermission("LEAVE_VIEW")]
+        public async Task<IActionResult> GetBalance(int userId)
+        {
+            var balance = await _service.GetBalanceAsync(userId);
+            return Ok(new
+            {
+                UserId = userId,
+                Year = DateTime.UtcNow.Year,
+                Balance = balance.Select(b => new
+                {
+                    b.LeaveType,
+                    b.TotalAllowed,
+                    b.UsedDays,
+                    b.RemainingDays
+                })
+            });
+        }
+
+        // =============================================
+        // Holiday Master
+        // =============================================
+        [HttpPost("holiday")]
+        [HasPermission("LEAVE_UPDATE")]
+        public async Task<IActionResult> AddHoliday([FromBody] HolidayCreateDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+
+            var result = await _service.AddHolidayAsync(dto, int.Parse(userIdClaim.Value));
+            return Ok(new { Message = "Holiday added.", Holiday = result });
+        }
+
+        [HttpGet("holidays")]
+        [HasPermission("LEAVE_VIEW")]
+        public async Task<IActionResult> GetHolidays([FromQuery] int? year)
+            => Ok(await _service.GetHolidaysAsync(year ?? DateTime.UtcNow.Year));
+
+        [HttpDelete("holiday/{id}")]
+        [HasPermission("LEAVE_UPDATE")]
+        public async Task<IActionResult> DeleteHoliday(int id)
+        {
+            var result = await _service.DeleteHolidayAsync(id);
+            if (!result) return NotFound(new { Message = "Holiday not found." });
+            return Ok(new { Message = "Holiday deleted." });
+        }
+
+        // =============================================
+        // Leave Calendar
+        // =============================================
+        [HttpGet("calendar")]
+        [HasPermission("LEAVE_VIEW")]
+        public async Task<IActionResult> GetCalendar([FromQuery] int? month, [FromQuery] int? year)
+        {
+            var result = await _service.GetCalendarAsync(
+                month ?? DateTime.UtcNow.Month,
+                year ?? DateTime.UtcNow.Year);
+            return Ok(result);
+        }
+
+        // =============================================
+        // Leave Encashment
+        // =============================================
+        [HttpPost("encashment/{userId}")]
+        [HasPermission("LEAVE_UPDATE")]
+        public async Task<IActionResult> ProcessEncashment(int userId, [FromQuery] string userName, [FromQuery] int? year)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+
+            var (result, error) = await _service.ProcessEncashmentAsync(
+                userId, userName, year ?? DateTime.UtcNow.Year, int.Parse(userIdClaim.Value));
+
+            if (result == null) return BadRequest(new { Message = error });
+
+            await _notification.CreateNotification(userId, "Leave Encashment Processed",
+                $"Your {result.EncashedDays} unused Earned leave days for {result.Year} have been encashed. Amount: ₹{result.AmountPaid:N2}.",
+                "Leave", result.Id);
+
+            return Ok(new { Message = "Encashment processed.", result.EncashedDays, result.AmountPaid, result.Year });
+        }
+
+        [HttpGet("encashment/{userId}")]
+        [HasPermission("LEAVE_VIEW")]
+        public async Task<IActionResult> GetEncashments(int userId)
+            => Ok(await _service.GetEncashmentsAsync(userId));
     }
 }

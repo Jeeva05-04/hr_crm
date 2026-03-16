@@ -15,8 +15,16 @@ namespace hr_crm.Service
         }
 
         // Assign training
-        public async Task<TrainingResponseDto> AssignTrainingAsync(AssignTrainingDto dto)
+        public async Task<(TrainingResponseDto? Result, string? Error)> AssignTrainingAsync(AssignTrainingDto dto)
         {
+            var userExists = await _repo.UserExistsAsync(dto.UserId);
+            if (!userExists)
+                return (null, $"User with ID {dto.UserId} does not exist.");
+
+            var assignedByExists = await _repo.UserExistsAsync(dto.AssignedBy);
+            if (!assignedByExists)
+                return (null, $"AssignedBy user with ID {dto.AssignedBy} does not exist.");
+
             var training = new EmployeeTraining
             {
                 UserId = dto.UserId,
@@ -42,7 +50,7 @@ namespace hr_crm.Service
             };
 
             var result = await _repo.AddAsync(training);
-            return MapToDTO(result);
+            return (MapToDTO(result), null);
         }
 
         // Get trainings by user

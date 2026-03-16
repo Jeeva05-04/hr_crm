@@ -1,4 +1,4 @@
-﻿using hr_crm.Entities;
+using hr_crm.Entities;
 
 namespace hr_crm.Repositories.Interface
 {
@@ -17,5 +17,28 @@ namespace hr_crm.Repositories.Interface
         Task<List<Deduction>> GetDeductionsAsync(int userId, DateTime month, int year);
 
         Task<Payroll?> GetPayrollByUserMonthYearAsync(int userId, DateTime month, int year);
+
+        // Overtime integration
+        Task<double> GetOvertimeHoursForMonthAsync(int userId, int year, int month);
+
+        // Attendance integration
+        Task<int> GetPresentDaysForMonthAsync(int userId, int year, int month);
+
+        // Approval workflow
+        Task<bool> ApprovePayrollAsync(int payrollId, int approvedBy);
+        Task<bool> MarkAsPaidAsync(int payrollId);
+
+        // Bonus
+        Task<Bonus> CreateBonusAsync(Bonus bonus);
+        Task<List<Bonus>> GetBonusesByUserAsync(int userId);
+        Task<List<Bonus>> GetAllBonusesAsync();
+        Task<Bonus?> GetBonusByIdAsync(int id);
+        Task<bool> ApproveBonusAsync(int id, int approvedBy);
+        Task<List<Bonus>> GetApprovedBonusesForMonthAsync(int userId, int month, int year);
+
+        // Salary Configuration
+        Task<SalaryConfiguration> SetSalaryConfigAsync(SalaryConfiguration config);
+        Task<SalaryConfiguration?> GetSalaryConfigAsync(int userId);
+        Task<List<SalaryConfiguration>> GetAllSalaryConfigsAsync();
     }
 }

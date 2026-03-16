@@ -9,5 +9,8 @@ namespace hr_crm.Repositories.Interface
         Task AddAsync(Recruitment recruitment);
         Task UpdateAsync(Recruitment recruitment);
         Task DeleteAsync(int id);
+        Task<List<Recruitment>> GetByStatusAsync(string status);
+        Task<EmployeeOnboarding> ConvertToOnboardingAsync(Recruitment candidate);
+        Task<bool> AssignLeadAsync(int candidateId, int assignedToUserId);
     }
 }

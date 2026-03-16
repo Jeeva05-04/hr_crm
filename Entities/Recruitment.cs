@@ -23,9 +23,29 @@ public partial class Recruitment
 
     public DateOnly ApplicationDate { get; set; }
 
-    public string Status { get; set; } = null!;
+    // Status pipeline: Applied → Screening → InterviewScheduled → Selected → Offered → Onboarded | Rejected
+    public string Status { get; set; } = "Applied";
 
     public string Source { get; set; } = null!;
+
+    // Interview details
+    public DateTime? InterviewDate { get; set; }
+    public string? InterviewerName { get; set; }
+    public string? InterviewType { get; set; }   // Phone / Video / In-Person
+    public string? InterviewNotes { get; set; }
+
+    // Salary info
+    public decimal? ExpectedSalary { get; set; }
+    public decimal? OfferedSalary { get; set; }
+
+    // Resume
+    public string? ResumeUrl { get; set; }
+
+    // Onboarding link — set when converted
+    public int? OnboardingId { get; set; }
+
+    // Lead assignment — set when HR manager assigns a lead to a recruiter/user
+    public int? AssignedToUserId { get; set; }
 
     public virtual Department Department { get; set; } = null!;
 }

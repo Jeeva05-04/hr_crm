@@ -11,8 +11,8 @@ namespace hr_crm.Repositories.Interface
             Task<EmployeeTraining> GetByIdAsync(int id);
              Task<List<EmployeeTraining>> GetAllAsync();
              Task UpdateAsync(EmployeeTraining training);
-      
-            Task DeleteAsync(EmployeeTraining training);
+             Task DeleteAsync(EmployeeTraining training);
+             Task<bool> UserExistsAsync(int userId);
         
     }
 }

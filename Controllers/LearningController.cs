@@ -1,5 +1,6 @@
 ﻿using hr_crm.Authorization;
 using hr_crm.DTO;
+using hr_crm.Service;
 using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -13,10 +14,12 @@ namespace hr_crm.Controllers
     public class LearningController : ControllerBase
     {
             private readonly ILearningService _service;
+            private readonly NotificationService _notification;
 
-            public LearningController(ILearningService service)
+            public LearningController(ILearningService service, NotificationService notification)
             {
                 _service = service;
+                _notification = notification;
             }
 
             [HttpPost("assign-course")]
@@ -24,6 +27,15 @@ namespace hr_crm.Controllers
             public async Task<IActionResult> AssignCourse(LearningCourseDto dto)
             {
                 var result = await _service.AssignCourse(dto);
+
+                await _notification.CreateNotification(
+                    dto.UserId,
+                    "New Course Assigned",
+                    $"You have been enrolled in a new course: {dto.CourseName}.",
+                    "Learning",
+                    0
+                );
+
                 return Ok(result);
             }
 

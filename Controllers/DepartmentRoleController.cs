@@ -5,6 +5,7 @@ using hr_crm.Authorization;
 using hr_crm.Data;
 using hr_crm.DTO;
 using hr_crm.Entities;
+using hr_crm.Service;
 
 namespace hr_crm.Controllers;
 
@@ -13,10 +14,12 @@ namespace hr_crm.Controllers;
 public class DepartmentRoleController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly NotificationService _notification;
 
-    public DepartmentRoleController(AppDbContext context)
+    public DepartmentRoleController(AppDbContext context, NotificationService notification)
     {
         _context = context;
+        _notification = notification;
     }
 
     // =====================================
@@ -90,6 +93,20 @@ public class DepartmentRoleController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
+
+        // Fetch role name for the notification message
+        var roleName = await _context.DepartmentRoles
+            .Where(r => r.DepartmentRoleId == dto.DepartmentRoleId)
+            .Select(r => r.RoleName)
+            .FirstOrDefaultAsync() ?? "a new role";
+
+        await _notification.CreateNotification(
+            dto.UserId,
+            "Role Assigned",
+            $"You have been assigned the role: {roleName}.",
+            "DepartmentRole",
+            dto.DepartmentRoleId
+        );
 
         return Ok("Role assigned successfully");
     }

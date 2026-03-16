@@ -16,5 +16,14 @@
         public string? DeviceInfo { get; set; }
 
         public string? Status { get; set; }
+
+        // Location at check-in
+        public double? CheckInLatitude { get; set; }
+        public double? CheckInLongitude { get; set; }
+
+        // Live location (updated periodically while checked in)
+        public double? LastKnownLatitude { get; set; }
+        public double? LastKnownLongitude { get; set; }
+        public DateTime? LastLocationUpdated { get; set; }
     }
 }

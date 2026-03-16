@@ -5,7 +5,7 @@ namespace hr_crm.Service.Interface
     public interface ITodoService
     {
         Task<List<TodoTask>> GetAllAsync();
-        Task<bool> CreateAsync(TodoTask task);
+        Task<bool> CreateAsync(TodoTask task, string assignerName = "HR Manager");
         Task<bool> UpdateAsync(int id, TodoTask task);
         Task<bool> DeleteAsync(int id);
     }

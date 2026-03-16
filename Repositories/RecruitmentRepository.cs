@@ -14,9 +14,6 @@ namespace hr_crm.Repositories
             _context = context;
         }
 
-        // =========================================
-        // ✅ GET ALL
-        // =========================================
         public async Task<List<Recruitment>> GetAllAsync()
         {
             return await _context.Recruitments
@@ -24,36 +21,24 @@ namespace hr_crm.Repositories
                 .ToListAsync();
         }
 
-        // =========================================
-        // ✅ GET BY ID
-        // =========================================
         public async Task<Recruitment?> GetByIdAsync(int id)
         {
             return await _context.Recruitments
                 .FirstOrDefaultAsync(r => r.CandidateId == id);
         }
 
-        // =========================================
-        // ✅ CREATE
-        // =========================================
         public async Task AddAsync(Recruitment recruitment)
         {
             _context.Recruitments.Add(recruitment);
             await _context.SaveChangesAsync();
         }
 
-        // =========================================
-        // ✅ UPDATE
-        // =========================================
         public async Task UpdateAsync(Recruitment recruitment)
         {
             _context.Recruitments.Update(recruitment);
             await _context.SaveChangesAsync();
         }
 
-        // =========================================
-        // ✅ DELETE
-        // =========================================
         public async Task DeleteAsync(int id)
         {
             var candidate = await _context.Recruitments
@@ -64,6 +49,77 @@ namespace hr_crm.Repositories
                 _context.Recruitments.Remove(candidate);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<Recruitment>> GetByStatusAsync(string status)
+        {
+            return await _context.Recruitments
+                .Where(r => r.Status == status)
+                .OrderByDescending(r => r.ApplicationDate)
+                .ToListAsync();
+        }
+
+        // Convert selected candidate → create EmployeeOnboarding stub
+        public async Task<EmployeeOnboarding> ConvertToOnboardingAsync(Recruitment candidate)
+        {
+            var onboarding = new EmployeeOnboarding
+            {
+                FullName = $"{candidate.FirstName} {candidate.LastName}",
+                Email = candidate.Email,
+                MobileNumber = candidate.Phone,
+                DateOfJoining = DateTime.UtcNow,
+                // Required non-null fields — will be filled during full onboarding
+                DateOfBirth = DateTime.UtcNow,
+                BloodGroup = "",
+                MaritalStatus = "",
+                FatherName = "",
+                FatherDOB = DateTime.UtcNow,
+                IsFatherDeceased = "No",
+                MotherName = "",
+                MotherDOB = DateTime.UtcNow,
+                IsMotherDeceased = "No",
+                PAN = "",
+                AadharNumber = "",
+                EmergencyContactName = "",
+                EmergencyContactRelationship = "",
+                TemporaryAddress = "",
+                PermanentAddress = "",
+                BankName = "",
+                AccountNumber = "",
+                IFSC = "",
+                BranchName = "",
+                OfficeEmail = "",
+                OfficeMobileNumber = "",
+                LaptopSerialNumber = "",
+                Status = "Pending",
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _context.EmployeeOnboardings.Add(onboarding);
+
+            // Link onboarding back to recruitment
+            candidate.OnboardingId = onboarding.EmployeeOnboardingId;
+            candidate.Status = "Onboarded";
+
+            await _context.SaveChangesAsync();
+
+            // Now OnboardingId is populated — update candidate
+            candidate.OnboardingId = onboarding.EmployeeOnboardingId;
+            _context.Recruitments.Update(candidate);
+            await _context.SaveChangesAsync();
+
+            return onboarding;
+        }
+
+        public async Task<bool> AssignLeadAsync(int candidateId, int assignedToUserId)
+        {
+            var candidate = await _context.Recruitments
+                .FirstOrDefaultAsync(r => r.CandidateId == candidateId);
+            if (candidate == null) return false;
+
+            candidate.AssignedToUserId = assignedToUserId;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

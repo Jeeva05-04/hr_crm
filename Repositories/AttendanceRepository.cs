@@ -17,30 +17,16 @@ namespace hr_crm.Repositories
         // =========================================
         // Check-In (STRICT SHIFT VALIDATION)
         // =========================================
-        public async Task<bool> CheckInAsync(int userId, string? ipAddress, double? latitude, double? longitude, string? deviceInfo)
+        public async Task<(bool Success, string? Error)> CheckInAsync(int userId, string? ipAddress, double? latitude, double? longitude, string? deviceInfo)
         {
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
 
             var userShift = await _context.UserShifts
                 .Include(us => us.Shift)
                 .FirstOrDefaultAsync(us => us.UserId == userId);
 
             if (userShift == null)
-                return false;
-
-            var now = DateTime.UtcNow.TimeOfDay;
-            var shiftStart = userShift.Shift.StartTime;
-            var shiftEnd = userShift.Shift.EndTime;
-
-            bool insideShift;
-
-            if (shiftStart < shiftEnd)
-                insideShift = now >= shiftStart && now <= shiftEnd;
-            else
-                insideShift = now >= shiftStart || now <= shiftEnd;
-
-            if (!insideShift)
-                return false;
+                return (false, "No shift assigned to this user. Please contact HR.");
 
             // Check if open session exists
             var openSession = await _context.Attendances
@@ -50,7 +36,7 @@ namespace hr_crm.Repositories
                     a.CheckOutTime == null);
 
             if (openSession != null)
-                return false;
+                return (false, "You are already checked in. Please check out first.");
 
             var newSession = new Attendance
             {
@@ -62,13 +48,20 @@ namespace hr_crm.Repositories
 
                 // Store IP and Device Info
                 IpAddress = ipAddress,
-                DeviceInfo = deviceInfo
+                DeviceInfo = deviceInfo,
+
+                // Store check-in location
+                CheckInLatitude = latitude,
+                CheckInLongitude = longitude,
+                LastKnownLatitude = latitude,
+                LastKnownLongitude = longitude,
+                LastLocationUpdated = latitude.HasValue ? DateTime.UtcNow : null
             };
 
             _context.Attendances.Add(newSession);
             await _context.SaveChangesAsync();
 
-            return true;
+            return (true, null);
         }
 
         // =========================================
@@ -76,7 +69,7 @@ namespace hr_crm.Repositories
         // =========================================
         public async Task<bool> CheckOutAsync(int userId)
         {
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
 
             var openSession = await _context.Attendances
                 .FirstOrDefaultAsync(a =>
@@ -158,7 +151,7 @@ namespace hr_crm.Repositories
         // =========================================
         public async Task<List<Attendance>> GetTodaySessionsAsync(int userId)
         {
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
 
             return await _context.Attendances
                 .Where(a => a.UserId == userId &&
@@ -176,6 +169,84 @@ namespace hr_crm.Repositories
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.CheckInTime)
                 .ToListAsync();
+        }
+
+        // =========================================
+        // Update Live Location + Save Trail Point
+        // =========================================
+        public async Task<bool> UpdateLocationAsync(int userId, double latitude, double longitude)
+        {
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+
+            var openSession = await _context.Attendances
+                .FirstOrDefaultAsync(a =>
+                    a.UserId == userId &&
+                    a.AttendanceDate == today &&
+                    a.CheckOutTime == null);
+
+            if (openSession == null)
+                return false;
+
+            var now = DateTime.UtcNow;
+
+            // Update the current "last known" position on the attendance record
+            openSession.LastKnownLatitude = latitude;
+            openSession.LastKnownLongitude = longitude;
+            openSession.LastLocationUpdated = now;
+
+            // Append a trail point so we can replay the full movement path
+            _context.EmployeeLocationTrails.Add(new EmployeeLocationTrail
+            {
+                AttendanceId = openSession.AttendanceId,
+                UserId = userId,
+                Latitude = latitude,
+                Longitude = longitude,
+                RecordedAt = now
+            });
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // =========================================
+        // Get Full Location Trail for a Day
+        // =========================================
+        public async Task<List<EmployeeLocationTrail>> GetLocationTrailAsync(int userId, DateTime date)
+        {
+            var utcDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+            var utcNextDay = utcDate.AddDays(1);
+
+            return await _context.EmployeeLocationTrails
+                .Where(t => t.UserId == userId && t.RecordedAt >= utcDate && t.RecordedAt < utcNextDay)
+                .OrderBy(t => t.RecordedAt)
+                .ToListAsync();
+        }
+
+        // =========================================
+        // Get All Active Check-Ins (for managers)
+        // =========================================
+        public async Task<List<Attendance>> GetActiveCheckInsAsync()
+        {
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+
+            return await _context.Attendances
+                .Where(a => a.AttendanceDate == today && a.CheckOutTime == null)
+                .OrderBy(a => a.UserId)
+                .ToListAsync();
+        }
+
+        // =========================================
+        // Get One Active Check-In
+        // =========================================
+        public async Task<Attendance?> GetActiveCheckInAsync(int userId)
+        {
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+
+            return await _context.Attendances
+                .FirstOrDefaultAsync(a =>
+                    a.UserId == userId &&
+                    a.AttendanceDate == today &&
+                    a.CheckOutTime == null);
         }
     }
 }

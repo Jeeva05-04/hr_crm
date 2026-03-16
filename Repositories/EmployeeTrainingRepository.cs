@@ -14,7 +14,12 @@ namespace hr_crm.Repositories
                 _context = context;
             }
 
-            public async Task<EmployeeTraining> AddAsync(EmployeeTraining training)
+            public async Task<bool> UserExistsAsync(int userId)
+        {
+            return await _context.UserDepartmentRoles.AnyAsync(u => u.UserId == userId);
+        }
+
+        public async Task<EmployeeTraining> AddAsync(EmployeeTraining training)
             {
                 _context.EmployeeTrainings.Add(training);
                 await _context.SaveChangesAsync();

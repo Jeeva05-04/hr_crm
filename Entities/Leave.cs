@@ -12,5 +12,6 @@ namespace hr_crm.Entities
         public string Status { get; set; } = string.Empty;
         public string ApprovedBY { get; set; } = string.Empty;
         public DateTime AppliedOn { get; set; } = DateTime.UtcNow;
+        public int TotalDays { get; set; }  // calculated excluding weekends + holidays
     }
 }

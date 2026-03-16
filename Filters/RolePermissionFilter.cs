@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Security.Claims;
 
 public class RolePermissionFilter : IAuthorizationFilter
 {
@@ -8,31 +7,53 @@ public class RolePermissionFilter : IAuthorizationFilter
     {
         var user = context.HttpContext.User;
 
-        if (!user.Identity.IsAuthenticated)
+        if (user.Identity == null || !user.Identity.IsAuthenticated)
         {
             context.Result = new UnauthorizedResult();
             return;
         }
 
-        var role = user.FindFirst(ClaimTypes.Role)?.Value;
+        // Check role from both raw "role" claim and ClaimTypes.Role (handles upper/lowercase)
+        var role = (user.FindFirst("role")?.Value
+                 ?? user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                   )?.ToUpper();
+
         var method = context.HttpContext.Request.Method;
+        var path = context.HttpContext.Request.Path.Value;
 
-        Console.WriteLine("ROLE: " + role);
-
-        // ADMIN → full access
-        if (role == "ADMIN")
-            return;
-
-        // HR_MANAGER → full access
+        // HR Manager → full access
         if (role == "HR_MANAGER")
             return;
 
-        // HR_USER → only GET
-        if (role == "HR_USER")
+        if (role == "USER" || role == "HR_USER")
         {
+            // allow attendance actions
+            if (path.Contains("check-in") || path.Contains("check-out"))
+                return;
+
+            // allow users to delete their own notifications
+            if (method == "DELETE" && path.Contains("/notification", System.StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // USER → only GET allowed
             if (method != "GET")
             {
                 context.Result = new ForbidResult();
+                return;
+            }
+
+            // Prevent accessing other users data
+            var tokenUserId = user.FindFirst("sub")?.Value;
+
+            if (context.RouteData.Values.ContainsKey("userId"))
+            {
+                var routeUserId = context.RouteData.Values["userId"]?.ToString();
+
+                if (routeUserId != tokenUserId)
+                {
+                    context.Result = new ForbidResult();
+                    return;
+                }
             }
         }
     }
