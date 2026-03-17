@@ -28,7 +28,7 @@ public class RolePermissionFilter : IAuthorizationFilter
         if (role == "USER" || role == "HR_USER")
         {
             // allow attendance actions
-            if (path.Contains("check-in") || path.Contains("check-out"))
+            if (path.Contains("checkin") || path.Contains("check-out"))
                 return;
 
             // allow users to delete their own notifications
