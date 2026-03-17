@@ -210,19 +210,6 @@ namespace hr_crm.Controllers
         }
 
         // =========================================
-        // UPDATE STATUS (move through pipeline)
-        // =========================================
-        [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto dto)
-        {
-            var (success, error) = await _service.UpdateStatusAsync(id, dto);
-            if (!success)
-                return BadRequest(new { Message = error });
-
-            return Ok(new { Message = $"Candidate status updated to '{dto.Status}'." });
-        }
-
-        // =========================================
         // CONVERT TO ONBOARDING (Selected → Onboarded)
         // =========================================
         [HttpPost("{id}/convert-to-onboarding")]
@@ -239,35 +226,6 @@ namespace hr_crm.Controllers
                 EmployeeName = onboarding.FullName,
                 Note = "Complete the onboarding form using the OnboardingId above."
             });
-        }
-
-        // =========================================
-        // ASSIGN LEAD TO USER
-        // =========================================
-        [HttpPut("{id}/assign")]
-        public async Task<IActionResult> AssignLead(int id, [FromBody] AssignLeadDto dto)
-        {
-            var candidate = await _service.GetByIdAsync(id);
-            if (candidate == null)
-                return NotFound(new { Message = "Candidate not found." });
-
-            var (success, error) = await _service.AssignLeadAsync(id, dto.AssignedToUserId);
-            if (!success)
-                return BadRequest(new { Message = error });
-
-            var assignerName = User.FindFirst("name")?.Value
-                            ?? User.FindFirst(ClaimTypes.Name)?.Value
-                            ?? "HR Manager";
-
-            await _notification.CreateNotification(
-                dto.AssignedToUserId,
-                $"Lead Assigned: {candidate.FirstName} {candidate.LastName}",
-                $"Candidate: {candidate.FirstName} {candidate.LastName}\nPosition: {candidate.AppliedPosition}\nStatus: {candidate.Status}\nAssigned by: {assignerName}",
-                "Recruitment",
-                id
-            );
-
-            return Ok(new { Message = $"Lead assigned to user {dto.AssignedToUserId} successfully." });
         }
 
         // =========================================

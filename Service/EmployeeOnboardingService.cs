@@ -51,10 +51,17 @@ namespace hr_crm.Services
         {
             var onboarding = _mapper.Map<EmployeeOnboarding>(dto);
 
-            onboarding.DateOfJoining = DateTime.SpecifyKind(dto.DateOfJoining, DateTimeKind.Utc);
-            onboarding.DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc);
-            onboarding.FatherDOB = DateTime.SpecifyKind(dto.FatherDOB, DateTimeKind.Utc);
-            onboarding.MotherDOB = DateTime.SpecifyKind(dto.MotherDOB, DateTimeKind.Utc);
+            if (dto.DateOfJoining.HasValue)
+                onboarding.DateOfJoining = DateTime.SpecifyKind(dto.DateOfJoining.Value, DateTimeKind.Utc);
+
+            if (dto.DateOfBirth.HasValue)
+                onboarding.DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth.Value, DateTimeKind.Utc);
+
+            if (dto.FatherDOB.HasValue)
+                onboarding.FatherDOB = DateTime.SpecifyKind(dto.FatherDOB.Value, DateTimeKind.Utc);
+
+            if (dto.MotherDOB.HasValue)
+                onboarding.MotherDOB = DateTime.SpecifyKind(dto.MotherDOB.Value, DateTimeKind.Utc);
 
             if (dto.SpouseDOB.HasValue)
                 onboarding.SpouseDOB = DateTime.SpecifyKind(dto.SpouseDOB.Value, DateTimeKind.Utc);
