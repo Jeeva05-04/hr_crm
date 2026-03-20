@@ -47,7 +47,7 @@ namespace hr_crm.Services
             if (candidate == null)
                 return (false, "Candidate not found.");
 
-            var validStatuses = new[] { "Applied", "Screening", "InterviewScheduled", "Selected", "Offered", "Onboarded", "Rejected" };
+            var validStatuses = new[] { "Applied", "Screening", "InterviewScheduled", "OnHold", "Selected", "Offered", "Onboarded", "Rejected" };
             if (!validStatuses.Contains(dto.Status))
                 return (false, $"Invalid status. Allowed: {string.Join(", ", validStatuses)}");
 
@@ -91,5 +91,14 @@ namespace hr_crm.Services
             var success = await _repo.AssignLeadAsync(candidateId, assignedToUserId);
             return (success, success ? null : "Failed to assign lead.");
         }
+
+        public Task<hr_crm.DTO.RecruitmentDashboardDto> GetDashboardAsync()
+            => _repo.GetDashboardAsync();
+
+        public Task<hr_crm.DTO.RoleStatsDto?> GetDashboardByRoleAsync(string role)
+            => _repo.GetDashboardByRoleAsync(role);
+
+        public Task<hr_crm.DTO.DepartmentStatsDto?> GetDashboardByDepartmentAsync(int departmentId)
+            => _repo.GetDashboardByDepartmentAsync(departmentId);
     }
 }

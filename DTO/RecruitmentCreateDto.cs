@@ -11,6 +11,7 @@
         public DateTime ApplicationDate { get; set; }
         public string Source { get; set; } = null!;   // LinkedIn / Referral / Website / Direct
         public decimal? ExpectedSalary { get; set; }
+        public int? JobOpeningId { get; set; }        // Optional link to a job opening
         public IFormFile? Resume { get; set; }        // PDF upload
     }
 

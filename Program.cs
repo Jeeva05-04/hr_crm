@@ -68,6 +68,9 @@ builder.Services.AddScoped<IDigitalSignatureService, DigitalSignatureService>();
 builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 
+builder.Services.AddScoped<IJobOpeningRepository, JobOpeningRepository>();
+builder.Services.AddScoped<IJobOpeningService, JobOpeningService>();
+
 builder.Services.AddScoped<IExitInterviewRepository, ExitInterviewRepository>();
 builder.Services.AddScoped<IExitInterviewService, ExitInterviewService>();
 

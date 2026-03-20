@@ -12,5 +12,8 @@ namespace hr_crm.Repositories.Interface
         Task<List<Recruitment>> GetByStatusAsync(string status);
         Task<EmployeeOnboarding> ConvertToOnboardingAsync(Recruitment candidate);
         Task<bool> AssignLeadAsync(int candidateId, int assignedToUserId);
+        Task<hr_crm.DTO.RecruitmentDashboardDto> GetDashboardAsync();
+        Task<hr_crm.DTO.RoleStatsDto?> GetDashboardByRoleAsync(string role);
+        Task<hr_crm.DTO.DepartmentStatsDto?> GetDashboardByDepartmentAsync(int departmentId);
     }
 }

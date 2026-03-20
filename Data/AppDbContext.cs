@@ -60,6 +60,7 @@ namespace hr_crm.Data
         public DbSet<LeaveEncashment> LeaveEncashments { get; set; }
         public DbSet<OnboardingInvite> OnboardingInvites { get; set; }
         public DbSet<Lead> Leads { get; set; }
+        public DbSet<JobOpening> JobOpenings { get; set; }
 
 
 

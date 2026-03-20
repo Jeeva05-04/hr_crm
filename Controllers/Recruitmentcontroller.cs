@@ -46,7 +46,8 @@ namespace hr_crm.Controllers
             OfferedSalary = c.OfferedSalary,
             ResumeUrl = c.ResumeUrl,
             OnboardingId = c.OnboardingId,
-            AssignedToUserId = c.AssignedToUserId
+            AssignedToUserId = c.AssignedToUserId,
+            JobOpeningId = c.JobOpeningId
         };
 
         // Save PDF to wwwroot/uploads/resumes/ and return the relative URL path
@@ -74,6 +75,36 @@ namespace hr_crm.Controllers
             await file.CopyToAsync(stream);
 
             return ($"/uploads/resumes/{fileName}", null);
+        }
+
+        // =========================================
+        // DASHBOARD — overall recruitment stats
+        // =========================================
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var result = await _service.GetDashboardAsync();
+            return Ok(result);
+        }
+
+        // GET /api/recruitment/dashboard/by-role/{role}
+        [HttpGet("dashboard/by-role/{role}")]
+        public async Task<IActionResult> GetDashboardByRole(string role)
+        {
+            var result = await _service.GetDashboardByRoleAsync(role);
+            if (result is null)
+                return NotFound(new { Message = $"No data found for role: {role}" });
+            return Ok(result);
+        }
+
+        // GET /api/recruitment/dashboard/by-department/{departmentId}
+        [HttpGet("dashboard/by-department/{departmentId}")]
+        public async Task<IActionResult> GetDashboardByDepartment(int departmentId)
+        {
+            var result = await _service.GetDashboardByDepartmentAsync(departmentId);
+            if (result is null)
+                return NotFound(new { Message = "Department not found." });
+            return Ok(result);
         }
 
         // =========================================
@@ -138,6 +169,7 @@ namespace hr_crm.Controllers
                 Status = "Applied",
                 Source = dto.Source,
                 ExpectedSalary = dto.ExpectedSalary,
+                JobOpeningId = dto.JobOpeningId,
                 ResumeUrl = resumeUrl
             };
 

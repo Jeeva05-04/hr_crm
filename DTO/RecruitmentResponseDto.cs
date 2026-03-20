@@ -30,5 +30,8 @@ namespace hr_crm.DTO
 
         // Lead assignment
         public int? AssignedToUserId { get; set; }
+
+        // Job opening link
+        public int? JobOpeningId { get; set; }
     }
 }

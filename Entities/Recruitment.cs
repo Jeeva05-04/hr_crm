@@ -47,5 +47,8 @@ public partial class Recruitment
     // Lead assignment — set when HR manager assigns a lead to a recruiter/user
     public int? AssignedToUserId { get; set; }
 
+    // Link to specific job opening this candidate applied for
+    public int? JobOpeningId { get; set; }
+
     public virtual Department Department { get; set; } = null!;
 }
