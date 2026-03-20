@@ -35,7 +35,7 @@ namespace hr_crm.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
+        [HasPermission("EXITINTERVIEW_VIEW")]
         public async Task<IActionResult> GetByUser(int userId)
         {
             var result = await _service.GetByUserId(userId);
@@ -43,7 +43,7 @@ namespace hr_crm.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize(Roles = "HR_MANAGER,ADMIN,HR,MANAGER")]
+        [HasPermission("EXITINTERVIEW_VIEW")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAll();

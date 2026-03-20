@@ -128,8 +128,34 @@ namespace hr_crm.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        // ── 8. GET /api/digitalsignature/view/{id} ────────────────────────────
+        /// <summary>HR views/previews the original document sent for signing.</summary>
+        [HttpGet("view/{id}")]
+        [HasPermission("DIGITALSIGNATURE_VIEW")]
+        public async Task<IActionResult> ViewDocument(int id)
+        {
+            var result = await _service.ViewDocumentAsync(id);
+            if (result is null)
+                return NotFound(new { message = "Document not found or file missing." });
+
+            return File(result.Value.FileBytes, "application/pdf", result.Value.FileName);
+        }
+
+        // ── 9. GET /api/digitalsignature/download-signed/{id} ─────────────────
+        /// <summary>HR downloads the signed copy after employee has signed.</summary>
+        [HttpGet("download-signed/{id}")]
+        [HasPermission("DIGITALSIGNATURE_VIEW")]
+        public async Task<IActionResult> DownloadSigned(int id)
+        {
+            var result = await _service.DownloadSignedDocumentAsync(id);
+            if (result is null)
+                return NotFound(new { message = "Signed document not found. Employee may not have signed yet." });
+
+            return File(result.Value.FileBytes, "application/pdf", result.Value.FileName);
+        }
     }
-    
+
 }
 
 

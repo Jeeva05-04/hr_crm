@@ -59,6 +59,7 @@ namespace hr_crm.Data
         public DbSet<Holiday> Holidays { get; set; }
         public DbSet<LeaveEncashment> LeaveEncashments { get; set; }
         public DbSet<OnboardingInvite> OnboardingInvites { get; set; }
+        public DbSet<Lead> Leads { get; set; }
 
 
 

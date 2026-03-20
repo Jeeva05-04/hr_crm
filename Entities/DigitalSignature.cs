@@ -22,11 +22,15 @@ namespace hr_crm.Entities
 
             public string Status { get; set; } = "Pending"; // Pending, Signed, Rejected
 
+            public string? FilePath { get; set; } // Original uploaded document path
+
+            public string? SignedFilePath { get; set; } // Signed document path (after employee signs)
+
             public string? SignatureHash { get; set; } // Hash generated on signing
-          
+
             public string? SignedByIp { get; set; } // IP address of signer
 
-            public DateTime RequestedAt { get; set; } = DateTime.UtcNow; 
+            public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 
             public DateTime? SignedAt { get; set; }
 

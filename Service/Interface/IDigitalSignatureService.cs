@@ -12,5 +12,7 @@ namespace hr_crm.Service.Interface
         Task<DigitalSignatureResponseCreateDto> UpdateRequestAsync(int signatureId, DigitalSignatureRequestCreateDto dto);
         Task<IEnumerable<DigitalSignature>> GetAllAsync();
         Task<bool> DeleteRequestAsync(int signatureId);
+        Task<(byte[] FileBytes, string FileName)?> ViewDocumentAsync(int signatureId);
+        Task<(byte[] FileBytes, string FileName)?> DownloadSignedDocumentAsync(int signatureId);
     }
 }

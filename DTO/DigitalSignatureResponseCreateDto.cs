@@ -9,6 +9,8 @@
             public string DocumentName { get; set; } = string.Empty;
             public string DocumentType { get; set; } = string.Empty;
             public string Status { get; set; } = string.Empty;
+            public string? FilePath { get; set; }
+            public string? SignedFilePath { get; set; }
             public string? SignatureHash { get; set; }
             public string? SignedByIp { get; set; }
             public DateTime RequestedAt { get; set; }
