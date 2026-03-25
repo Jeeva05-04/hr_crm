@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260320125225_AddDigitalSignatureFilePaths")]
+    partial class AddDigitalSignatureFilePaths
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1157,58 +1160,6 @@ namespace hr_crm.Migrations
                     b.ToTable("LeaveEncashments");
                 });
 
-            modelBuilder.Entity("hr_crm.Entities.LeaveType", b =>
-                {
-                    b.Property<int>("LeaveTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LeaveTypeId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("LeaveTypeId");
-
-                    b.ToTable("LeaveTypes");
-                });
-
-            modelBuilder.Entity("hr_crm.Entities.LogEntry", b =>
-                {
-                    b.Property<int>("LogEntryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LogEntryId"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("text");
-
-                    b.HasKey("LogEntryId");
-
-                    b.ToTable("Logs");
-                });
-
             modelBuilder.Entity("hr_crm.Entities.Notification", b =>
                 {
                     b.Property<int>("NotificationId")
@@ -1379,64 +1330,16 @@ namespace hr_crm.Migrations
                     b.Property<decimal>("BonusAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("ConveyanceAllowance")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DOJ")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Designation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("EmployeePF")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("EmployerPF")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("EmploymentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("GrossSalary")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("HRA")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MedicalAllowance")
-                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("Month")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("MonthlyCTC")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MonthlyCTCApportioned")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("NetSalary")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("NoOfPayableDays")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("OtherAllowance")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("OvertimePay")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("PT")
                         .HasColumnType("numeric");
 
                     b.Property<int>("PresentDays")
@@ -1445,9 +1348,6 @@ namespace hr_crm.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<decimal>("TAOrPBonus")
-                        .HasColumnType("numeric");
 
                     b.Property<decimal>("TaxDeduction")
                         .HasColumnType("numeric");
@@ -1472,9 +1372,6 @@ namespace hr_crm.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("PayrollId");
-
-                    b.HasIndex("UserId", "Month")
-                        .IsUnique();
 
                     b.ToTable("Payrolls");
                 });

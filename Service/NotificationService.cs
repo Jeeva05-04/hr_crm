@@ -10,11 +10,13 @@ namespace hr_crm.Service
     {
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
         private readonly IHubContext<NotificationHub> _hub;
+        private readonly LoggingService _loggingService;
 
-        public NotificationService(IDbContextFactory<AppDbContext> dbFactory, IHubContext<NotificationHub> hub)
+        public NotificationService(IDbContextFactory<AppDbContext> dbFactory, IHubContext<NotificationHub> hub, LoggingService loggingService)
         {
             _dbFactory = dbFactory;
             _hub = hub;
+            _loggingService = loggingService;
         }
 
         // Always uses a fresh DbContext — never affected by the caller's context state
@@ -35,6 +37,15 @@ namespace hr_crm.Service
 
             db.Notifications.Add(notification);
             await db.SaveChangesAsync();
+            // Also create a log entry for the notification creation (non-fatal)
+            try
+            {
+                if (_loggingService != null)
+                {
+                    await _loggingService.CreateLog(notification.UserId, null, "NotificationCreated", $"Title={notification.Title}; Module={notification.Module}; ReferenceId={notification.ReferenceId}");
+                }
+            }
+            catch { /* swallow */ }
 
             try
             {

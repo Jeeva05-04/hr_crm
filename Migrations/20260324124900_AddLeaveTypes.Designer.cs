@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using hr_crm.Data;
@@ -11,9 +12,11 @@ using hr_crm.Data;
 namespace hr_crm.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324124900_AddLeaveTypes")]
+    partial class AddLeaveTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1379,64 +1382,16 @@ namespace hr_crm.Migrations
                     b.Property<decimal>("BonusAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("ConveyanceAllowance")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DOJ")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Designation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("EmployeePF")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("EmployerPF")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("EmploymentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("GrossSalary")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("HRA")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MedicalAllowance")
-                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("Month")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("MonthlyCTC")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MonthlyCTCApportioned")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("NetSalary")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("NoOfPayableDays")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("OtherAllowance")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("OvertimePay")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("PT")
                         .HasColumnType("numeric");
 
                     b.Property<int>("PresentDays")
@@ -1445,9 +1400,6 @@ namespace hr_crm.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<decimal>("TAOrPBonus")
-                        .HasColumnType("numeric");
 
                     b.Property<decimal>("TaxDeduction")
                         .HasColumnType("numeric");
@@ -1472,9 +1424,6 @@ namespace hr_crm.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("PayrollId");
-
-                    b.HasIndex("UserId", "Month")
-                        .IsUnique();
 
                     b.ToTable("Payrolls");
                 });

@@ -67,16 +67,35 @@ namespace hr_crm.Service
             UserName = p.UserName,
             Month = p.Month,
             Year = p.Year,
+            // employment info
+            EmploymentType = p.EmploymentType,
+            Department = p.Department,
+            Designation = p.Designation,
+            DOJ = p.DOJ,
+
+            // CTC / payable
+            MonthlyCTC = p.MonthlyCTC == 0 ? (p.BasicSalary + p.TotalAllowances + p.EmployeePF + p.EmployerPF + p.TaxDeduction + p.TotalDeductions) : p.MonthlyCTC,
+            NoOfPayableDays = p.NoOfPayableDays != 0 ? p.NoOfPayableDays : p.PresentDays,
+            MonthlyCTCApportioned = p.WorkingDays > 0 ? Math.Round((p.MonthlyCTC == 0 ? (p.BasicSalary + p.TotalAllowances) : p.MonthlyCTC) * (decimal)(p.PresentDays) / p.WorkingDays, 2) : 0m,
+
+            // earnings breakdown
             BasicSalary = p.BasicSalary,
-            OvertimePay = p.OvertimePay,
-            BonusAmount = p.BonusAmount,
-            TotalAllowances = p.TotalAllowances,
-            AbsentDeduction = p.AbsentDeduction,
-            TaxDeduction = p.TaxDeduction,
-            TotalDeductions = p.TotalDeductions,
-            WorkingDays = p.WorkingDays,
-            PresentDays = p.PresentDays,
-            NetSalary = p.NetSalary,
+            HRA = p.HRA,
+            ConveyanceAllowance = p.ConveyanceAllowance,
+            MedicalAllowance = p.MedicalAllowance,
+            OtherAllowance = p.OtherAllowance,
+            TAOrPBonus = p.TAOrPBonus == 0 ? p.BonusAmount : p.TAOrPBonus,
+
+            GrossSalary = p.GrossSalary == 0 ? Math.Round(p.BasicSalary + p.TotalAllowances + p.OvertimePay + p.BonusAmount, 2) : p.GrossSalary,
+
+            // deductions
+            EmployeePF = p.EmployeePF,
+            PT = p.PT,
+            EmployerPF = p.EmployerPF,
+            TDS = p.TaxDeduction,
+
+            // summary
+            NetPay = p.NetSalary,
             Status = p.Status,
             CreatedDate = p.CreatedDate,
             ApprovedBy = p.ApprovedBy,
@@ -149,8 +168,16 @@ namespace hr_crm.Service
                 CreatedDate = DateTime.UtcNow
             };
 
-            var result = await _repo.GeneratePayrollAsync(payroll);
-            return (MapToResponse(result), null);
+            try
+            {
+                var result = await _repo.GeneratePayrollAsync(payroll);
+                return (MapToResponse(result), null);
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                // Unique constraint violation or concurrent insert — provide friendly message
+                return (null, $"Payroll already generated for this user for {currentMonth:MMMM yyyy}.");
+            }
         }
 
         public async Task<List<PayrollResponseDto>> GetAllPayrollAsync()

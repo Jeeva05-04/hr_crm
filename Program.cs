@@ -1,5 +1,6 @@
 using hr_crm.Authorization;
 using hr_crm.Service;
+using hr_crm.Middleware;
 using hr_crm.BackgroundServices;
 using hr_crm.Data;
 using hr_crm.Hubs;
@@ -58,6 +59,7 @@ builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
 builder.Services.AddScoped<IPayrollService, PayrollService>();
 builder.Services.AddHostedService<PayrollAutoGenerationService>();
+builder.Services.AddHostedService<hr_crm.BackgroundServices.LogCleanupService>();
 
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
@@ -105,6 +107,9 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddSignalR();
+
+// Logging service
+builder.Services.AddScoped<LoggingService>();
 
 
 // =======================
@@ -290,6 +295,8 @@ app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+// Request logging middleware - records actions to the Logs table
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

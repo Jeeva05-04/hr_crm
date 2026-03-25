@@ -44,8 +44,10 @@ namespace hr_crm.Data
         public DbSet<ExitInterview> ExitInterviews { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<LogEntry> Logs { get; set; }
 
         public DbSet<OffBoarding> OffBoardings { get; set; }
+        public DbSet<LeaveType> LeaveTypes { get; set; }
         public DbSet<EmployeeTraining> EmployeeTrainings { get; set; }
          public DbSet<LearningCourse> LearningCourses { get; set; }
 

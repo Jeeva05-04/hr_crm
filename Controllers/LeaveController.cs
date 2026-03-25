@@ -5,6 +5,9 @@ using hr_crm.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using hr_crm.Extensions;
+using hr_crm.Extensions;
 
 namespace hr_crm.Controllers
 {
@@ -15,11 +18,59 @@ namespace hr_crm.Controllers
     {
         private readonly ILeaveService _service;
         private readonly NotificationService _notification;
+        private readonly LoggingService _loggingService;
+        private readonly hr_crm.Data.AppDbContext _db;
 
-        public LeaveController(ILeaveService service, NotificationService notification)
+        public LeaveController(ILeaveService service, NotificationService notification, LoggingService loggingService, hr_crm.Data.AppDbContext db)
         {
             _service = service;
             _notification = notification;
+            _loggingService = loggingService;
+            _db = db;
+        }
+
+        // =============================================
+        // Leave Types (HR can manage)
+        // =============================================
+        [HttpPost("types")]
+        [HasPermission("LEAVE_UPDATE")]
+        public async Task<IActionResult> CreateLeaveType([FromBody] DTO.LeaveTypeDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+            var createdBy = int.Parse(userIdClaim.Value);
+
+            var exists = await _db.LeaveTypes.AnyAsync(t => t.Name.ToLower() == dto.Name.Trim().ToLower());
+            if (exists) return Conflict(new { Message = "Leave type already exists." });
+
+            var entity = new Entities.LeaveType
+            {
+                Name = dto.Name.Trim(),
+                CreatedBy = createdBy,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.LeaveTypes.Add(entity);
+            await _db.SaveChangesAsync();
+
+            try { await _loggingService.CreateLog(createdBy, User.GetDisplayName(), "LeaveTypeCreate", $"Name={entity.Name}"); } catch { }
+
+            dto.LeaveTypeId = entity.LeaveTypeId;
+            return Ok(dto);
+        }
+
+        [HttpGet("types")]
+        [HasPermission("LEAVE_VIEW")]
+        public async Task<IActionResult> GetLeaveTypes()
+        {
+            var types = await _db.LeaveTypes
+                .OrderBy(t => t.Name)
+                .Select(t => new DTO.LeaveTypeDto { LeaveTypeId = t.LeaveTypeId, Name = t.Name })
+                .ToListAsync();
+
+            return Ok(types);
         }
 
         [HttpPost("apply")]

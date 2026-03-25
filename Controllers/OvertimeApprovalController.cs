@@ -61,5 +61,45 @@ namespace hr_crm.Controllers
                 IsApproved = approval.IsApproved
             });
         }
+
+        [Authorize]
+        [HasPermission("OVERTIME_APPROVE")]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var approvals = await _context.OvertimeApprovals
+                .Select(a => new OvertimeApprovalResponseDto
+                {
+                    OvertimeApprovalId = a.OvertimeApprovalId,
+                    UserId = a.UserId,
+                    ValidFrom = a.ValidFrom,
+                    ValidTo = a.ValidTo,
+                    IsApproved = a.IsApproved
+                })
+                .ToListAsync();
+
+            return Ok(approvals);
+        }
+
+        [Authorize]
+        [HasPermission("OVERTIME_APPROVE")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var a = await _context.OvertimeApprovals.FindAsync(id);
+            if (a == null)
+                return NotFound();
+
+            var dto = new OvertimeApprovalResponseDto
+            {
+                OvertimeApprovalId = a.OvertimeApprovalId,
+                UserId = a.UserId,
+                ValidFrom = a.ValidFrom,
+                ValidTo = a.ValidTo,
+                IsApproved = a.IsApproved
+            };
+
+            return Ok(dto);
+        }
     }
 }

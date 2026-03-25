@@ -1,10 +1,12 @@
 ﻿using hr_crm.Service.Interface;
+using hr_crm.Service;
 using hr_crm.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using hr_crm.DTO;
 using System.Security.Claims;
+using hr_crm.Extensions;
 
 namespace hr_crm.Controllers
 {
@@ -15,11 +17,24 @@ namespace hr_crm.Controllers
     {
         private readonly IAttendanceService _attendanceService;
         private readonly IHubContext<LocationHub> _hubContext;
+        private readonly LoggingService _loggingService;
 
-        public AttendenceController(IAttendanceService attendanceService, IHubContext<LocationHub> hubContext)
+        public AttendenceController(IAttendanceService attendanceService, IHubContext<LocationHub> hubContext, LoggingService loggingService)
         {
             _attendanceService = attendanceService;
             _hubContext = hubContext;
+            _loggingService = loggingService;
+        }
+
+        // Helper to call logging service without throwing
+        private async Task _logging_service_safe(int? userId, string? userName, string action, string details)
+        {
+            try
+            {
+                if (_loggingService != null)
+                    await _loggingService.CreateLog(userId, userName, action, details);
+            }
+            catch { }
         }
 
         // =========================================
@@ -44,6 +59,15 @@ namespace hr_crm.Controllers
 
             if (record == null)
                 return BadRequest(new { Message = error });
+
+            // Create a semantic log for the check-in
+            try
+            {
+                var userName = User.GetDisplayName();
+                var details = $"Ip={record.IpAddress}; Device={record.DeviceInfo}; Lat={record.CheckInLatitude}; Lon={record.CheckInLongitude}";
+                await _logging_service_safe(tokenUserId, userName, "CheckIn", details);
+            }
+            catch { }
 
             return Ok(new
             {
@@ -78,6 +102,13 @@ namespace hr_crm.Controllers
 
             if (!result)
                 return BadRequest("No active check-in found");
+
+            try
+            {
+                var userName = User.GetDisplayName();
+                await _logging_service_safe(userId, userName, "CheckOut", $"User checked out at {DateTime.UtcNow}");
+            }
+            catch { }
 
             return Ok(new
             {
@@ -193,6 +224,14 @@ namespace hr_crm.Controllers
                 LastUpdated = DateTime.UtcNow,
                 GoogleMapsLink = $"https://www.google.com/maps?q={dto.Latitude},{dto.Longitude}"
             });
+            // Log the location update (best-effort)
+            try
+            {
+                var userName = User.GetDisplayName();
+                var details = $"Lat={dto.Latitude}; Lon={dto.Longitude}";
+                await _logging_service_safe(dto.UserId, userName, "LocationUpdate", details);
+            }
+            catch { }
 
             return Ok(new
             {

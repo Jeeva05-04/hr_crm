@@ -75,6 +75,30 @@ namespace hr_crm.Controllers
         }
 
         // =============================================
+        // PUBLIC: Employee submits onboarding form via invite token
+        // POST /api/onboardinginvite/submit/{token}
+        // =============================================
+        [HttpPost("submit/{token}")]
+        [AllowAnonymous]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Submit(string token, [FromForm] EmployeeOnboardingCreateDto dto)
+        {
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            var (record, error) = await _service.SubmitWithTokenAsync(token, dto, webRootPath);
+
+            if (record == null)
+                return BadRequest(new { Message = error });
+
+            return Ok(new
+            {
+                Message = "Onboarding form submitted successfully.",
+                OnboardingId = record.EmployeeOnboardingId,
+                EmployeeName = record.FullName
+            });
+        }
+
+        // =============================================
         // HR MANAGER: View all generated invites
         // GET /api/onboardinginvite/all
         // =============================================
