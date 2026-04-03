@@ -21,10 +21,110 @@ namespace hr_crm.Controllers
             _logger = logger;
         }
 
+        [HttpGet("employees")]
+        public async Task<IActionResult> GetEmployeeContacts()
+        {
+            try
+            {
+                var contacts = await _chatService.GetEmployeeContactsAsync();
+                return Ok(new { success = true, employees = contacts });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving employee contacts");
+                return StatusCode(500, new { message = "Error retrieving employee contacts" });
+            }
+        }
+
+        [HttpPost("conversations/direct")]
+        public async Task<IActionResult> CreateDirectConversation([FromBody] CreateDirectConversationDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            var (result, error) = await _chatService.CreateDirectConversationAsync(userId.Value, GetCurrentUserName(userId.Value), dto.UserId);
+            if (result == null)
+                return BadRequest(new { message = error });
+
+            return Ok(new { success = true, conversation = result });
+        }
+
+        [HttpPost("conversations/group")]
+        public async Task<IActionResult> CreateGroupConversation([FromBody] CreateGroupConversationDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            var (result, error) = await _chatService.CreateGroupConversationAsync(userId.Value, GetCurrentUserName(userId.Value), dto);
+            if (result == null)
+                return BadRequest(new { message = error });
+
+            return Ok(new { success = true, conversation = result });
+        }
+
+        [HttpPost("conversations/{conversationId}/members")]
+        public async Task<IActionResult> AddGroupMembers(int conversationId, [FromBody] AddGroupMembersDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            var (success, error) = await _chatService.AddGroupMembersAsync(userId.Value, GetCurrentUserName(userId.Value), conversationId, dto);
+            if (!success)
+                return BadRequest(new { message = error });
+
+            return Ok(new { success = true, conversationId });
+        }
+
+        [HttpGet("conversations")]
+        public async Task<IActionResult> GetConversations()
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            try
+            {
+                var conversations = await _chatService.GetConversationsAsync(userId.Value);
+                return Ok(new { success = true, conversations });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving conversations");
+                return StatusCode(500, new { message = "Error retrieving conversations" });
+            }
+        }
+
+        [HttpGet("conversations/{conversationId}/messages")]
+        public async Task<IActionResult> GetConversationMessages(int conversationId, [FromQuery] int pageSize = 100, [FromQuery] int pageNumber = 1)
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            try
+            {
+                var (messages, error) = await _chatService.GetConversationMessagesAsync(userId.Value, conversationId, pageSize, pageNumber);
+                if (messages == null)
+                    return NotFound(new { message = error });
+
+                return Ok(new
+                {
+                    success = true,
+                    conversationId,
+                    totalCount = messages.Count,
+                    pageSize,
+                    pageNumber,
+                    messages
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving conversation messages");
+                return StatusCode(500, new { message = "Error retrieving conversation messages" });
+            }
+        }
+
         // POST: /api/chat/send
-        // Send a message (broadcast to everyone or to specific user)
-        // Body: { "content": "message", "receiverUserId": null } (null or omit for broadcast)
-        // Body: { "content": "message", "receiverUserId": 5 } (for direct message)
+        // Body: { "content": "message", "conversationId": 1 }
+        // Body: { "content": "message", "receiverUserId": 5 } (auto-creates/reuses a direct conversation)
         [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromBody] SendChatMessageDto dto)
         {
@@ -37,7 +137,6 @@ namespace hr_crm.Controllers
             if (string.IsNullOrWhiteSpace(dto.Content))
                 return BadRequest(new { message = "Message content cannot be empty" });
 
-            // Get user display name from token claims
             var userName = GetCurrentUserName(userId.Value);
 
             try
@@ -47,13 +146,17 @@ namespace hr_crm.Controllers
                 {
                     success = true,
                     message.ChatMessageId,
+                    message.ChatConversationId,
                     message.SentByUserId,
                     message.SentByUserName,
                     message.ReceiverUserId,
                     message.Content,
-                    message.SentAt,
-                    messageType = message.ReceiverUserId.HasValue ? "direct" : "broadcast"
+                    message.SentAt
                 });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -62,8 +165,7 @@ namespace hr_crm.Controllers
             }
         }
 
-        // GET: /api/chat/history
-        // Get all chat messages (Chat History for everyone)
+        // Legacy endpoint retained for compatibility.
         [HttpGet("history")]
         public async Task<IActionResult> GetChatHistory([FromQuery] int pageSize = 100, [FromQuery] int pageNumber = 1)
         {
@@ -82,12 +184,12 @@ namespace hr_crm.Controllers
                     messages = messages.Select(m => new
                     {
                         m.ChatMessageId,
+                        m.ChatConversationId,
                         m.SentByUserId,
                         m.SentByUserName,
                         m.ReceiverUserId,
                         m.Content,
-                        m.SentAt,
-                        messageType = m.ReceiverUserId.HasValue ? $"Direct to User {m.ReceiverUserId}" : "Broadcast (Everyone)"
+                        m.SentAt
                     })
                 });
             }

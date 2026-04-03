@@ -5,6 +5,7 @@ namespace hr_crm.Entities
     public class ChatMessage
     {
         public int ChatMessageId { get; set; }
+        public int? ChatConversationId { get; set; }
 
         public int SentByUserId { get; set; }
         public string? SentByUserName { get; set; }

@@ -64,6 +64,8 @@ namespace hr_crm.Data
         public DbSet<Lead> Leads { get; set; }
         public DbSet<JobOpening> JobOpenings { get; set; }
 
+        public DbSet<ChatConversation> ChatConversations { get; set; }
+        public DbSet<ChatConversationMember> ChatConversationMembers { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<ChatUserPresence> ChatUserPresences { get; set; }
 
@@ -92,6 +94,10 @@ namespace hr_crm.Data
 
             modelBuilder.Entity<ChatUserPresence>()
                 .HasIndex(p => p.UserId)
+                .IsUnique();
+
+            modelBuilder.Entity<ChatConversationMember>()
+                .HasIndex(m => new { m.ChatConversationId, m.UserId })
                 .IsUnique();
         }
     }
