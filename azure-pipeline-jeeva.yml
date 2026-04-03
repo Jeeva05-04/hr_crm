@@ -25,7 +25,30 @@ steps:
       latest
       $(tag)
 
-- script: |
-    curl -X POST -k https://89.116.20.215:9443/api/stacks/webhooks/4173be62-b5d0-4073-9fda-ffdecea4c731?IMAGE_TAG=$(Build.BuildId)
-  displayName: 'Trigger Portainer webhook deployment'
+- task: SSH@0
+  displayName: 'Deploy $(imageName)'
   condition: succeeded()
+  inputs:
+    sshEndpoint: 'hostinger-vps'
+    runOptions: inline
+    inline: |
+      set -e
+
+      IMAGE="$(registry)/$(imageName):$(Build.BuildId)"
+      CONTAINER="$(imageName)"
+
+      echo "Deploying $IMAGE"
+
+      # Stop & remove old container
+      docker stop $CONTAINER || true
+      docker rm $CONTAINER || true
+
+      # Pull new image
+      docker pull $IMAGE
+
+      # Run container
+      docker run -d \
+        --name $CONTAINER \
+        -p 9095:8080 \
+        --restart always \
+        $IMAGE
