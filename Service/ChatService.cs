@@ -220,6 +220,47 @@ namespace hr_crm.Service
             return (true, null);
         }
 
+        public async Task<(bool Success, string? Error)> DeleteGroupConversationAsync(int currentUserId, int conversationId)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+            await EnsureChatTablesAsync(db);
+
+            var conversation = await db.ChatConversations
+                .FirstOrDefaultAsync(c => c.ChatConversationId == conversationId && !c.IsDeleted);
+
+            if (conversation == null)
+                return (false, "Conversation not found.");
+
+            if (conversation.ConversationType != "Group")
+                return (false, "Only group conversations can be deleted.");
+
+            var currentMembership = await db.ChatConversationMembers
+                .FirstOrDefaultAsync(m => m.ChatConversationId == conversationId &&
+                                          m.UserId == currentUserId &&
+                                          m.IsActive);
+
+            if (currentMembership == null)
+                return (false, "You are not a member of this conversation.");
+
+            if (!currentMembership.IsAdmin)
+                return (false, "Only a group admin can delete this conversation.");
+
+            var messages = await db.ChatMessages
+                .Where(m => m.ChatConversationId == conversationId)
+                .ToListAsync();
+
+            var members = await db.ChatConversationMembers
+                .Where(m => m.ChatConversationId == conversationId)
+                .ToListAsync();
+
+            db.ChatMessages.RemoveRange(messages);
+            db.ChatConversationMembers.RemoveRange(members);
+            db.ChatConversations.Remove(conversation);
+
+            await db.SaveChangesAsync();
+            return (true, null);
+        }
+
         public async Task<List<ChatConversationDto>> GetConversationsAsync(int currentUserId)
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
@@ -517,25 +558,51 @@ namespace hr_crm.Service
 
         private static async Task<string?> ResolveEmployeeNameAsync(AppDbContext db, int userId)
         {
+            var authUserName = await db.AuthUsers
+                .Where(x => x.UserId == userId &&
+                            x.DeletedAt == null &&
+                            !string.IsNullOrWhiteSpace(x.UserName))
+                .Select(x => x.UserName)
+                .FirstOrDefaultAsync();
+            if (IsMeaningfulDisplayName(authUserName))
+                return authUserName;
+
+            var onboardingName = await db.EmployeeOnboardings
+                .Where(x => (x.ConvertedEmployeeId == userId || x.EmployeeOnboardingId == userId) &&
+                            !string.IsNullOrWhiteSpace(x.FullName))
+                .OrderByDescending(x => x.ConvertedAt ?? x.CreatedDate)
+                .Select(x => x.FullName)
+                .FirstOrDefaultAsync();
+            if (IsMeaningfulDisplayName(onboardingName))
+                return onboardingName;
+
             var payrollName = await db.Payrolls
                 .Where(x => x.UserId == userId && !string.IsNullOrWhiteSpace(x.UserName))
                 .OrderByDescending(x => x.CreatedDate)
                 .Select(x => x.UserName)
                 .FirstOrDefaultAsync();
-            if (!string.IsNullOrWhiteSpace(payrollName))
+            if (IsMeaningfulDisplayName(payrollName))
                 return payrollName;
 
             var salaryName = await db.SalaryConfigurations
                 .Where(x => x.UserId == userId && !string.IsNullOrWhiteSpace(x.UserName))
                 .Select(x => x.UserName)
                 .FirstOrDefaultAsync();
-            if (!string.IsNullOrWhiteSpace(salaryName))
+            if (IsMeaningfulDisplayName(salaryName))
                 return salaryName;
 
-            return await db.ChatUserPresences
+            var presenceName = await db.ChatUserPresences
                 .Where(x => x.UserId == userId && !string.IsNullOrWhiteSpace(x.UserName))
                 .Select(x => x.UserName)
                 .FirstOrDefaultAsync();
+            if (IsMeaningfulDisplayName(presenceName))
+                return presenceName;
+
+            return authUserName
+                ?? onboardingName
+                ?? payrollName
+                ?? salaryName
+                ?? presenceName;
         }
 
         private static async Task<Dictionary<int, string>> GetEmployeeDirectoryAsync(AppDbContext db)
@@ -551,6 +618,8 @@ namespace hr_crm.Service
             await AddIdsAsync(db.Leaves.Select(x => x.UserId), ids);
             await AddIdsAsync(db.ChatConversationMembers.Select(x => x.UserId), ids);
             await AddIdsAsync(db.ChatUserPresences.Select(x => x.UserId), ids);
+            await AddIdsAsync(db.AuthUsers.Where(x => x.DeletedAt == null).Select(x => x.UserId), ids);
+            await AddIdsAsync(db.EmployeeOnboardings.Where(x => x.ConvertedEmployeeId.HasValue).Select(x => x.ConvertedEmployeeId!.Value), ids);
 
             var directory = new Dictionary<int, string>();
             foreach (var userId in ids)
@@ -566,6 +635,22 @@ namespace hr_crm.Service
                 if (id > 0)
                     ids.Add(id);
             }
+        }
+
+        private static bool IsMeaningfulDisplayName(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            var trimmed = value.Trim();
+            if (trimmed.Length <= 1)
+                return false;
+
+            if (trimmed.StartsWith("User", StringComparison.OrdinalIgnoreCase) &&
+                int.TryParse(trimmed[4..], out _))
+                return false;
+
+            return true;
         }
 
         private static async Task EnsureChatTablesAsync(AppDbContext db)

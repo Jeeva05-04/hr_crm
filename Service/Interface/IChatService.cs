@@ -7,6 +7,7 @@ namespace hr_crm.Service.Interface
         Task<(ChatConversationDto? Result, string? Error)> CreateDirectConversationAsync(int currentUserId, string? currentUserName, int otherUserId);
         Task<(ChatConversationDto? Result, string? Error)> CreateGroupConversationAsync(int currentUserId, string? currentUserName, CreateGroupConversationDto dto);
         Task<(bool Success, string? Error)> AddGroupMembersAsync(int currentUserId, string? currentUserName, int conversationId, AddGroupMembersDto dto);
+        Task<(bool Success, string? Error)> DeleteGroupConversationAsync(int currentUserId, int conversationId);
         Task<List<ChatConversationDto>> GetConversationsAsync(int currentUserId);
         Task<(List<ChatMessageDto>? Result, string? Error)> GetConversationMessagesAsync(int currentUserId, int conversationId, int pageSize = 100, int pageNumber = 1);
         Task<ChatMessageDto> SendMessageAsync(SendChatMessageDto dto, int sentByUserId, string? userName);

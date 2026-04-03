@@ -142,6 +142,31 @@ namespace hr_crm.Controllers
             return Ok(result);
         }
 
+        [HttpPost("{id}/convert-to-user")]
+        public async Task<IActionResult> ConvertToUser(int id)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdClaim, out var actingUserId))
+                return Unauthorized();
+
+            var (user, error) = await _service.ConvertToUserAsync(id, actingUserId);
+            if (user == null)
+                return NotFound(new { Message = error });
+
+            return Ok(new
+            {
+                Message = "Onboarding successfully converted to user.",
+                userId = user.UserId,
+                employeeId = user.EmployeeId,
+                userName = user.UserName,
+                email = user.Emails,
+                designation = user.Designation,
+                branch = user.AssignedBranch,
+                accountStatus = user.AccountStatus
+            });
+        }
+
         // Convert DTO file-system paths to public URLs under /onboarding/{id}/{filename}
         private void TryConvertPathsToPublicUrls(DTO.EmployeeOnboardingResponseDto dto)
         {

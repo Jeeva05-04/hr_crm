@@ -32,6 +32,7 @@ namespace hr_crm.Data
         public DbSet<Recruitment> Recruitments { get; set; }
 
         public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; }
+        public DbSet<AuthUser> AuthUsers { get; set; }
         public DbSet<WorkExperience> WorkExperiences { get; set; }
         public DbSet<EmployeeOnboardingDocuments> EmployeeOnboardingDocuments { get; set; }
 
@@ -78,6 +79,9 @@ namespace hr_crm.Data
             modelBuilder.Entity<EmployeeOnboarding>()
                 .Property(e => e.IsMotherDeceased)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<AuthUser>()
+                .ToTable("users");
 
             base.OnModelCreating(modelBuilder);
 

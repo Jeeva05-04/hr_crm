@@ -15,6 +15,7 @@ namespace hr_crm.Service.Interface
 
         Task<EmployeeOnboardingDocuments?> GetDocumentsAsync(int onboardingId);
         Task<WorkExperience?> GetWorkExperienceAsync(int onboardingId);
+        Task<(AuthUser? User, string? Error)> ConvertToUserAsync(int onboardingId, int actingUserId);
 
         // Invite link methods
         Task<OnboardingInvite> GenerateInviteAsync(GenerateInviteDto dto, int createdByUserId, string baseUrl);

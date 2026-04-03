@@ -70,6 +70,9 @@ namespace hr_crm.DTO
         public string? LaptopImagePath { get; set; }
 
         public string Status { get; set; } = string.Empty;
+        public int? ConvertedUserId { get; set; }
+        public DateTime? ConvertedAt { get; set; }
+        public bool IsConvertedToUser { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }

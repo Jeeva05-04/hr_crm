@@ -49,5 +49,7 @@ public class EmployeeOnboarding
     public string? LaptopImagePath { get; set; }
 
     public string Status { get; set; } = "Submitted";
+    public int? ConvertedEmployeeId { get; set; }
+    public DateTime? ConvertedAt { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }

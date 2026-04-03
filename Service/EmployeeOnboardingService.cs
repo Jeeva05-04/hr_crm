@@ -153,6 +153,9 @@ namespace hr_crm.Services
                     LaptopSerialNumber = onboarding.LaptopSerialNumber,
                     LaptopImagePath = onboarding.LaptopImagePath,
                     Status = onboarding.Status,
+                    ConvertedUserId = onboarding.ConvertedEmployeeId,
+                    ConvertedAt = onboarding.ConvertedAt,
+                    IsConvertedToUser = onboarding.ConvertedEmployeeId.HasValue,
                     CreatedDate = onboarding.CreatedDate
                 };
 
@@ -235,6 +238,9 @@ namespace hr_crm.Services
                 LaptopSerialNumber = onboarding.LaptopSerialNumber,
                 LaptopImagePath = onboarding.LaptopImagePath,
                 Status = onboarding.Status,
+                ConvertedUserId = onboarding.ConvertedEmployeeId,
+                ConvertedAt = onboarding.ConvertedAt,
+                IsConvertedToUser = onboarding.ConvertedEmployeeId.HasValue,
                 CreatedDate = onboarding.CreatedDate
             };
 
@@ -288,6 +294,84 @@ namespace hr_crm.Services
             _context.EmployeeOnboardings.Remove(onboarding);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<(AuthUser? User, string? Error)> ConvertToUserAsync(int onboardingId, int actingUserId)
+        {
+            var onboarding = await _context.EmployeeOnboardings
+                .FirstOrDefaultAsync(x => x.EmployeeOnboardingId == onboardingId);
+
+            if (onboarding == null)
+                return (null, "Onboarding record not found.");
+
+            if (onboarding.ConvertedEmployeeId.HasValue)
+            {
+                var existingUser = await _context.AuthUsers
+                    .FirstOrDefaultAsync(x => x.UserId == onboarding.ConvertedEmployeeId.Value && x.DeletedAt == null);
+
+                return existingUser == null
+                    ? (null, "Onboarding is already marked as converted, but the user record was not found.")
+                    : (existingUser, null);
+            }
+
+            var work = await GetWorkExperienceAsync(onboardingId);
+            var convertedAt = DateTime.UtcNow;
+
+            // Keep the Postgres identity sequence aligned with the actual max user_id.
+            // This avoids stale sequence values and lets the database assign the next id safely.
+            await _context.Database.ExecuteSqlRawAsync(
+                """
+                SELECT setval(
+                    pg_get_serial_sequence('users', 'user_id'),
+                    COALESCE((SELECT MAX(user_id) FROM users), 1),
+                    EXISTS (SELECT 1 FROM users)
+                );
+                """);
+
+            var user = new AuthUser
+            {
+                EmployeeId = onboarding.EmployeeOnboardingId.ToString(),
+                UserName = string.IsNullOrWhiteSpace(onboarding.FullName) ? onboarding.Email : onboarding.FullName,
+                Emails = string.IsNullOrWhiteSpace(onboarding.OfficeEmail) ? onboarding.Email : onboarding.OfficeEmail,
+                Department = null,
+                Designation = work?.OfferedDesignation,
+                ManagerId = null,
+                AssignedTeamId = null,
+                AssignedRegion = null,
+                AssignedBranch = onboarding.BranchName,
+                AccountStatus = "Active",
+                LockReason = null,
+                AccessStartDate = onboarding.DateOfJoining ?? convertedAt,
+                AccessEndDate = null,
+                LastActivityAt = null,
+                LastAssignedLeadAt = null,
+                LastClosedTicketAt = null,
+                EmploymentType = null,
+                WorkShift = null,
+                TermsAcceptedAt = convertedAt,
+                Remarks = BuildOnboardingRemarks(onboarding, work),
+                CreatedBy = actingUserId,
+                UpdatedBy = actingUserId,
+                ApprovedBy = actingUserId,
+                SecurityReviewedBy = null,
+                CreatedAt = convertedAt,
+                UpdatedAt = convertedAt,
+                DeletedAt = null,
+                CreatedVia = "OnboardingConversion",
+                DomainId = null,
+                Gender = null,
+                PayrollAmount = work?.OfferedMonthlyCTC
+            };
+
+            _context.AuthUsers.Add(user);
+            await _context.SaveChangesAsync();
+
+            onboarding.ConvertedEmployeeId = user.UserId;
+            onboarding.ConvertedAt = convertedAt;
+            onboarding.Status = "Converted";
+            await _context.SaveChangesAsync();
+
+            return (user, null);
         }
 
         // =============================================
@@ -381,6 +465,24 @@ namespace hr_crm.Services
             return await _context.OnboardingInvites
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
+        }
+
+        private static string BuildOnboardingRemarks(EmployeeOnboarding onboarding, WorkExperience? work)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(onboarding.MobileNumber))
+                parts.Add($"Mobile: {onboarding.MobileNumber}");
+            if (!string.IsNullOrWhiteSpace(onboarding.BloodGroup))
+                parts.Add($"BloodGroup: {onboarding.BloodGroup}");
+            if (!string.IsNullOrWhiteSpace(onboarding.PermanentAddress))
+                parts.Add($"Address: {onboarding.PermanentAddress}");
+            if (!string.IsNullOrWhiteSpace(work?.TotalExperience))
+                parts.Add($"Experience: {work.TotalExperience}");
+            if (!string.IsNullOrWhiteSpace(onboarding.OfficeMobileNumber))
+                parts.Add($"OfficeMobile: {onboarding.OfficeMobileNumber}");
+
+            return string.Join(" | ", parts);
         }
     }
 }

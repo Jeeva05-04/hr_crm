@@ -75,6 +75,19 @@ namespace hr_crm.Controllers
             return Ok(new { success = true, conversationId });
         }
 
+        [HttpDelete("conversations/{conversationId}")]
+        public async Task<IActionResult> DeleteConversation(int conversationId)
+        {
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue) return Unauthorized();
+
+            var (success, error) = await _chatService.DeleteGroupConversationAsync(userId.Value, conversationId);
+            if (!success)
+                return BadRequest(new { message = error });
+
+            return Ok(new { success = true, conversationId, message = "Group conversation deleted permanently." });
+        }
+
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations()
         {
@@ -201,14 +214,22 @@ namespace hr_crm.Controllers
         }
 
         [HttpGet("status")]
-        public async Task<IActionResult> GetMyStatus()
+        public async Task<IActionResult> GetStatus([FromQuery] int? userId = null)
         {
-            var userId = GetCurrentUserId();
-            if (!userId.HasValue) return Unauthorized();
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue) return Unauthorized();
+
+            var targetUserId = userId.GetValueOrDefault(currentUserId.Value);
+            if (targetUserId <= 0)
+                return BadRequest(new { message = "userId must be greater than 0." });
 
             try
             {
-                var status = await _chatService.EnsurePresenceAsync(userId.Value, GetCurrentUserName(userId.Value));
+                var userName = targetUserId == currentUserId.Value
+                    ? GetCurrentUserName(currentUserId.Value)
+                    : null;
+
+                var status = await _chatService.EnsurePresenceAsync(targetUserId, userName);
                 return Ok(new { success = true, presence = status });
             }
             catch (Exception ex)
