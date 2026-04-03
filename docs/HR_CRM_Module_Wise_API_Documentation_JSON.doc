@@ -1,0 +1,3416 @@
+﻿<html>
+<head>
+<meta charset='utf-8'>
+<title>HR CRM Module-Wise API Documentation</title>
+<style>
+body{font-family:Calibri,Arial,sans-serif;line-height:1.35;margin:28px;}
+h1{font-size:24pt;margin:0 0 12px 0;}
+h2{font-size:18pt;margin:22px 0 8px 0;color:#1f4e79;}
+h3{font-size:13pt;margin:16px 0 6px 0;color:#333;}
+p{font-size:10.5pt;margin:4px 0;}
+pre{font-family:Consolas,'Courier New',monospace;font-size:10pt;background:#f4f6f8;border:1px solid #d7dbe0;padding:10px;white-space:pre-wrap;}
+.sp{margin:10px 0;}
+</style>
+</head>
+<body>
+<h1>HR CRM Module-Wise API Documentation</h1>
+<p>Generated from source code on 2026-04-02 16:42:27</p>
+<p>This document explains the HR CRM API module by module. Each endpoint includes a short purpose note, a sample request, and one sample success response in JSON format.</p>
+<p class="sp"></p>
+<h2>System Overview</h2>
+<p><b>Technology stack:</b> ASP.NET Core Web API, .NET 8, Entity Framework Core, PostgreSQL, Swagger, JWT authentication, static files, and SignalR.</p>
+<p>Security exists in the codebase, but this document focuses on endpoint purpose and sample JSON structures.</p>
+<p><b>Real-time endpoints:</b> /hubs/location and /hubs/notifications.</p>
+<p class="sp"></p>
+<h2>Attendance Module</h2>
+<p><b>Module description:</b> Handles employee check-in, check-out, attendance history, total hours, and live location tracking.</p>
+<p><b>Base route:</b> api/Attendence</p>
+<p><b>Endpoints in this module:</b> 8</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Attendence/checkin</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Attendence/checkin.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;Latitude&quot;:  1000.5,
+    &quot;Longitude&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Attendence/check-out</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Attendence/check-out.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;UserId&quot;:  1,
+    &quot;Time&quot;:  &quot;09:00:00&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/total-hours</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/total-hours.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;TotalHoursHistory&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/history/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/history/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Attendence/location</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Attendence/location.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;Latitude&quot;:  1000.5,
+    &quot;Longitude&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;UserId&quot;:  1,
+    &quot;Latitude&quot;:  &quot;string&quot;,
+    &quot;Longitude&quot;:  &quot;string&quot;,
+    &quot;UpdatedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;GoogleMapsLink&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Publishes a real-time SignalR location update event.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/live-locations</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/live-locations.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Employees&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/location-trail/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/location-trail/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1,
+    &quot;date&quot;:  &quot;2026-04-02&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;Date&quot;:  &quot;2026-04-02&quot;,
+    &quot;TotalPoints&quot;:  &quot;string&quot;,
+    &quot;StartLocation&quot;:  &quot;string&quot;,
+    &quot;CurrentLocation&quot;:  &quot;string&quot;,
+    &quot;Trail&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/live-location/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/live-location/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;CheckInLocation&quot;:  &quot;string&quot;,
+    &quot;Longitude&quot;:  &quot;string&quot;,
+    &quot;GoogleMapsLink&quot;:  &quot;string&quot;,
+    &quot;LiveLocation&quot;:  &quot;string&quot;,
+    &quot;LastUpdated&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Branch Management Module</h2>
+<p><b>Module description:</b> Maintains branch master data.</p>
+<p><b>Base route:</b> api/Branch</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Branch</h3>
+<p><b>What it does:</b> Fetches data for api/Branch.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Branch</h3>
+<p><b>What it does:</b> Creates or submits data for api/Branch.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;Location&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Branch added successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Branch/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Branch/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;Location&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Branch updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Branch/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Branch/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Branch deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Budget Change Request Module</h2>
+<p><b>Module description:</b> Manages budget change requests and approval actions.</p>
+<p><b>Base route:</b> api/BudgetChange</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/BudgetChange</h3>
+<p><b>What it does:</b> Creates or submits data for api/BudgetChange.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;DepartmentId&quot;:  1,
+    &quot;RequestedAmount&quot;:  1000.5,
+    &quot;Reason&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/BudgetChange</h3>
+<p><b>What it does:</b> Fetches data for api/BudgetChange.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/BudgetChange/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/BudgetChange/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/BudgetChange/approve/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/BudgetChange/approve/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Budget change approved&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/BudgetChange/reject/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/BudgetChange/reject/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Budget change rejected&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/BudgetChange/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/BudgetChange/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Budget change request deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Chat Module</h2>
+<p><b>Module description:</b> Supports internal messaging and chat presence.</p>
+<p><b>Base route:</b> api/Chat</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Chat/send</h3>
+<p><b>What it does:</b> Creates or submits data for api/Chat/send.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Content&quot;:  &quot;string&quot;,
+    &quot;ReceiverUserId&quot;:  1,
+    &quot;ChatMessageId&quot;:  1,
+    &quot;SentByUserId&quot;:  1,
+    &quot;SentByUserName&quot;:  &quot;string&quot;,
+    &quot;SentAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;UserId&quot;:  1,
+    &quot;UserName&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;StatusMessage&quot;:  &quot;string&quot;,
+    &quot;UpdatedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;success&quot;:  &quot;string&quot;,
+    &quot;messageType&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Chat/history</h3>
+<p><b>What it does:</b> Fetches data for api/Chat/history.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;pageSize&quot;:  1,
+    &quot;pageNumber&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;success&quot;:  &quot;string&quot;,
+    &quot;totalCount&quot;:  1,
+    &quot;pageSize&quot;:  &quot;string&quot;,
+    &quot;pageNumber&quot;:  &quot;string&quot;,
+    &quot;messages&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Chat/status</h3>
+<p><b>What it does:</b> Fetches data for api/Chat/status.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;success&quot;:  &quot;string&quot;,
+    &quot;presence&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Chat/status</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Chat/status.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;value&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;success&quot;:  &quot;string&quot;,
+    &quot;presence&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Department Budget Module</h2>
+<p><b>Module description:</b> Stores and exposes department budget records.</p>
+<p><b>Base route:</b> api/DepartmentBudget</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentBudget</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentBudget.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;DepartmentId&quot;:  1,
+    &quot;TotalAnnualBudget&quot;:  1000.5,
+    &quot;TrainingBudget&quot;:  1000.5,
+    &quot;ResourceBudget&quot;:  1000.5,
+    &quot;Year&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;DepartmentId&quot;:  1,
+    &quot;TotalAnnualBudget&quot;:  1000.5,
+    &quot;TrainingBudget&quot;:  1000.5,
+    &quot;ResourceBudget&quot;:  1000.5,
+    &quot;UsedBudget&quot;:  1000.5,
+    &quot;Year&quot;:  1,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;ApprovedAmount&quot;:  1000.5,
+    &quot;HeadApprovedBy&quot;:  1,
+    &quot;HeadApprovedDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;FinanceApprovedBy&quot;:  1,
+    &quot;FinanceApprovedDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;CreatedDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Department&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget/department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget/department/{departmentId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;departmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DepartmentBudget/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DepartmentBudget/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Budget deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Department Module</h2>
+<p><b>Module description:</b> Maintains department master records and department user lookup.</p>
+<p><b>Base route:</b> api/Department</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Department</h3>
+<p><b>What it does:</b> Fetches data for api/Department.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Department</h3>
+<p><b>What it does:</b> Creates or submits data for api/Department.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;DepartmentName&quot;:  &quot;string&quot;,
+    &quot;BranchId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Department added successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Department/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Department/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;DepartmentName&quot;:  &quot;string&quot;,
+    &quot;BranchId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Department updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Department/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Department/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Department deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Department/{departmentId}/users</h3>
+<p><b>What it does:</b> Fetches data for api/Department/{departmentId}/users.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;departmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Department Role Module</h2>
+<p><b>Module description:</b> Manages department roles and user role assignment.</p>
+<p><b>Base route:</b> api/DepartmentRole</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentRole</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentRole.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Role created successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentRole</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentRole.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentRole/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentRole/assign.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Role assigned successfully&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentRole/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentRole/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/DepartmentRole/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/DepartmentRole/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1,
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Role updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DepartmentRole/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DepartmentRole/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Role deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Digital Signature Module</h2>
+<p><b>Module description:</b> Handles signature requests, signing flow, and document retrieval.</p>
+<p><b>Base route:</b> api/DigitalSignature</p>
+<p><b>Endpoints in this module:</b> 9</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DigitalSignature/sign/{id}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/DigitalSignature/sign/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;SignedByIp&quot;:  &quot;string&quot;,
+    &quot;Remarks&quot;:  &quot;string&quot;,
+    &quot;SignatureImageBase64&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;string&quot;,
+    &quot;data&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/status/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/status/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/history/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/history/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/DigitalSignature/update/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/DigitalSignature/update/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Remarks&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;string&quot;,
+    &quot;data&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/all</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DigitalSignature/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DigitalSignature/delete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/view/{id}</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/DigitalSignature/view/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;fileName&quot;:  &quot;string&quot;,
+    &quot;contentType&quot;:  &quot;application/octet-stream&quot;,
+    &quot;description&quot;:  &quot;File download response&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/download-signed/{id}</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/DigitalSignature/download-signed/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;fileName&quot;:  &quot;string&quot;,
+    &quot;contentType&quot;:  &quot;application/octet-stream&quot;,
+    &quot;description&quot;:  &quot;File download response&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Employee Onboarding Module</h2>
+<p><b>Module description:</b> Captures onboarding forms and onboarding documents.</p>
+<p><b>Base route:</b> api/EmployeeOnboarding</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeOnboarding/public-submit</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeOnboarding/public-submit.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;FullName&quot;:  &quot;string&quot;,
+    &quot;DateOfJoining&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;DateOfBirth&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;MobileNumber&quot;:  &quot;string&quot;,
+    &quot;BloodGroup&quot;:  &quot;string&quot;,
+    &quot;MaritalStatus&quot;:  &quot;string&quot;,
+    &quot;SpouseName&quot;:  &quot;string&quot;,
+    &quot;SpouseDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ChildrenDetails&quot;:  &quot;string&quot;,
+    &quot;FatherName&quot;:  &quot;string&quot;,
+    &quot;FatherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsFatherDeceased&quot;:  &quot;string&quot;,
+    &quot;MotherName&quot;:  &quot;string&quot;,
+    &quot;MotherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsMotherDeceased&quot;:  &quot;string&quot;,
+    &quot;PAN&quot;:  &quot;string&quot;,
+    &quot;AadharNumber&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactName&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactRelationship&quot;:  &quot;string&quot;,
+    &quot;TemporaryAddress&quot;:  &quot;string&quot;,
+    &quot;PermanentAddress&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyDetails&quot;:  &quot;string&quot;,
+    &quot;OfferedDesignation&quot;:  &quot;string&quot;,
+    &quot;OfferedSalaryNTH&quot;:  1000.5,
+    &quot;OfferedMonthlyCTC&quot;:  1000.5,
+    &quot;OfferedYearlyCTC&quot;:  1000.5,
+    &quot;TotalExperience&quot;:  &quot;string&quot;,
+    &quot;LastCompanyPFNumber&quot;:  &quot;string&quot;,
+    &quot;LastCompanyUAN&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyPayslip&quot;:  &quot;string&quot;,
+    &quot;BankName&quot;:  &quot;string&quot;,
+    &quot;AccountNumber&quot;:  &quot;string&quot;,
+    &quot;IFSC&quot;:  &quot;string&quot;,
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;AadharCard&quot;:  &quot;string&quot;,
+    &quot;PANCard&quot;:  &quot;string&quot;,
+    &quot;BankStatement&quot;:  &quot;string&quot;,
+    &quot;BankPassbook&quot;:  &quot;string&quot;,
+    &quot;ParentAadhar&quot;:  &quot;string&quot;,
+    &quot;HighestQualificationDocument&quot;:  &quot;string&quot;,
+    &quot;ExperienceLetter&quot;:  &quot;string&quot;,
+    &quot;AcceptanceLetter&quot;:  &quot;string&quot;,
+    &quot;OfficeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;OfficeMobileNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopSerialNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopImage&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeOnboarding</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeOnboarding.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;FullName&quot;:  &quot;string&quot;,
+    &quot;DateOfJoining&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;DateOfBirth&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;MobileNumber&quot;:  &quot;string&quot;,
+    &quot;BloodGroup&quot;:  &quot;string&quot;,
+    &quot;MaritalStatus&quot;:  &quot;string&quot;,
+    &quot;SpouseName&quot;:  &quot;string&quot;,
+    &quot;SpouseDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ChildrenDetails&quot;:  &quot;string&quot;,
+    &quot;FatherName&quot;:  &quot;string&quot;,
+    &quot;FatherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsFatherDeceased&quot;:  &quot;string&quot;,
+    &quot;MotherName&quot;:  &quot;string&quot;,
+    &quot;MotherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsMotherDeceased&quot;:  &quot;string&quot;,
+    &quot;PAN&quot;:  &quot;string&quot;,
+    &quot;AadharNumber&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactName&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactRelationship&quot;:  &quot;string&quot;,
+    &quot;TemporaryAddress&quot;:  &quot;string&quot;,
+    &quot;PermanentAddress&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyDetails&quot;:  &quot;string&quot;,
+    &quot;OfferedDesignation&quot;:  &quot;string&quot;,
+    &quot;OfferedSalaryNTH&quot;:  1000.5,
+    &quot;OfferedMonthlyCTC&quot;:  1000.5,
+    &quot;OfferedYearlyCTC&quot;:  1000.5,
+    &quot;TotalExperience&quot;:  &quot;string&quot;,
+    &quot;LastCompanyPFNumber&quot;:  &quot;string&quot;,
+    &quot;LastCompanyUAN&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyPayslip&quot;:  &quot;string&quot;,
+    &quot;BankName&quot;:  &quot;string&quot;,
+    &quot;AccountNumber&quot;:  &quot;string&quot;,
+    &quot;IFSC&quot;:  &quot;string&quot;,
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;AadharCard&quot;:  &quot;string&quot;,
+    &quot;PANCard&quot;:  &quot;string&quot;,
+    &quot;BankStatement&quot;:  &quot;string&quot;,
+    &quot;BankPassbook&quot;:  &quot;string&quot;,
+    &quot;ParentAadhar&quot;:  &quot;string&quot;,
+    &quot;HighestQualificationDocument&quot;:  &quot;string&quot;,
+    &quot;ExperienceLetter&quot;:  &quot;string&quot;,
+    &quot;AcceptanceLetter&quot;:  &quot;string&quot;,
+    &quot;OfficeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;OfficeMobileNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopSerialNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopImage&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;EmployeeOnboardingId&quot;:  1,
+    &quot;FullName&quot;:  &quot;string&quot;,
+    &quot;DateOfJoining&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;DateOfBirth&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;MobileNumber&quot;:  &quot;string&quot;,
+    &quot;BloodGroup&quot;:  &quot;string&quot;,
+    &quot;MaritalStatus&quot;:  &quot;string&quot;,
+    &quot;SpouseName&quot;:  &quot;string&quot;,
+    &quot;SpouseDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ChildrenDetails&quot;:  &quot;string&quot;,
+    &quot;FatherName&quot;:  &quot;string&quot;,
+    &quot;FatherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsFatherDeceased&quot;:  &quot;string&quot;,
+    &quot;FatherDOD&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;FatherAge&quot;:  1,
+    &quot;MotherName&quot;:  &quot;string&quot;,
+    &quot;MotherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsMotherDeceased&quot;:  &quot;string&quot;,
+    &quot;MotherDOD&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;MotherAge&quot;:  1,
+    &quot;PAN&quot;:  &quot;string&quot;,
+    &quot;AadharNumber&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactName&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactRelationship&quot;:  &quot;string&quot;,
+    &quot;TemporaryAddress&quot;:  &quot;string&quot;,
+    &quot;PermanentAddress&quot;:  &quot;string&quot;,
+    &quot;BankName&quot;:  &quot;string&quot;,
+    &quot;AccountNumber&quot;:  &quot;string&quot;,
+    &quot;IFSC&quot;:  &quot;string&quot;,
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;OfficeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;OfficeMobileNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopSerialNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopImagePath&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;CreatedDate&quot;:  &quot;2026-04-02&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeOnboarding.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeOnboarding/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding/{id}/documents</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/EmployeeOnboarding/{id}/documents.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;fileName&quot;:  &quot;string&quot;,
+    &quot;contentType&quot;:  &quot;application/octet-stream&quot;,
+    &quot;description&quot;:  &quot;File download response&quot;
+}
+</pre>
+<p>Note: Can return a ZIP archive when requested.</p>
+<p>Note: Includes file upload or file storage handling.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/EmployeeOnboarding/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/EmployeeOnboarding/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Employee onboarding deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Employee Training Module</h2>
+<p><b>Module description:</b> Assigns training and tracks employee training records.</p>
+<p><b>Base route:</b> api/EmployeeTraining</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeTraining/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeTraining/assign.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;TrainingName&quot;:  &quot;string&quot;,
+    &quot;Description&quot;:  &quot;string&quot;,
+    &quot;IsMandatory&quot;:  true,
+    &quot;TrainingProvider&quot;:  &quot;string&quot;,
+    &quot;Category&quot;:  &quot;string&quot;,
+    &quot;DurationHours&quot;:  1,
+    &quot;AssignedBy&quot;:  1,
+    &quot;DueDate&quot;:  &quot;2026-04-02&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeTraining/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeTraining/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeTraining/all</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeTraining/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/EmployeeTraining/update-status/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/EmployeeTraining/update-status/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;Progress&quot;:  1,
+    &quot;CompletionDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;IsCertified&quot;:  true,
+    &quot;Score&quot;:  1,
+    &quot;Feedback&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Status updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/EmployeeTraining/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/EmployeeTraining/delete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Exit Interview Module</h2>
+<p><b>Module description:</b> Schedules and tracks exit interviews and feedback.</p>
+<p><b>Base route:</b> api/ExitInterview</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/ExitInterview/schedule</h3>
+<p><b>What it does:</b> Creates or submits data for api/ExitInterview/schedule.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ScheduledDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;ReasonForLeaving&quot;:  &quot;string&quot;,
+    &quot;Feedback&quot;:  &quot;string&quot;,
+    &quot;Suggestions&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/ExitInterview/submit-feedback</h3>
+<p><b>What it does:</b> Creates or submits data for api/ExitInterview/submit-feedback.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ScheduledDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;ReasonForLeaving&quot;:  &quot;string&quot;,
+    &quot;Feedback&quot;:  &quot;string&quot;,
+    &quot;Suggestions&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/ExitInterview/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/ExitInterview/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ScheduledDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;ReasonForLeaving&quot;:  &quot;string&quot;,
+    &quot;Feedback&quot;:  &quot;string&quot;,
+    &quot;Suggestions&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/ExitInterview/all</h3>
+<p><b>What it does:</b> Fetches data for api/ExitInterview/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/ExitInterview/update/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/ExitInterview/update/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1,
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ScheduledDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;ReasonForLeaving&quot;:  &quot;string&quot;,
+    &quot;Feedback&quot;:  &quot;string&quot;,
+    &quot;Suggestions&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/ExitInterview/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/ExitInterview/delete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Exit Interview Deleted Successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Job Opening Module</h2>
+<p><b>Module description:</b> Maintains job openings used by recruitment.</p>
+<p><b>Base route:</b> api/JobOpening</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening/department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening/department/{departmentId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;departmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/JobOpening</h3>
+<p><b>What it does:</b> Creates or submits data for api/JobOpening.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Description&quot;:  &quot;string&quot;,
+    &quot;Title&quot;:  &quot;string&quot;,
+    &quot;TotalOpenings&quot;:  1,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;JobOpeningId&quot;:  1,
+    &quot;DepartmentId&quot;:  1,
+    &quot;DepartmentName&quot;:  &quot;string&quot;,
+    &quot;CreatedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ClosedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;FilledCount&quot;:  1,
+    &quot;RemainingOpenings&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Data&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/JobOpening/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;value&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/JobOpening/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Knowledge Module</h2>
+<p><b>Module description:</b> Stores organization knowledge-base records.</p>
+<p><b>Base route:</b> api/Knowledge</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Knowledge</h3>
+<p><b>What it does:</b> Fetches data for api/Knowledge.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Knowledge</h3>
+<p><b>What it does:</b> Creates or submits data for api/Knowledge.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;BranchId&quot;:  1,
+    &quot;RecordType&quot;:  &quot;string&quot;,
+    &quot;Code&quot;:  &quot;string&quot;,
+    &quot;Title&quot;:  &quot;string&quot;,
+    &quot;Category&quot;:  &quot;string&quot;,
+    &quot;SubCategory&quot;:  &quot;string&quot;,
+    &quot;Summary&quot;:  &quot;string&quot;,
+    &quot;ApprovalStatus&quot;:  &quot;string&quot;,
+    &quot;ApprovedBy&quot;:  &quot;string&quot;,
+    &quot;Visibility&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;CreatedBy&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Knowledge record added successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Knowledge/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Knowledge/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Knowledge record deactivated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Lead Module</h2>
+<p><b>Module description:</b> Maintains lead assignment and lead status workflows.</p>
+<p><b>Base route:</b> api/Lead</p>
+<p><b>Endpoints in this module:</b> 8</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead</h3>
+<p><b>What it does:</b> Fetches data for api/Lead.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/status/{status}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/status/{status}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/assigned/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/assigned/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Lead</h3>
+<p><b>What it does:</b> Creates or submits data for api/Lead.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Phone&quot;:  &quot;9876543210&quot;,
+    &quot;Source&quot;:  &quot;string&quot;,
+    &quot;Notes&quot;:  &quot;string&quot;,
+    &quot;LeadId&quot;:  1,
+    &quot;LeadName&quot;:  &quot;string&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;AssignedToUserId&quot;:  1,
+    &quot;AssignedByUserId&quot;:  1,
+    &quot;CreatedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;UpdatedAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Data&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Lead/{id}/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/Lead/{id}/assign.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;value&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Lead/{id}/status</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Lead/{id}/status.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;value&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Lead/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Lead/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Learning Module</h2>
+<p><b>Module description:</b> Assigns courses and updates learning progress.</p>
+<p><b>Base route:</b> api/Learning</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Learning/assign-course</h3>
+<p><b>What it does:</b> Creates or submits data for api/Learning/assign-course.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;CourseName&quot;:  &quot;string&quot;,
+    &quot;Description&quot;:  &quot;string&quot;,
+    &quot;Role&quot;:  &quot;string&quot;,
+    &quot;AssignedDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;DueDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Progress&quot;:  1,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Learning/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Learning/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Learning/update-progress/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Learning/update-progress/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1,
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Progress Updated&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Learning/complete/{id}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Learning/complete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Course Completed&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Learning/all</h3>
+<p><b>What it does:</b> Fetches data for api/Learning/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Learning/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Learning/delete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Course deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Leave Module</h2>
+<p><b>Module description:</b> Covers leave types, leave applications, approval flow, holidays, balances, and encashment.</p>
+<p><b>Base route:</b> api/Leave</p>
+<p><b>Endpoints in this module:</b> 10</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/types</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/types.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;LeaveTypeId&quot;:  1,
+    &quot;Name&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p>Note: Writes an audit or business log entry.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/types</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/types.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/apply</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/apply.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;LeaveType&quot;:  &quot;string&quot;,
+    &quot;StartDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;EndDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Reason&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;ApprovedBY&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave</h3>
+<p><b>What it does:</b> Fetches data for api/Leave.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Leave/{leaveId}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Leave/{leaveId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;leaveId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/balance/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/balance/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;Year&quot;:  &quot;string&quot;,
+    &quot;Balance&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/holiday</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/holiday.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Name&quot;:  &quot;string&quot;,
+    &quot;Date&quot;:  &quot;2026-04-02&quot;,
+    &quot;Type&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Holiday&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/holidays</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/holidays.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/calendar</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/calendar.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;month&quot;:  1,
+    &quot;year&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/encashment/{userId}</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/encashment/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1,
+    &quot;userName&quot;:  &quot;string&quot;,
+    &quot;year&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h2>Logs Module</h2>
+<p><b>Module description:</b> Exposes audit and log data stored by the application.</p>
+<p><b>Base route:</b> api/Logs</p>
+<p><b>Endpoints in this module:</b> 2</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Logs</h3>
+<p><b>What it does:</b> Fetches data for api/Logs.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Logs/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Logs/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Notification Module</h2>
+<p><b>Module description:</b> Returns user notifications and supports read/delete actions.</p>
+<p><b>Base route:</b> api/Notification</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Notification</h3>
+<p><b>What it does:</b> Fetches data for api/Notification.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Notification/unread-count</h3>
+<p><b>What it does:</b> Fetches data for api/Notification/unread-count.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;UnreadCount&quot;:  1
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Notification/read/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Notification/read/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Notification/read-all</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Notification/read-all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Notification/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Notification/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Notification/clear-all</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Notification/clear-all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Offboarding Module</h2>
+<p><b>Module description:</b> Handles offboarding records and their status updates.</p>
+<p><b>Base route:</b> api/OffBoarding</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OffBoarding/create</h3>
+<p><b>What it does:</b> Creates or submits data for api/OffBoarding/create.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ResignationDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;LastWorkingDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Reason&quot;:  &quot;string&quot;,
+    &quot;KnowledgeTransferStatus&quot;:  &quot;string&quot;,
+    &quot;AssetReturnStatus&quot;:  &quot;string&quot;,
+    &quot;ExitInterviewStatus&quot;:  &quot;string&quot;,
+    &quot;OverallStatus&quot;:  &quot;string&quot;,
+    &quot;AccountDeactivation&quot;:  true
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OffBoarding/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/OffBoarding/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ResignationDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;LastWorkingDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Reason&quot;:  &quot;string&quot;,
+    &quot;KnowledgeTransferStatus&quot;:  &quot;string&quot;,
+    &quot;AssetReturnStatus&quot;:  &quot;string&quot;,
+    &quot;ExitInterviewStatus&quot;:  &quot;string&quot;,
+    &quot;OverallStatus&quot;:  &quot;string&quot;,
+    &quot;AccountDeactivation&quot;:  true
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OffBoarding</h3>
+<p><b>What it does:</b> Fetches data for api/OffBoarding.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/OffBoarding/update-status/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OffBoarding/update-status/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1,
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Id&quot;:  1,
+    &quot;UserId&quot;:  1,
+    &quot;ResignationDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;LastWorkingDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Reason&quot;:  &quot;string&quot;,
+    &quot;KnowledgeTransferStatus&quot;:  &quot;string&quot;,
+    &quot;AssetReturnStatus&quot;:  &quot;string&quot;,
+    &quot;ExitInterviewStatus&quot;:  &quot;string&quot;,
+    &quot;OverallStatus&quot;:  &quot;string&quot;,
+    &quot;AccountDeactivation&quot;:  true
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/OffBoarding/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/OffBoarding/delete/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Deleted Successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Onboarding Invite Module</h2>
+<p><b>Module description:</b> Creates and validates onboarding invite tokens.</p>
+<p><b>Base route:</b> api/OnboardingInvite</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OnboardingInvite/generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/OnboardingInvite/generate.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;EmployeeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;EmployeeName&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;ShareableLink&quot;:  &quot;string&quot;,
+    &quot;Token&quot;:  &quot;string&quot;,
+    &quot;EmployeeName&quot;:  &quot;string&quot;,
+    &quot;EmployeeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;ExpiresAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;Note&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OnboardingInvite/validate/{token}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/OnboardingInvite/validate/{token}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;token&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Valid&quot;:  1,
+    &quot;EmployeeName&quot;:  &quot;string&quot;,
+    &quot;EmployeeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;ExpiresAt&quot;:  &quot;2026-04-02T10:00:00Z&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OnboardingInvite/submit/{token}</h3>
+<p><b>What it does:</b> Creates or submits data for api/OnboardingInvite/submit/{token}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;FullName&quot;:  &quot;string&quot;,
+    &quot;DateOfJoining&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;DateOfBirth&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;MobileNumber&quot;:  &quot;string&quot;,
+    &quot;BloodGroup&quot;:  &quot;string&quot;,
+    &quot;MaritalStatus&quot;:  &quot;string&quot;,
+    &quot;SpouseName&quot;:  &quot;string&quot;,
+    &quot;SpouseDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ChildrenDetails&quot;:  &quot;string&quot;,
+    &quot;FatherName&quot;:  &quot;string&quot;,
+    &quot;FatherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsFatherDeceased&quot;:  &quot;string&quot;,
+    &quot;MotherName&quot;:  &quot;string&quot;,
+    &quot;MotherDOB&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;IsMotherDeceased&quot;:  &quot;string&quot;,
+    &quot;PAN&quot;:  &quot;string&quot;,
+    &quot;AadharNumber&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactName&quot;:  &quot;string&quot;,
+    &quot;EmergencyContactRelationship&quot;:  &quot;string&quot;,
+    &quot;TemporaryAddress&quot;:  &quot;string&quot;,
+    &quot;PermanentAddress&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyDetails&quot;:  &quot;string&quot;,
+    &quot;OfferedDesignation&quot;:  &quot;string&quot;,
+    &quot;OfferedSalaryNTH&quot;:  1000.5,
+    &quot;OfferedMonthlyCTC&quot;:  1000.5,
+    &quot;OfferedYearlyCTC&quot;:  1000.5,
+    &quot;TotalExperience&quot;:  &quot;string&quot;,
+    &quot;LastCompanyPFNumber&quot;:  &quot;string&quot;,
+    &quot;LastCompanyUAN&quot;:  &quot;string&quot;,
+    &quot;PreviousCompanyPayslip&quot;:  &quot;string&quot;,
+    &quot;BankName&quot;:  &quot;string&quot;,
+    &quot;AccountNumber&quot;:  &quot;string&quot;,
+    &quot;IFSC&quot;:  &quot;string&quot;,
+    &quot;BranchName&quot;:  &quot;string&quot;,
+    &quot;AadharCard&quot;:  &quot;string&quot;,
+    &quot;PANCard&quot;:  &quot;string&quot;,
+    &quot;BankStatement&quot;:  &quot;string&quot;,
+    &quot;BankPassbook&quot;:  &quot;string&quot;,
+    &quot;ParentAadhar&quot;:  &quot;string&quot;,
+    &quot;HighestQualificationDocument&quot;:  &quot;string&quot;,
+    &quot;ExperienceLetter&quot;:  &quot;string&quot;,
+    &quot;AcceptanceLetter&quot;:  &quot;string&quot;,
+    &quot;OfficeEmail&quot;:  &quot;user@example.com&quot;,
+    &quot;OfficeMobileNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopSerialNumber&quot;:  &quot;string&quot;,
+    &quot;LaptopImage&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;OnboardingId&quot;:  1,
+    &quot;EmployeeName&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OnboardingInvite/all</h3>
+<p><b>What it does:</b> Fetches data for api/OnboardingInvite/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Overtime Approval Module</h2>
+<p><b>Module description:</b> Handles overtime approval requests.</p>
+<p><b>Base route:</b> api/OvertimeApproval</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OvertimeApproval</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OvertimeApproval.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;ValidFrom&quot;:  &quot;2026-04-02T10:00:00Z&quot;,
+    &quot;ValidTo&quot;:  &quot;2026-04-02T10:00:00Z&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeApproval</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeApproval.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeApproval/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeApproval/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Overtime Policy Module</h2>
+<p><b>Module description:</b> Maintains overtime policies.</p>
+<p><b>Base route:</b> api/OvertimePolicy</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OvertimePolicy</h3>
+<p><b>What it does:</b> Creates or submits data for api/OvertimePolicy.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;DepartmentId&quot;:  1,
+    &quot;StandardDailyHours&quot;:  1000.5,
+    &quot;MaxWeeklyOvertimeHours&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Overtime policy created successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimePolicy</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimePolicy.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/OvertimePolicy/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OvertimePolicy/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;StandardDailyHours&quot;:  1000.5,
+    &quot;MaxWeeklyOvertimeHours&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Policy updated successfully.&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Overtime Record Module</h2>
+<p><b>Module description:</b> Returns overtime records and summaries.</p>
+<p><b>Base route:</b> api/OvertimeRecord</p>
+<p><b>Endpoints in this module:</b> 2</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeRecord/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeRecord/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeRecord/weekly/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeRecord/weekly/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;WeeklyOvertimeHours&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Payroll Module</h2>
+<p><b>Module description:</b> Handles payroll, payslips, salary configuration, bonuses, allowances, and deductions.</p>
+<p><b>Base route:</b> api/Payroll</p>
+<p><b>Endpoints in this module:</b> 18</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/generate.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;UserName&quot;:  &quot;string&quot;,
+    &quot;BasicSalary&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;UserName&quot;:  &quot;string&quot;,
+    &quot;BasicSalary&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Payroll/{payrollId}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Payroll/{payrollId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;payrollId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/allowance</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/allowance.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;AllowanceType&quot;:  &quot;string&quot;,
+    &quot;Amount&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/deduction</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/deduction.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;DeductionType&quot;:  &quot;string&quot;,
+    &quot;Amount&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/payslip/current/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/payslip/current/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}/approve</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}/approve.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;payrollId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;PayrollId&quot;:  1
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}/mark-paid</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}/mark-paid.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;payrollId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;PayrollId&quot;:  1
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/salary-config</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/salary-config.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;UserName&quot;:  &quot;string&quot;,
+    &quot;BasicSalary&quot;:  1000.5,
+    &quot;MonthlyCTC&quot;:  1000.5,
+    &quot;Conveyance&quot;:  1000.5,
+    &quot;MedicalAllowance&quot;:  1000.5
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Config&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/salary-config/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/salary-config/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/salary-config/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/salary-config/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/auto-generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/auto-generate.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Generated&quot;:  &quot;string&quot;,
+    &quot;Skipped&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/bonus</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/bonus.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;UserId&quot;:  1,
+    &quot;UserName&quot;:  &quot;string&quot;,
+    &quot;BonusType&quot;:  &quot;string&quot;,
+    &quot;Amount&quot;:  1000.5,
+    &quot;Reason&quot;:  &quot;string&quot;,
+    &quot;Month&quot;:  1,
+    &quot;Year&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;Bonus&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/bonus/{id}/approve</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/bonus/{id}/approve.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;BonusId&quot;:  1
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/bonus/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/bonus/all.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/bonus/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/bonus/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Project Module</h2>
+<p><b>Module description:</b> Maintains project records and manager notifications.</p>
+<p><b>Base route:</b> api/Project</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Project</h3>
+<p><b>What it does:</b> Fetches data for api/Project.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Project</h3>
+<p><b>What it does:</b> Creates or submits data for api/Project.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;ProjectName&quot;:  &quot;string&quot;,
+    &quot;Duration&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;ManagerId&quot;:  1,
+    &quot;DepartmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Project created successfully&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Project/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Project/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;ProjectName&quot;:  &quot;string&quot;,
+    &quot;Duration&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;ManagerId&quot;:  1,
+    &quot;DepartmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Project updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Project/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Project/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Project deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Recruitment Module</h2>
+<p><b>Module description:</b> Handles candidate recruitment, dashboards, resumes, interviews, and onboarding conversion.</p>
+<p><b>Base route:</b> api/Recruitment</p>
+<p><b>Endpoints in this module:</b> 12</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard/by-role/{role}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard/by-role/{role}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;role&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard/by-department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard/by-department/{departmentId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;departmentId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/status/{status}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/status/{status}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Recruitment</h3>
+<p><b>What it does:</b> Creates or submits data for api/Recruitment.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;FirstName&quot;:  &quot;string&quot;,
+    &quot;LastName&quot;:  &quot;string&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;Phone&quot;:  &quot;9876543210&quot;,
+    &quot;AppliedPosition&quot;:  &quot;string&quot;,
+    &quot;DepartmentId&quot;:  1,
+    &quot;ApplicationDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Source&quot;:  &quot;string&quot;,
+    &quot;ExpectedSalary&quot;:  1000.5,
+    &quot;JobOpeningId&quot;:  1,
+    &quot;Resume&quot;:  &quot;string&quot;,
+    &quot;InterviewDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;InterviewerName&quot;:  &quot;string&quot;,
+    &quot;InterviewType&quot;:  &quot;string&quot;,
+    &quot;Notes&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;OfferedSalary&quot;:  1000.5,
+    &quot;AssignedToUserId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;CandidateId&quot;:  1,
+    &quot;ResumeUrl&quot;:  &quot;string&quot;
+}
+</pre>
+<p>Note: Includes file upload or file storage handling.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Recruitment/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;FirstName&quot;:  &quot;string&quot;,
+    &quot;LastName&quot;:  &quot;string&quot;,
+    &quot;Email&quot;:  &quot;user@example.com&quot;,
+    &quot;Phone&quot;:  &quot;9876543210&quot;,
+    &quot;AppliedPosition&quot;:  &quot;string&quot;,
+    &quot;DepartmentId&quot;:  1,
+    &quot;ApplicationDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Source&quot;:  &quot;string&quot;,
+    &quot;ExpectedSalary&quot;:  1000.5,
+    &quot;JobOpeningId&quot;:  1,
+    &quot;Resume&quot;:  &quot;string&quot;,
+    &quot;InterviewDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;InterviewerName&quot;:  &quot;string&quot;,
+    &quot;InterviewType&quot;:  &quot;string&quot;,
+    &quot;Notes&quot;:  &quot;string&quot;,
+    &quot;Status&quot;:  &quot;string&quot;,
+    &quot;OfferedSalary&quot;:  1000.5,
+    &quot;AssignedToUserId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/{id}/resume</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/Recruitment/{id}/resume.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;fileName&quot;:  &quot;string&quot;,
+    &quot;contentType&quot;:  &quot;application/octet-stream&quot;,
+    &quot;description&quot;:  &quot;File download response&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Recruitment/{id}/schedule-interview</h3>
+<p><b>What it does:</b> Creates or submits data for api/Recruitment/{id}/schedule-interview.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;value&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Recruitment/{id}/convert-to-onboarding</h3>
+<p><b>What it does:</b> Converts one business record into another workflow state for api/Recruitment/{id}/convert-to-onboarding.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;,
+    &quot;OnboardingId&quot;:  1,
+    &quot;EmployeeName&quot;:  &quot;string&quot;,
+    &quot;Note&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Recruitment/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;Message&quot;:  &quot;string&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Shift Module</h2>
+<p><b>Module description:</b> Maintains shifts and user shift assignments.</p>
+<p><b>Base route:</b> api/Shift</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift</h3>
+<p><b>What it does:</b> Fetches data for api/Shift.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift/assigned-users</h3>
+<p><b>What it does:</b> Fetches data for api/Shift/assigned-users.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Shift/user/{userId}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Shift</h3>
+<p><b>What it does:</b> Creates or submits data for api/Shift.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;dto&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Shift created successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Shift/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/Shift/assign.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;userId&quot;:  1,
+    &quot;shiftId&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Shift assigned successfully&quot;
+}
+</pre>
+<p>Note: Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h2>To-Do Module</h2>
+<p><b>Module description:</b> Manages task assignments and task status updates.</p>
+<p><b>Base route:</b> api/Todo</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Todo</h3>
+<p><b>What it does:</b> Fetches data for api/Todo.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+  &quot;message&quot;: &quot;No request body&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Success&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Todo</h3>
+<p><b>What it does:</b> Creates or submits data for api/Todo.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Title&quot;:  &quot;string&quot;,
+    &quot;Description&quot;:  &quot;string&quot;,
+    &quot;AssignedTo&quot;:  1,
+    &quot;DueDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;To-Do task added successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Todo/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Todo/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;Title&quot;:  &quot;string&quot;,
+    &quot;Description&quot;:  &quot;string&quot;,
+    &quot;AssignedTo&quot;:  1,
+    &quot;DueDate&quot;:  &quot;2026-04-02&quot;,
+    &quot;Status&quot;:  &quot;string&quot;
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;To-Do task updated successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Todo/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Todo/{id}.</p>
+<p><b>Sample Request:</b></p>
+<pre>
+{
+    &quot;id&quot;:  1
+}
+</pre>
+<p><b>Sample Success Response:</b></p>
+<pre>
+{
+    &quot;message&quot;:  &quot;Task deleted successfully&quot;
+}
+</pre>
+<p class="sp"></p>
+<h2>Model Reference</h2>
+<p>The following DTOs and entities are available in the current codebase and can be used as field-level references while integrating with the API.</p>
+<p>Allowance</p>
+<p>Defined in: Allowance.cs</p>
+<p>Fields: AllowanceId (int), UserId (int), AllowanceType (string), Amount (decimal), Month (DateTime), Year (int)</p>
+<p>AllowanceCreateDto</p>
+<p>Defined in: AllowanceCreateDto.cs</p>
+<p>Fields: UserId (int), AllowanceType (string), Amount (decimal)</p>
+<p>AssignTrainingDto</p>
+<p>Defined in: AssignTrainingDto.cs</p>
+<p>Fields: UserId (int), TrainingName (string), Description (string), IsMandatory (bool), TrainingProvider (string?), Category (string?), DurationHours (int?), AssignedBy (int), DueDate (DateTime?)</p>
+<p>AssignUserRoleDto</p>
+<p>Defined in: AssignUserRoleDto.cs</p>
+<p>Fields: UserId (int), DepartmentRoleId (int)</p>
+<p>Attendance</p>
+<p>Defined in: Attendance.cs</p>
+<p>Fields: AttendanceId (int), UserId (int), AttendanceDate (DateTime), CheckInTime (DateTime), CheckOutTime (DateTime?), IpAddress (string?), DeviceInfo (string?), Status (string?), CheckInLatitude (double?), CheckInLongitude (double?), LastKnownLatitude (double?), LastKnownLongitude (double?), LastLocationUpdated (DateTime?)</p>
+<p>AttendanceCheckInDto</p>
+<p>Defined in: AttendanceCheckInDto.cs</p>
+<p>Fields: UserId (int), Latitude (double?), Longitude (double?)</p>
+<p>AttendanceTracking</p>
+<p>Defined in: AttendanceTracking.cs</p>
+<p>Fields: Id (int), UserId (int), IpAddress (string), DeviceInfo (string), CheckInTime (DateTime), CheckOutTime (DateTime?)</p>
+<p>Bonus</p>
+<p>Defined in: Bonus.cs</p>
+<p>Fields: Id (int), UserId (int), UserName (string), BonusType (string), Amount (decimal), Reason (string?), Month (int), Year (int), Status (string), CreatedDate (DateTime), CreatedBy (int), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>BonusCreateDto</p>
+<p>Defined in: BonusCreateDto.cs</p>
+<p>Fields: UserId (int), UserName (string), BonusType (string), Amount (decimal), Reason (string?), Month (int), Year (int)</p>
+<p>Branch</p>
+<p>Defined in: Branch.cs</p>
+<p>Fields: BranchId (int), BranchName (string), Location (string), Status (string?), Departments (virtual ICollection&lt;Department&gt;)</p>
+<p>BranchCreateDto</p>
+<p>Defined in: BranchCreateDto.cs</p>
+<p>Fields: BranchName (string), Location (string), Status (string)</p>
+<p>BudgetChangeRequest</p>
+<p>Defined in: BudgetChangeRequest.cs</p>
+<p>Fields: BudgetChangeRequestId (int), DepartmentId (int), RequestedAmount (decimal), Reason (string), Status (string), RequestDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>BudgetGuideline</p>
+<p>Defined in: BudgetGuideline.cs</p>
+<p>Fields: BudgetGuidelineId (int), MaxAnnualBudget (decimal), MaxTrainingPercentage (decimal), MaxResourcePercentage (decimal)</p>
+<p>BudgetRequestDto</p>
+<p>Defined in: BudgetRequestDto.cs</p>
+<p>Fields: DepartmentId (int), RequestedAmount (decimal), Reason (string)</p>
+<p>ChatMessage</p>
+<p>Defined in: ChatMessage.cs</p>
+<p>Fields: ChatMessageId (int), SentByUserId (int), SentByUserName (string?), ReceiverUserId (int?), Content (string), SentAt (DateTime), IsDeleted (bool)</p>
+<p>ChatUserPresence</p>
+<p>Defined in: ChatUserPresence.cs</p>
+<p>Fields: ChatUserPresenceId (int), UserId (int), UserName (string?), Status (string), StatusMessage (string?), UpdatedAt (DateTime)</p>
+<p>Deduction</p>
+<p>Defined in: Deduction.cs</p>
+<p>Fields: DeductionId (int), UserId (int), DeductionType (string), Amount (decimal), Month (DateTime), Year (int)</p>
+<p>DeductionCreateDto</p>
+<p>Defined in: DeductionCreateDto.cs</p>
+<p>Fields: UserId (int), DeductionType (string), Amount (decimal)</p>
+<p>Department</p>
+<p>Defined in: Department.cs</p>
+<p>Fields: DepartmentId (int), DepartmentName (string), BranchId (int?), Branch (virtual Branch?), Projects (virtual ICollection&lt;Project&gt;), Recruitments (virtual ICollection&lt;Recruitment&gt;), Budgets (ICollection&lt;DepartmentBudget&gt;)</p>
+<p>DepartmentBudget</p>
+<p>Defined in: DepartmentBudget.cs</p>
+<p>Fields: Id (int), DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), UsedBudget (decimal), Year (int), Status (string), ApprovedAmount (decimal?), HeadApprovedBy (int?), HeadApprovedDate (DateTime?), FinanceApprovedBy (int?), FinanceApprovedDate (DateTime?), CreatedDate (DateTime), Department (Department?)</p>
+<p>DepartmentBudgetDto</p>
+<p>Defined in: DepartmentBudgetDto.cs</p>
+<p>Fields: DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), Year (int)</p>
+<p>DepartmentDto</p>
+<p>Defined in: DepartmentDto.cs</p>
+<p>Fields: DepartmentName (string), BranchId (int)</p>
+<p>DepartmentRole</p>
+<p>Defined in: DepartmentRole.cs</p>
+<p>Fields: DepartmentRoleId (int), RoleName (string), RequiredSkillLevel (string), PerformanceLevel (string), DepartmentId (int), Department (Department), UserDepartmentRoles (ICollection&lt;UserDepartmentRole&gt;)</p>
+<p>DepartmentRoleCreateDto</p>
+<p>Defined in: DepartmentRoleCreateDto.cs</p>
+<p>Fields: RoleName (string), RequiredSkillLevel (string), PerformanceLevel (string), DepartmentId (int)</p>
+<p>DigitalSignature</p>
+<p>Defined in: DigitalSignature.cs</p>
+<p>Fields: SignatureId (int), UserId (int), RequestedBy (int), DocumentName (string), DocumentType (string), Status (string), FilePath (string?), SignedFilePath (string?), SignatureHash (string?), SignedByIp (string?), RequestedAt (DateTime), SignedAt (DateTime?), Remarks (string?)</p>
+<p>DigitalSignatureRequestCreateDto</p>
+<p>Defined in: DigitalSignatureRequestCreateDto.cs</p>
+<p>Fields: Remarks (string?)</p>
+<p>DigitalSignatureResponseCreateDto</p>
+<p>Defined in: DigitalSignatureResponseCreateDto.cs</p>
+<p>Fields: SignatureId (int), UserId (int), RequestedBy (int), DocumentName (string), DocumentType (string), Status (string), FilePath (string?), SignedFilePath (string?), SignatureHash (string?), SignedByIp (string?), RequestedAt (DateTime), SignedAt (DateTime?), Remarks (string?)</p>
+<p>DigitalSignatureSignCreateDto</p>
+<p>Defined in: DigitalSignatureSignCreateDto.cs</p>
+<p>Fields: SignedByIp (string?), Remarks (string?), SignatureImageBase64 (string?)</p>
+<p>EmployeeLocationTrail</p>
+<p>Defined in: EmployeeLocationTrail.cs</p>
+<p>Fields: Id (int), AttendanceId (int), UserId (int), Latitude (double), Longitude (double), RecordedAt (DateTime)</p>
+<p>EmployeeOnboarding</p>
+<p>Defined in: EmployeeOnboarding.cs</p>
+<p>Fields: EmployeeOnboardingId (int), FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), FatherDOD (DateTime?), FatherAge (int?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), MotherDOD (DateTime?), MotherAge (int?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImagePath (string?), Status (string), CreatedDate (DateTime)</p>
+<p>EmployeeOnboardingCreateDto</p>
+<p>Defined in: EmployeeOnboardingDto.cs</p>
+<p>Fields: FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslip (IFormFile?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCard (IFormFile?), PANCard (IFormFile?), BankStatement (IFormFile?), BankPassbook (IFormFile?), ParentAadhar (List&lt;IFormFile&gt;?), HighestQualificationDocument (IFormFile?), ExperienceLetter (IFormFile?), AcceptanceLetter (IFormFile?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImage (IFormFile?)</p>
+<p>EmployeeOnboardingDocuments</p>
+<p>Defined in: Documents.cs</p>
+<p>Fields: Id (int), EmployeeOnboardingId (int), AadharCardPath (string?), PANCardPath (string?), BankStatementPath (string?), BankPassbookPath (string?), ParentAadharPath (string?), HighestQualificationDocumentPath (string?), ExperienceLetterPath (string?), AcceptanceLetterPath (string?)</p>
+<p>EmployeeOnboardingResponseDto</p>
+<p>Defined in: EmployeeOnboardingResponseDto.cs</p>
+<p>Fields: EmployeeOnboardingId (int), FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (bool?), FatherDOD (DateTime?), FatherAge (int?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (bool?), MotherDOD (DateTime?), MotherAge (int?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslipPath (string?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCardPath (string?), PANCardPath (string?), BankStatementPath (string?), BankPassbookPath (string?), ParentAadharPath (string?), HighestQualificationDocumentPath (string?), ExperienceLetterPath (string?), AcceptanceLetterPath (string?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImagePath (string?), Status (string), CreatedDate (DateTime)</p>
+<p>EmployeeTraining</p>
+<p>Defined in: EmployeeTraining.cs</p>
+<p>Fields: Id (int), UserId (int), TrainingName (string), Description (string), IsMandatory (bool), Status (string), AssignedDate (DateTime), CompletionDate (DateTime?), DueDate (DateTime?), TrainingProvider (string?), Category (string?), DurationHours (int?), Progress (int), AssignedBy (int), IsCertified (bool), Feedback (string?), Score (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>ExitInterview</p>
+<p>Defined in: ExitInterview.cs</p>
+<p>Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p>ExitInterviewFeedbackDto</p>
+<p>Defined in: ExitInterviewFeedbackDto.cs</p>
+<p>Fields: UserId (int), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?)</p>
+<p>ExitInterviewRequestDto</p>
+<p>Defined in: ExitInterviewRequestDto.cs</p>
+<p>Fields: UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?)</p>
+<p>ExitInterviewResponseDto</p>
+<p>Defined in: ExitInterviewResponseDto.cs</p>
+<p>Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p>GenerateInviteDto</p>
+<p>Defined in: GenerateInviteDto.cs</p>
+<p>Fields: EmployeeEmail (string?), EmployeeName (string?)</p>
+<p>Holiday</p>
+<p>Defined in: Holiday.cs</p>
+<p>Fields: Id (int), Name (string), Date (DateTime), Type (string), CreatedBy (int), CreatedDate (DateTime)</p>
+<p>HolidayCreateDto</p>
+<p>Defined in: HolidayCreateDto.cs</p>
+<p>Fields: Name (string), Date (DateTime), Type (string)</p>
+<p>JobOpening</p>
+<p>Defined in: JobOpening.cs</p>
+<p>Fields: JobOpeningId (int), Title (string), DepartmentId (int), TotalOpenings (int), Description (string?), Status (string), CreatedAt (DateTime), ClosedAt (DateTime?), Department (virtual Department)</p>
+<p>JobOpeningCreateDto</p>
+<p>Defined in: JobOpeningDto.cs</p>
+<p>Fields: Description (string?), Title (string?), TotalOpenings (int?), Description (string?), Status (string?), JobOpeningId (int), Title (string), DepartmentId (int), DepartmentName (string), TotalOpenings (int), Description (string?), Status (string), CreatedAt (DateTime), ClosedAt (DateTime?), FilledCount (int), RemainingOpenings (int)</p>
+<p>Knowledge</p>
+<p>Defined in: Knowledge.cs</p>
+<p>Fields: KnowledgeId (int), BranchId (int), RecordType (string?), Code (string?), Title (string), Category (string?), SubCategory (string?), Summary (string?), ApprovalStatus (string?), ApporvedBy (string?), Visibility (string?), Status (string?), CreatedBy (int?), CreatedDate (DateTime?), Branch (virtual Branch)</p>
+<p>KnowledgeCreateDto</p>
+<p>Defined in: knowledgeCreateDto.cs</p>
+<p>Fields: BranchId (int), RecordType (string), Code (string), Title (string), Category (string), SubCategory (string), Summary (string), ApprovalStatus (string), ApprovedBy (string), Visibility (string), Status (string), CreatedBy (int)</p>
+<p>Lead</p>
+<p>Defined in: Lead.cs</p>
+<p>Fields: LeadId (int), LeadName (string), Email (string), Phone (string?), Source (string), Status (string), Notes (string?), AssignedToUserId (int?), AssignedByUserId (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>LeadCreateDto</p>
+<p>Defined in: LeadDto.cs</p>
+<p>Fields: Phone (string?), Source (string), Notes (string?), Notes (string?), LeadId (int), LeadName (string), Email (string), Phone (string?), Source (string), Status (string), Notes (string?), AssignedToUserId (int?), AssignedByUserId (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>LearningCourse</p>
+<p>Defined in: LearningCourse.cs</p>
+<p>Fields: Id (int), UserId (int), CourseName (string?), Description (string?), Role (string?), AssignedDate (DateTime), DueDate (DateTime), Progress (int), Status (string?)</p>
+<p>LearningCourseDto</p>
+<p>Defined in: LearningCourseDto.cs</p>
+<p>Fields: UserId (int), CourseName (string?), Description (string?), Role (string?), AssignedDate (DateTime), DueDate (DateTime), Progress (int), Status (string?)</p>
+<p>LearningUpdateProgressDto</p>
+<p>Defined in: LearningUpdateProgressDto.cs</p>
+<p>Fields: Progress (int), Status (string?)</p>
+<p>Leave</p>
+<p>Defined in: Leave.cs</p>
+<p>Fields: LeaveId (int), UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string), AppliedOn (DateTime), TotalDays (int)</p>
+<p>LeaveBalance</p>
+<p>Defined in: LeaveBalance.cs</p>
+<p>Fields: Id (int), UserId (int), LeaveType (string), TotalAllowed (int), UsedDays (int), Year (int)</p>
+<p>LeaveCreateDto</p>
+<p>Defined in: LeaveCreateDto.cs</p>
+<p>Fields: UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string)</p>
+<p>LeaveEncashment</p>
+<p>Defined in: LeaveEncashment.cs</p>
+<p>Fields: Id (int), UserId (int), UserName (string), EncashedDays (int), AmountPaid (decimal), Year (int), ProcessedDate (DateTime), ProcessedBy (int)</p>
+<p>LeaveResponseDto</p>
+<p>Defined in: LeaveResponseDto.cs</p>
+<p>Fields: LeaveId (int), UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string), AppliedOn (DateTime)</p>
+<p>LeaveStatusDto</p>
+<p>Defined in: LeaveStatusDto.cs</p>
+<p>Fields: Status (string), ApprovedBY (string)</p>
+<p>LeaveType</p>
+<p>Defined in: LeaveType.cs</p>
+<p>Fields: LeaveTypeId (int), Name (string), CreatedBy (int?), CreatedAt (DateTime)</p>
+<p>LeaveTypeDto</p>
+<p>Defined in: LeaveTypeDto.cs</p>
+<p>Fields: LeaveTypeId (int), Name (string)</p>
+<p>LocationUpdateDto</p>
+<p>Defined in: LocationUpdateDto.cs</p>
+<p>Fields: UserId (int), Latitude (double), Longitude (double)</p>
+<p>LogEntry</p>
+<p>Defined in: LogEntry.cs</p>
+<p>Fields: LogEntryId (int), UserId (int?), UserName (string?), Action (string), Details (string?), Timestamp (DateTime), StatusCode (int?), DurationMs (int?), ControllerName (string?), ActionName (string?), UserAgent (string?)</p>
+<p>LogEntryDto</p>
+<p>Defined in: LogEntryDto.cs</p>
+<p>Fields: LogEntryId (int), UserId (int?), UserName (string?), Action (string), Details (string?), Timestamp (DateTime)</p>
+<p>Notification</p>
+<p>Defined in: Notification.cs</p>
+<p>Fields: NotificationId (int), UserId (int), Title (string), Message (string), Module (string), ReferenceId (int), IsRead (bool), CreatedAt (DateTime)</p>
+<p>OffBoarding</p>
+<p>Defined in: OffBoarding.cs</p>
+<p>Fields: Id (int), UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string), AccountDeactivation (bool)</p>
+<p>OffBoardingDto</p>
+<p>Defined in: OffBoardingDto.cs</p>
+<p>Fields: UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), AccountDeactivation (bool), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string)</p>
+<p>OnboardingInvite</p>
+<p>Defined in: OnboardingInvite.cs</p>
+<p>Fields: Id (int), Token (string), EmployeeEmail (string?), EmployeeName (string?), CreatedByUserId (int), CreatedAt (DateTime), ExpiresAt (DateTime), IsUsed (bool), OnboardingId (int?)</p>
+<p>OvertimeApproval</p>
+<p>Defined in: OvertimeApproval.cs</p>
+<p>Fields: OvertimeApprovalId (int), UserId (int), ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimeApprovalCreateDto</p>
+<p>Defined in: OvertimeApprovalCreateDto.cs</p>
+<p>Fields: UserId (int), ValidFrom (DateTime), ValidTo (DateTime)</p>
+<p>OvertimeApprovalResponseDto</p>
+<p>Defined in: OvertimeApprovalResponseDto.cs</p>
+<p>Fields: OvertimeApprovalId (int), UserId (int), ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimeApprovalUpdateDto</p>
+<p>Defined in: OvertimeApprovalUpdateDto.cs</p>
+<p>Fields: ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimePolicy</p>
+<p>Defined in: OvertimePolicy.cs</p>
+<p>Fields: OvertimePolicyId (int), DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double), Department (Department)</p>
+<p>OvertimePolicyCreateDto</p>
+<p>Defined in: OvertimePolicyCreateDto.cs</p>
+<p>Fields: DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimePolicyResponseDto</p>
+<p>Defined in: OvertimePolicyResponseDto.cs</p>
+<p>Fields: OvertimePolicyId (int), DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimePolicyUpdateDto</p>
+<p>Defined in: OvertimePolicyUpdateDto.cs</p>
+<p>Fields: StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimeRecord</p>
+<p>Defined in: OvertimeRecord.cs</p>
+<p>Fields: OvertimeRecordId (int), UserId (int), Date (DateTime), OvertimeHours (double)</p>
+<p>OvertimeRecordResponseDto</p>
+<p>Defined in: OvertimeRecordResponseDto.cs</p>
+<p>Fields: OvertimeRecordId (int), UserId (int), Date (DateTime), OvertimeHours (double)</p>
+<p>Payroll</p>
+<p>Defined in: Payroll.cs</p>
+<p>Fields: PayrollId (int), UserId (int), UserName (string), Month (DateTime), Year (int), EmploymentType (string), Department (string), Designation (string), DOJ (DateTime?), MonthlyCTC (decimal), NoOfPayableDays (int), MonthlyCTCApportioned (decimal), BasicSalary (decimal), HRA (decimal), ConveyanceAllowance (decimal), MedicalAllowance (decimal), OtherAllowance (decimal), TAOrPBonus (decimal), OvertimePay (decimal), TotalAllowances (decimal), GrossSalary (decimal), BonusAmount (decimal), EmployeePF (decimal), EmployerPF (decimal), PT (decimal), AbsentDeduction (decimal), TaxDeduction (decimal), TotalDeductions (decimal), WorkingDays (int), PresentDays (int), NetSalary (decimal), Status (string), CreatedDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>PayrollCreateDto</p>
+<p>Defined in: PayrollCreateDto.cs</p>
+<p>Fields: UserId (int), UserName (string), BasicSalary (decimal)</p>
+<p>PayrollResponseDto</p>
+<p>Defined in: PayrollResponseDto.cs</p>
+<p>Fields: PayrollId (int), UserId (int), UserName (string), Month (DateTime), Year (int), EmploymentType (string), Department (string), Designation (string), DOJ (DateTime?), MonthlyCTC (decimal), NoOfPayableDays (int), MonthlyCTCApportioned (decimal), BasicSalary (decimal), HRA (decimal), ConveyanceAllowance (decimal), MedicalAllowance (decimal), OtherAllowance (decimal), TAOrPBonus (decimal), GrossSalary (decimal), EmployeePF (decimal), PT (decimal), EmployerPF (decimal), TDS (decimal), NetPay (decimal), WorkingDays (int), PresentDays (int), Status (string), CreatedDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?), TotalAllowances (decimal), AbsentDeduction (decimal), TotalDeductions (decimal), BonusAmount (decimal), OvertimePay (decimal)</p>
+<p>PayslipDto</p>
+<p>Defined in: PayslipCreateDto.cs</p>
+<p>Fields: UserId (int), UserName (string), Month (DateTime), Year (int), WorkingDays (int), PresentDays (int), BasicSalary (decimal), OvertimePay (decimal), BonusAmount (decimal), BonusDetails (string?), Allowances (List&lt;AllowanceItemDto&gt;), TotalAllowances (decimal), AbsentDeduction (decimal), TaxDeduction (decimal), AnnualSalary (decimal), Deductions (List&lt;DeductionItemDto&gt;), TotalDeductions (decimal), NetSalary (decimal), Status (string), GeneratedDate (DateTime), Type (string), Amount (decimal), Type (string), Amount (decimal)</p>
+<p>Project</p>
+<p>Defined in: Project.cs</p>
+<p>Fields: ProjectId (int), ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int), CreatedDate (DateTime?), Department (virtual Department)</p>
+<p>ProjectCreateDto</p>
+<p>Defined in: ProjectCreateDto.cs</p>
+<p>Fields: ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int)</p>
+<p>Recruitment</p>
+<p>Defined in: Recruitment.cs</p>
+<p>Fields: CandidateId (int), FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateOnly), Status (string), Source (string), InterviewDate (DateTime?), InterviewerName (string?), InterviewType (string?), InterviewNotes (string?), ExpectedSalary (decimal?), OfferedSalary (decimal?), ResumeUrl (string?), OnboardingId (int?), AssignedToUserId (int?), JobOpeningId (int?), Department (virtual Department)</p>
+<p>RecruitmentCreateDto</p>
+<p>Defined in: RecruitmentCreateDto.cs</p>
+<p>Fields: FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateTime), Source (string), ExpectedSalary (decimal?), JobOpeningId (int?), Resume (IFormFile?), InterviewDate (DateTime), InterviewerName (string), InterviewType (string), Notes (string?), Status (string), Notes (string?), OfferedSalary (decimal?), AssignedToUserId (int)</p>
+<p>RecruitmentDashboardDto</p>
+<p>Defined in: RecruitmentDashboardDto.cs</p>
+<p>Fields: TotalOpenings (int), TotalApplicants (int), ByStatus (StatusBreakdownDto), ByDepartment (List&lt;DepartmentStatsDto&gt;), ByRole (List&lt;RoleStatsDto&gt;), Applied (int), Screening (int), InterviewScheduled (int), OnHold (int), Selected (int), Offered (int), Hired (int), Rejected (int), DepartmentId (int), DepartmentName (string), Openings (int), Applicants (int), InterviewsDone (int), OnHold (int), Selected (int), Hired (int), Rejected (int), Role (string), Openings (int), Applicants (int), InterviewsDone (int), OnHold (int), Selected (int), Offered (int), Hired (int), Rejected (int)</p>
+<p>RecruitmentResponseDto</p>
+<p>Defined in: RecruitmentResponseDto.cs</p>
+<p>Fields: CandidateId (int), FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (string), Status (string), Source (string), InterviewDate (DateTime?), InterviewerName (string?), InterviewType (string?), InterviewNotes (string?), ExpectedSalary (decimal?), OfferedSalary (decimal?), ResumeUrl (string?), OnboardingId (int?), AssignedToUserId (int?), JobOpeningId (int?)</p>
+<p>SalaryConfigDto</p>
+<p>Defined in: SalaryConfigDto.cs</p>
+<p>Fields: UserId (int), UserName (string), BasicSalary (decimal), MonthlyCTC (decimal), Conveyance (decimal), MedicalAllowance (decimal)</p>
+<p>SalaryConfiguration</p>
+<p>Defined in: SalaryConfiguration.cs</p>
+<p>Fields: Id (int), UserId (int), UserName (string), MonthlyCTC (decimal), Conveyance (decimal), MedicalAllowance (decimal), BasicSalary (decimal), EffectiveFrom (DateTime), CreatedDate (DateTime), UpdatedDate (DateTime?), SetBy (int)</p>
+<p>SendChatMessageDto</p>
+<p>Defined in: ChatMessageDto.cs</p>
+<p>Fields: Content (string), ReceiverUserId (int?), ChatMessageId (int), SentByUserId (int), SentByUserName (string?), ReceiverUserId (int?), Content (string), SentAt (DateTime), UserId (int), UserName (string?), UserId (int), UserName (string?), Status (string), StatusMessage (string?), UpdatedAt (DateTime), Status (string), StatusMessage (string?)</p>
+<p>Shift</p>
+<p>Defined in: Shift.cs</p>
+<p>Fields: ShiftId (int), ShiftName (string), StartTime (TimeSpan), EndTime (TimeSpan), DepartmentId (int), Department (Department)</p>
+<p>ShiftCreateDto</p>
+<p>Defined in: ShiftCreateDto.cs</p>
+<p>Fields: ShiftName (string), StartTime (string), EndTime (string), DepartmentId (int)</p>
+<p>TodoCreateDto</p>
+<p>Defined in: To-Do CreateDtocs.cs</p>
+<p>Fields: Title (string), Description (string), AssignedTo (int), DueDate (DateTime), Status (string)</p>
+<p>TodoTask</p>
+<p>Defined in: TodoTask.cs</p>
+<p>Fields: TaskId (int), Title (string), Description (string?), AssignedTo (int), DueDate (DateOnly), Status (string), CreatedAt (DateTime?)</p>
+<p>TrainingResponseDto</p>
+<p>Defined in: TrainingResponseDto.cs</p>
+<p>Fields: Id (int), UserId (int), TrainingName (string), Description (string), IsMandatory (bool), Status (string), AssignedDate (DateTime), DueDate (DateTime?), CompletionDate (DateTime?), Progress (int), TrainingProvider (string?), Category (string?), DurationHours (int?), AssignedBy (int), IsCertified (bool), Feedback (string?), Score (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>UpdateTrainingStatusCreateDto</p>
+<p>Defined in: UpdateTrainingStatusCreateDto.cs</p>
+<p>Fields: Status (string), Progress (int), CompletionDate (DateTime?), IsCertified (bool), Score (int?), Feedback (string?)</p>
+<p>UserDepartmentRole</p>
+<p>Defined in: UserDepartmentRole.cs</p>
+<p>Fields: Id (int), UserId (int), DepartmentRoleId (int), DepartmentRole (DepartmentRole)</p>
+<p>UserShift</p>
+<p>Defined in: UserShift.cs</p>
+<p>Fields: Id (int), UserId (int), ShiftId (int), Shift (Shift)</p>
+<p>WorkExperience</p>
+<p>Defined in: Work Experience.cs</p>
+<p>Fields: Id (int), EmployeeOnboardingId (int), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslipPath (string?)</p>
+<h2>Document Summary</h2>
+<p><b>Total modules documented:</b> 28</p>
+<p><b>Total endpoints documented:</b> 164</p>
+</body>
+</html>

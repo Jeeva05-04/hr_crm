@@ -19,5 +19,19 @@ namespace hr_crm.Entities
         public string? Details { get; set; }
 
         public DateTime Timestamp { get; set; }
+
+        // Structured fields for easier querying and reporting
+        // HTTP status code returned by the request (if applicable)
+        public int? StatusCode { get; set; }
+
+        // Duration in milliseconds of the action
+        public int? DurationMs { get; set; }
+
+        // Controller and action names for structured queries
+        public string? ControllerName { get; set; }
+        public string? ActionName { get; set; }
+
+        // Truncated user agent string (optional)
+        public string? UserAgent { get; set; }
     }
 }

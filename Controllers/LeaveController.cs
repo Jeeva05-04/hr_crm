@@ -79,6 +79,47 @@ namespace hr_crm.Controllers
         {
             var (success, error) = await _service.ApplyLeaveAsync(dto);
             if (!success) return BadRequest(new { Message = error });
+
+            // Find the newly created leave record (best-effort) to use as reference
+            var leave = await _db.Leaves
+                .Where(l => l.UserId == dto.UserId && l.StartDate == dto.StartDate && l.EndDate == dto.EndDate && l.Status == "Pending")
+                .OrderByDescending(l => l.AppliedOn)
+                .FirstOrDefaultAsync();
+
+            // Notify all HR managers about the new leave request
+            try
+            {
+                var hrRoleNames = new[] { "HR_MANAGER" };
+                var hrUserIds = await _db.UserDepartmentRoles
+                    .Include(ud => ud.DepartmentRole)
+                    .Where(ud => hrRoleNames.Contains(ud.DepartmentRole.RoleName))
+                    .Select(ud => ud.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Resolve applicant name from payroll snapshot or fallback to "Employee"
+                var applicantName = "Employee";
+                try
+                {
+                    var payrollSnapshot = await _db.Payrolls
+                        .Where(p => p.UserId == dto.UserId && !string.IsNullOrEmpty(p.UserName))
+                        .OrderByDescending(p => p.CreatedDate)
+                        .FirstOrDefaultAsync();
+                    if (payrollSnapshot != null)
+                        applicantName = payrollSnapshot.UserName;
+                }
+                catch { }
+                var message = $"Leave request from {applicantName} for {dto.StartDate:dd MMM yyyy} - {dto.EndDate:dd MMM yyyy} requires your approval.";
+
+                foreach (var hrId in hrUserIds)
+                {
+                    // referenceId set to leave id if available
+                    var referenceId = leave != null ? leave.LeaveId : 0;
+                    await _notification.CreateNotification(hrId, "Leave Approval Required", message, "Leave", referenceId);
+                }
+            }
+            catch { /* don't fail the apply flow because notifications failed */ }
+
             return Ok(new { Message = "Leave applied successfully. Pending manager approval." });
         }
 

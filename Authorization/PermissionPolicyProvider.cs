@@ -18,15 +18,15 @@ namespace hr_crm.Authorization
             {
                 var permission = policyName.Substring("Permission:".Length);
 
-            // Remove "Permission:" prefix if exists
-            permission = policyName.Replace("Permission:", "");
+                // Remove "Permission:" prefix if exists
+                permission = policyName.Replace("Permission:", "");
 
-            var policy = new AuthorizationPolicyBuilder()
-                .RequireAssertion(context =>
-                    context.User.HasClaim("perm", "CRM_FULL_ACCESS") ||
-                    context.User.HasClaim("perm", permission)
-                )
-                .Build();
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAssertion(context =>
+                        context.User.HasClaim("perm", "CRM_FULL_ACCESS") ||
+                        context.User.HasClaim("perm", permission)
+                    )
+                    .Build();
 
 
                 return Task.FromResult<AuthorizationPolicy?>(policy);

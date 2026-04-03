@@ -7,9 +7,9 @@ namespace hr_crm.Service.Interface
     {
         Task<EmployeeOnboarding> CreateAsync(EmployeeOnboardingCreateDto dto, string webRootPath);
 
-        Task<List<EmployeeOnboarding>> GetAllAsync();
+        Task<List<DTO.EmployeeOnboardingResponseDto>> GetAllAsync();
 
-        Task<EmployeeOnboarding?> GetByIdAsync(int id);
+        Task<DTO.EmployeeOnboardingResponseDto?> GetByIdAsync(int id);
 
         Task<bool> DeleteAsync(int id);
 

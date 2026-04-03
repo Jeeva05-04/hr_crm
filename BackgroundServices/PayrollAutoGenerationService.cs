@@ -44,12 +44,23 @@ namespace hr_crm.BackgroundServices
                 using var scope = _scopeFactory.CreateScope();
                 var payrollService = scope.ServiceProvider.GetRequiredService<IPayrollService>();
                 var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+                var loggingService = scope.ServiceProvider.GetService<hr_crm.Service.LoggingService>();
 
+                // Log start of auto-generation
+                if (loggingService != null)
+                {
+                    await loggingService.CreateLog(null, "System", "AutoPayroll/Start", "Auto payroll generation started.");
+                }
                 var (generated, skipped) = await payrollService.AutoGeneratePayrollForAllAsync();
 
                 _logger.LogInformation(
                     "Auto payroll done. Generated: {Generated}, Skipped: {Skipped}",
                     generated, skipped);
+                if (loggingService != null)
+                {
+                    await loggingService.CreateLog(null, "System", "AutoPayroll/Complete",
+                        $"Auto payroll completed. Generated: {generated}, Skipped: {skipped}");
+                }
 
                 // Notify all employees whose payroll was generated
                 if (generated > 0)
@@ -73,6 +84,16 @@ namespace hr_crm.BackgroundServices
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during auto payroll generation");
+                try
+                {
+                    using var scope = _scopeFactory.CreateScope();
+                    var loggingService = scope.ServiceProvider.GetService<hr_crm.Service.LoggingService>();
+                    if (loggingService != null)
+                    {
+                        await loggingService.CreateLog(null, "System", "AutoPayroll/Error", ex.Message);
+                    }
+                }
+                catch { }
             }
         }
     }

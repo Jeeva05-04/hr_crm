@@ -63,7 +63,8 @@ namespace hr_crm.Controllers
         }
 
         [Authorize]
-        [HasPermission("OVERTIME_APPROVE")]
+        // Viewing approvals requires view permission
+        [HasPermission("OVERTIME_APPROVAL_VIEW")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -82,7 +83,8 @@ namespace hr_crm.Controllers
         }
 
         [Authorize]
-        [HasPermission("OVERTIME_APPROVE")]
+        // Viewing a single approval requires view permission
+        [HasPermission("OVERTIME_APPROVAL_VIEW")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

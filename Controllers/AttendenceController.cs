@@ -37,22 +37,35 @@ namespace hr_crm.Controllers
             catch { }
         }
 
+        // Helper to read token user id from multiple possible claim types
+        private string? GetTokenUserIdString()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value
+                   ?? User.FindFirst("id")?.Value;
+        }
+
+        private int? GetTokenUserId()
+        {
+            var s = GetTokenUserIdString();
+            if (int.TryParse(s, out var v)) return v;
+            return null;
+        }
+
         // =========================================
         // Check-In
         // =========================================
         [HttpPost("checkin")]
         public async Task<IActionResult> CheckIn([FromBody] AttendanceCheckInDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var tokenUserId = GetTokenUserId();
 
-            if (userIdClaim == null)
+            if (!tokenUserId.HasValue)
                 return Unauthorized("User ID not found in token");
 
-            var tokenUserId = int.Parse(userIdClaim.Value);
-
             // Prevent checking in for another user
-            if (dto.UserId != tokenUserId)
-                return Forbid("You cannot check-in for another user.");
+            if (dto.UserId != tokenUserId.Value)
+                return Forbid();
 
             // HttpContext will be used to capture IP & Device info
             var (record, error) = await _attendanceService.CheckInAsync(dto, HttpContext);
@@ -88,15 +101,13 @@ namespace hr_crm.Controllers
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut(int userId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var tokenUserId = GetTokenUserId();
 
-            if (userIdClaim == null)
+            if (!tokenUserId.HasValue)
                 return Unauthorized("User ID not found in token");
 
-            var tokenUserId = int.Parse(userIdClaim.Value);
-
-            if (userId != tokenUserId)
-                return Forbid("You cannot check-out another user.");
+            if (userId != tokenUserId.Value)
+                return Forbid();
 
             var result = await _attendanceService.CheckOutAsync(userId);
 
@@ -125,19 +136,17 @@ namespace hr_crm.Controllers
         [HttpGet("total-hours")]
         public async Task<IActionResult> GetTotalHours(int userId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var tokenUserId = GetTokenUserId();
 
-            if (userIdClaim == null)
+            if (!tokenUserId.HasValue)
                 return Unauthorized("User ID not found in token");
 
-            var tokenUserId = int.Parse(userIdClaim.Value);
-
-            // Check if user is HR
-            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+            // Check if user is HR or Admin (admins have full access)
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER") || User.IsInRole("ADMIN") || User.IsInRole("SUPERADMIN");
 
             // Employees can only view their own hours
             if (!isHR && userId != tokenUserId)
-                return Forbid("You can only view your own data.");
+                return Forbid();
 
             // Get attendance history
             var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
@@ -171,19 +180,17 @@ namespace hr_crm.Controllers
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetHistory(int userId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var tokenUserId = GetTokenUserId();
 
-            if (userIdClaim == null)
+            if (!tokenUserId.HasValue)
                 return Unauthorized("User ID not found in token");
 
-            var tokenUserId = int.Parse(userIdClaim.Value);
-
-            // Check if user is HR
-            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+            // Check if user is HR or Admin
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER") || User.IsInRole("ADMIN") || User.IsInRole("SUPERADMIN");
 
             // Employees can only see their own data
             if (!isHR && userId != tokenUserId)
-                return Forbid("You can only view your own attendance history.");
+                return Forbid();
 
             var records = await _attendanceService.GetAttendanceHistoryAsync(userId);
 
@@ -200,15 +207,13 @@ namespace hr_crm.Controllers
         [HttpPut("location")]
         public async Task<IActionResult> UpdateLocation([FromBody] LocationUpdateDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var tokenUserId = GetTokenUserId();
 
-            if (userIdClaim == null)
+            if (!tokenUserId.HasValue)
                 return Unauthorized("User ID not found in token");
 
-            var tokenUserId = int.Parse(userIdClaim.Value);
-
             if (dto.UserId != tokenUserId)
-                return Forbid("You cannot update location for another user.");
+                return Forbid();
 
             var updated = await _attendanceService.UpdateLocationAsync(dto.UserId, dto.Latitude, dto.Longitude);
 
@@ -251,10 +256,10 @@ namespace hr_crm.Controllers
         [HttpGet("live-locations")]
         public async Task<IActionResult> GetLiveLocations()
         {
-            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER") || User.IsInRole("ADMIN") || User.IsInRole("SUPERADMIN");
 
             if (!isHR)
-                return Forbid("Only HR managers can view live locations.");
+                return Forbid();
 
             var activeCheckIns = await _attendanceService.GetActiveCheckInsAsync();
 
@@ -299,9 +304,9 @@ namespace hr_crm.Controllers
         [HttpGet("location-trail/{userId}")]
         public async Task<IActionResult> GetLocationTrail(int userId, [FromQuery] DateTime? date)
         {
-            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER") || User.IsInRole("ADMIN") || User.IsInRole("SUPERADMIN");
             if (!isHR)
-                return Forbid("Only HR managers can view location trails.");
+                return Forbid();
 
             var targetDate = date?.Date ?? DateTime.UtcNow.Date;
 
@@ -343,10 +348,10 @@ namespace hr_crm.Controllers
                 return Unauthorized("User ID not found in token");
 
             var tokenUserId = int.Parse(userIdClaim.Value);
-            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER");
+            var isHR = User.IsInRole("HR_USER") || User.IsInRole("HR_MANAGER") || User.IsInRole("ADMIN") || User.IsInRole("SUPERADMIN");
 
             if (!isHR)
-                return Forbid("Only HR managers can view live locations.");
+                return Forbid();
 
             var session = await _attendanceService.GetActiveCheckInAsync(userId);
 

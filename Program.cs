@@ -87,6 +87,8 @@ builder.Services.AddScoped<ILearningService, LearningService>();
 
 builder.Services.AddScoped<IEmployeeOnboardingService, EmployeeOnboardingService>();
 
+builder.Services.AddScoped<IChatService, ChatService>();
+
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 
@@ -104,6 +106,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<RolePermissionFilter>();
+    // Global audit filter - logs business actions and arguments to Logs table
+    options.Filters.Add<hr_crm.Filters.AuditActionFilter>();
 });
 
 builder.Services.AddSignalR();

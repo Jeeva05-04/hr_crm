@@ -103,15 +103,167 @@ namespace hr_crm.Services
             return onboarding;
         }
 
-        public async Task<List<EmployeeOnboarding>> GetAllAsync()
+        public async Task<List<DTO.EmployeeOnboardingResponseDto>> GetAllAsync()
         {
-            return await _context.EmployeeOnboardings.ToListAsync();
+            var list = await _context.EmployeeOnboardings
+                .OrderByDescending(e => e.CreatedDate)
+                .ToListAsync();
+
+            var result = new List<DTO.EmployeeOnboardingResponseDto>();
+            foreach (var onboarding in list)
+            {
+                var docs = await GetDocumentsAsync(onboarding.EmployeeOnboardingId);
+                var work = await GetWorkExperienceAsync(onboarding.EmployeeOnboardingId);
+
+                var resp = new DTO.EmployeeOnboardingResponseDto
+                {
+                    EmployeeOnboardingId = onboarding.EmployeeOnboardingId,
+                    FullName = onboarding.FullName,
+                    DateOfJoining = onboarding.DateOfJoining,
+                    DateOfBirth = onboarding.DateOfBirth,
+                    Email = onboarding.Email,
+                    MobileNumber = onboarding.MobileNumber,
+                    BloodGroup = onboarding.BloodGroup,
+                    MaritalStatus = onboarding.MaritalStatus,
+                    SpouseName = onboarding.SpouseName,
+                    SpouseDOB = onboarding.SpouseDOB,
+                    ChildrenDetails = onboarding.ChildrenDetails,
+                    FatherName = onboarding.FatherName,
+                    FatherDOB = onboarding.FatherDOB,
+                    IsFatherDeceased = onboarding.IsFatherDeceased == "true" || onboarding.IsFatherDeceased == "True",
+                    FatherDOD = onboarding.FatherDOD,
+                    FatherAge = onboarding.FatherAge,
+                    MotherName = onboarding.MotherName,
+                    MotherDOB = onboarding.MotherDOB,
+                    IsMotherDeceased = onboarding.IsMotherDeceased == "true" || onboarding.IsMotherDeceased == "True",
+                    MotherDOD = onboarding.MotherDOD,
+                    MotherAge = onboarding.MotherAge,
+                    PAN = onboarding.PAN,
+                    AadharNumber = onboarding.AadharNumber,
+                    EmergencyContactName = onboarding.EmergencyContactName,
+                    EmergencyContactRelationship = onboarding.EmergencyContactRelationship,
+                    TemporaryAddress = onboarding.TemporaryAddress,
+                    PermanentAddress = onboarding.PermanentAddress,
+                    BankName = onboarding.BankName,
+                    AccountNumber = onboarding.AccountNumber,
+                    IFSC = onboarding.IFSC,
+                    BranchName = onboarding.BranchName,
+                    OfficeEmail = onboarding.OfficeEmail,
+                    OfficeMobileNumber = onboarding.OfficeMobileNumber,
+                    LaptopSerialNumber = onboarding.LaptopSerialNumber,
+                    LaptopImagePath = onboarding.LaptopImagePath,
+                    Status = onboarding.Status,
+                    CreatedDate = onboarding.CreatedDate
+                };
+
+                if (docs != null)
+                {
+                    resp.AadharCardPath = docs.AadharCardPath;
+                    resp.PANCardPath = docs.PANCardPath;
+                    resp.BankStatementPath = docs.BankStatementPath;
+                    resp.BankPassbookPath = docs.BankPassbookPath;
+                    resp.ParentAadharPath = docs.ParentAadharPath;
+                    resp.HighestQualificationDocumentPath = docs.HighestQualificationDocumentPath;
+                    resp.ExperienceLetterPath = docs.ExperienceLetterPath;
+                    resp.AcceptanceLetterPath = docs.AcceptanceLetterPath;
+                }
+
+                if (work != null)
+                {
+                    resp.PreviousCompanyDetails = work.PreviousCompanyDetails;
+                    resp.OfferedDesignation = work.OfferedDesignation;
+                    resp.OfferedSalaryNTH = work.OfferedSalaryNTH;
+                    resp.OfferedMonthlyCTC = work.OfferedMonthlyCTC;
+                    resp.OfferedYearlyCTC = work.OfferedYearlyCTC;
+                    resp.TotalExperience = work.TotalExperience;
+                    resp.LastCompanyPFNumber = work.LastCompanyPFNumber;
+                    resp.LastCompanyUAN = work.LastCompanyUAN;
+                    resp.PreviousCompanyPayslipPath = work.PreviousCompanyPayslipPath;
+                }
+
+                result.Add(resp);
+            }
+
+            return result;
         }
 
-        public async Task<EmployeeOnboarding?> GetByIdAsync(int id)
+        public async Task<DTO.EmployeeOnboardingResponseDto?> GetByIdAsync(int id)
         {
-            return await _context.EmployeeOnboardings
+            var onboarding = await _context.EmployeeOnboardings
                 .FirstOrDefaultAsync(x => x.EmployeeOnboardingId == id);
+
+            if (onboarding == null) return null;
+
+            var docs = await GetDocumentsAsync(id);
+            var work = await GetWorkExperienceAsync(id);
+
+            var resp = new DTO.EmployeeOnboardingResponseDto
+            {
+                EmployeeOnboardingId = onboarding.EmployeeOnboardingId,
+                FullName = onboarding.FullName,
+                DateOfJoining = onboarding.DateOfJoining,
+                DateOfBirth = onboarding.DateOfBirth,
+                Email = onboarding.Email,
+                MobileNumber = onboarding.MobileNumber,
+                BloodGroup = onboarding.BloodGroup,
+                MaritalStatus = onboarding.MaritalStatus,
+                SpouseName = onboarding.SpouseName,
+                SpouseDOB = onboarding.SpouseDOB,
+                ChildrenDetails = onboarding.ChildrenDetails,
+                FatherName = onboarding.FatherName,
+                FatherDOB = onboarding.FatherDOB,
+                IsFatherDeceased = onboarding.IsFatherDeceased == "true" || onboarding.IsFatherDeceased == "True",
+                FatherDOD = onboarding.FatherDOD,
+                FatherAge = onboarding.FatherAge,
+                MotherName = onboarding.MotherName,
+                MotherDOB = onboarding.MotherDOB,
+                IsMotherDeceased = onboarding.IsMotherDeceased == "true" || onboarding.IsMotherDeceased == "True",
+                MotherDOD = onboarding.MotherDOD,
+                MotherAge = onboarding.MotherAge,
+                PAN = onboarding.PAN,
+                AadharNumber = onboarding.AadharNumber,
+                EmergencyContactName = onboarding.EmergencyContactName,
+                EmergencyContactRelationship = onboarding.EmergencyContactRelationship,
+                TemporaryAddress = onboarding.TemporaryAddress,
+                PermanentAddress = onboarding.PermanentAddress,
+                BankName = onboarding.BankName,
+                AccountNumber = onboarding.AccountNumber,
+                IFSC = onboarding.IFSC,
+                BranchName = onboarding.BranchName,
+                OfficeEmail = onboarding.OfficeEmail,
+                OfficeMobileNumber = onboarding.OfficeMobileNumber,
+                LaptopSerialNumber = onboarding.LaptopSerialNumber,
+                LaptopImagePath = onboarding.LaptopImagePath,
+                Status = onboarding.Status,
+                CreatedDate = onboarding.CreatedDate
+            };
+
+            if (docs != null)
+            {
+                resp.AadharCardPath = docs.AadharCardPath;
+                resp.PANCardPath = docs.PANCardPath;
+                resp.BankStatementPath = docs.BankStatementPath;
+                resp.BankPassbookPath = docs.BankPassbookPath;
+                resp.ParentAadharPath = docs.ParentAadharPath;
+                resp.HighestQualificationDocumentPath = docs.HighestQualificationDocumentPath;
+                resp.ExperienceLetterPath = docs.ExperienceLetterPath;
+                resp.AcceptanceLetterPath = docs.AcceptanceLetterPath;
+            }
+
+            if (work != null)
+            {
+                resp.PreviousCompanyDetails = work.PreviousCompanyDetails;
+                resp.OfferedDesignation = work.OfferedDesignation;
+                resp.OfferedSalaryNTH = work.OfferedSalaryNTH;
+                resp.OfferedMonthlyCTC = work.OfferedMonthlyCTC;
+                resp.OfferedYearlyCTC = work.OfferedYearlyCTC;
+                resp.TotalExperience = work.TotalExperience;
+                resp.LastCompanyPFNumber = work.LastCompanyPFNumber;
+                resp.LastCompanyUAN = work.LastCompanyUAN;
+                resp.PreviousCompanyPayslipPath = work.PreviousCompanyPayslipPath;
+            }
+
+            return resp;
         }
 
         public async Task<EmployeeOnboardingDocuments?> GetDocumentsAsync(int onboardingId)

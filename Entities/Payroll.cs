@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace hr_crm.Entities
+﻿namespace hr_crm.Entities
 {
-    [Index(nameof(UserId), nameof(Month), IsUnique = true)]
     public class Payroll
     {
         public int PayrollId { get; set; }
@@ -22,22 +19,19 @@ namespace hr_crm.Entities
         public int NoOfPayableDays { get; set; }
         public decimal MonthlyCTCApportioned { get; set; }
 
-        // Earnings
+        // Earnings breakdown
         public decimal BasicSalary { get; set; }
-        public decimal OvertimePay { get; set; }
-        public decimal TotalAllowances { get; set; }
-
-        // Bonus
-        public decimal BonusAmount { get; set; }
-
-        // Detailed allowances
         public decimal HRA { get; set; }
         public decimal ConveyanceAllowance { get; set; }
         public decimal MedicalAllowance { get; set; }
         public decimal OtherAllowance { get; set; }
         public decimal TAOrPBonus { get; set; }
-
+        public decimal OvertimePay { get; set; }
+        public decimal TotalAllowances { get; set; }
         public decimal GrossSalary { get; set; }
+
+        // Bonus
+        public decimal BonusAmount { get; set; }
 
         // PF / Taxes / PT
         public decimal EmployeePF { get; set; }

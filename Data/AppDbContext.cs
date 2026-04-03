@@ -64,8 +64,8 @@ namespace hr_crm.Data
         public DbSet<Lead> Leads { get; set; }
         public DbSet<JobOpening> JobOpenings { get; set; }
 
-
-
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<ChatUserPresence> ChatUserPresences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -88,6 +88,10 @@ namespace hr_crm.Data
             // Unique index on onboarding invite token
             modelBuilder.Entity<OnboardingInvite>()
                 .HasIndex(i => i.Token)
+                .IsUnique();
+
+            modelBuilder.Entity<ChatUserPresence>()
+                .HasIndex(p => p.UserId)
                 .IsUnique();
         }
     }

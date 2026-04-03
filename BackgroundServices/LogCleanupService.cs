@@ -40,6 +40,15 @@ namespace hr_crm.BackgroundServices
 
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var loggingService = scope.ServiceProvider.GetService<hr_crm.Service.LoggingService>();
+
+            // Log cleanup start
+            try
+            {
+                if (loggingService != null)
+                    await loggingService.CreateLog(null, "System", "LogCleanup/Start", $"Log cleanup starting. Cutoff={cutoff}");
+            }
+            catch { }
 
             var oldLogs = await db.Logs
                 .Where(l => l.Timestamp < cutoff)
@@ -50,10 +59,23 @@ namespace hr_crm.BackgroundServices
                 _logger.LogInformation("Deleting {Count} log entries older than {Cutoff}", oldLogs.Count, cutoff);
                 db.Logs.RemoveRange(oldLogs);
                 await db.SaveChangesAsync(cancellationToken);
+
+                try
+                {
+                    if (loggingService != null)
+                        await loggingService.CreateLog(null, "System", "LogCleanup/Complete", $"Deleted {oldLogs.Count} log entries older than {cutoff}.");
+                }
+                catch { }
             }
             else
             {
                 _logger.LogDebug("No old logs to delete. Cutoff={Cutoff}", cutoff);
+                try
+                {
+                    if (loggingService != null)
+                        await loggingService.CreateLog(null, "System", "LogCleanup/NoAction", $"No logs older than {cutoff} to delete.");
+                }
+                catch { }
             }
         }
     }
