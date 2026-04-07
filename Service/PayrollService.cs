@@ -60,6 +60,101 @@ namespace hr_crm.Service
             return Math.Round(tax / 12, 2); // monthly TDS
         }
 
+        private sealed class PayrollComputationResult
+        {
+            public decimal MonthlyCTC { get; init; }
+            public decimal MonthlyCTCApportioned { get; init; }
+            public decimal BasicSalary { get; init; }
+            public decimal HRA { get; init; }
+            public decimal Conveyance { get; init; }
+            public decimal MedicalAllowance { get; init; }
+            public decimal OtherAllowance { get; init; }
+            public decimal OvertimePay { get; init; }
+            public decimal BonusAmount { get; init; }
+            public decimal GrossSalary { get; init; }
+            public decimal AbsentDeduction { get; init; }
+            public decimal MonthlyTax { get; init; }
+            public decimal NetSalary { get; init; }
+            public int NoOfPayableDays { get; init; }
+            public int PresentDays { get; init; }
+            public int WorkingDays { get; init; }
+        }
+
+        private async Task<PayrollComputationResult> ComputePayrollAmountsAsync(
+            int userId,
+            int year,
+            int month,
+            int workingDays,
+            decimal totalAllowances,
+            decimal totalDeductions,
+            SalaryConfiguration? salaryConfig,
+            decimal fallbackBasicSalary)
+        {
+            const decimal defaultConveyance = 1600m;
+            const decimal defaultMedical = 1250m;
+
+            decimal monthlyCTC = 0m;
+            if (salaryConfig != null && salaryConfig.MonthlyCTC > 0)
+                monthlyCTC = salaryConfig.MonthlyCTC;
+            else if (fallbackBasicSalary > 0)
+                monthlyCTC = fallbackBasicSalary * 2m;
+
+            decimal dailySalary = workingDays > 0 ? monthlyCTC / workingDays : 0m;
+            double overtimeHours = await _repo.GetOvertimeHoursForMonthAsync(userId, year, month);
+            decimal overtimePay = (decimal)overtimeHours * (dailySalary / 8m) * 1.5m;
+
+            int presentDays = await _repo.GetPresentDaysForMonthAsync(userId, year, month);
+            int absentDays = Math.Max(0, workingDays - presentDays);
+            decimal absentDeduction = absentDays * dailySalary;
+
+            decimal monthlyCTCApportioned = workingDays > 0
+                ? Math.Round(monthlyCTC * (decimal)presentDays / workingDays, 2)
+                : 0m;
+            decimal basicSalary = Math.Round(monthlyCTCApportioned * 0.50m, 2);
+            decimal hra = Math.Round(basicSalary * 0.50m, 2);
+            decimal conveyance = salaryConfig != null && salaryConfig.Conveyance > 0
+                ? salaryConfig.Conveyance
+                : defaultConveyance;
+            decimal medical = salaryConfig != null && salaryConfig.MedicalAllowance > 0
+                ? salaryConfig.MedicalAllowance
+                : defaultMedical;
+            decimal otherAllowance = Math.Round(
+                monthlyCTCApportioned - (basicSalary + hra + conveyance + medical),
+                2);
+            if (otherAllowance < 0)
+                otherAllowance = 0m;
+
+            var bonuses = await _repo.GetApprovedBonusesForMonthAsync(userId, month, year);
+            decimal bonusAmount = bonuses.Sum(b => b.Amount);
+
+            decimal annualSalary = monthlyCTC * 12;
+            decimal monthlyTax = CalculateMonthlyTax(annualSalary);
+            decimal grossSalary = Math.Round(
+                basicSalary + hra + conveyance + medical + otherAllowance + overtimePay + bonusAmount + totalAllowances,
+                2);
+            decimal netSalary = grossSalary - totalDeductions - absentDeduction - monthlyTax;
+
+            return new PayrollComputationResult
+            {
+                MonthlyCTC = monthlyCTC,
+                MonthlyCTCApportioned = monthlyCTCApportioned,
+                BasicSalary = basicSalary,
+                HRA = hra,
+                Conveyance = conveyance,
+                MedicalAllowance = medical,
+                OtherAllowance = otherAllowance,
+                OvertimePay = Math.Round(overtimePay, 2),
+                BonusAmount = Math.Round(bonusAmount, 2),
+                GrossSalary = grossSalary,
+                AbsentDeduction = Math.Round(absentDeduction, 2),
+                MonthlyTax = monthlyTax,
+                NetSalary = Math.Round(netSalary, 2),
+                NoOfPayableDays = presentDays,
+                PresentDays = presentDays,
+                WorkingDays = workingDays
+            };
+        }
+
         private PayrollResponseDto MapToResponse(Payroll p) => new()
         {
             PayrollId = p.PayrollId,
@@ -129,85 +224,43 @@ namespace hr_crm.Service
 
             // 1. Auto overtime pay
             int workingDays = GetWorkingDaysInMonth(year, month);
-            double overtimeHours = await _repo.GetOvertimeHoursForMonthAsync(dto.UserId, year, month);
 
             // NOTE: we will compute amounts based on Monthly CTC (from salary config if present)
             var salaryConfig = await _repo.GetSalaryConfigAsync(dto.UserId);
-            // Fallback defaults
-            const decimal defaultConveyance = 1600m;
-            const decimal defaultMedical = 1250m;
-
-            decimal monthlyCTC = 0m;
-            if (salaryConfig != null && salaryConfig.MonthlyCTC > 0)
-                monthlyCTC = salaryConfig.MonthlyCTC;
-            else if (dto.BasicSalary > 0)
-                monthlyCTC = dto.BasicSalary * 2m; // assume Basic = 50% of CTC when no config
-
-            decimal dailySalary = workingDays > 0 ? monthlyCTC / workingDays : 0;
-            decimal hourlySalary = dailySalary / 8;
-            decimal overtimePay = (decimal)overtimeHours * hourlySalary * 1.5m; // 1.5x rate
-
-            // 2. Attendance-based absent deduction
-            int presentDays = await _repo.GetPresentDaysForMonthAsync(dto.UserId, year, month);
-            int absentDays = Math.Max(0, workingDays - presentDays);
-            decimal absentDeduction = absentDays * dailySalary;
-
-            // Monthly CTC apportioned to paid days
-            decimal monthlyCTCApportioned = workingDays > 0 ? Math.Round(monthlyCTC * (decimal)presentDays / workingDays, 2) : 0m;
-
-            // Basic = 50% of apportioned CTC
-            decimal basicSalary = Math.Round(monthlyCTCApportioned * 0.50m, 2);
-            // HRA = 50% of Basic
-            decimal hra = Math.Round(basicSalary * 0.50m, 2);
-            // Conveyance & Medical from config or defaults
-            decimal conveyance = salaryConfig != null && salaryConfig.Conveyance > 0 ? salaryConfig.Conveyance : defaultConveyance;
-            decimal medical = salaryConfig != null && salaryConfig.MedicalAllowance > 0 ? salaryConfig.MedicalAllowance : defaultMedical;
-
-            // Other allowance = apportioned CTC - (Basic + HRA + Conveyance + Medical)
-            decimal otherAllowance = Math.Round(monthlyCTCApportioned - (basicSalary + hra + conveyance + medical), 2);
-            if (otherAllowance < 0) otherAllowance = 0m;
-
-            // Bonuses/TA
-
-            // 3. Auto-pickup approved bonuses for this month
-            var bonuses = await _repo.GetApprovedBonusesForMonthAsync(dto.UserId, month, year);
-            decimal bonusAmount = bonuses.Sum(b => b.Amount);
-
-            // 4. Tax calculation (TDS) — based on projected annual salary
-            // Tax calculation (projected annual salary based on full monthly CTC)
-            decimal annualSalary = monthlyCTC * 12;
-            decimal monthlyTax = CalculateMonthlyTax(annualSalary);
-
-            // Gross salary (sum of earnings)
-            decimal grossSalary = Math.Round(basicSalary + hra + conveyance + medical + otherAllowance + overtimePay + bonusAmount + totalAllowances, 2);
-
-            // Net salary calculation
-            decimal netSalary = grossSalary - totalDeductions - absentDeduction - monthlyTax;
+            var computed = await ComputePayrollAmountsAsync(
+                dto.UserId,
+                year,
+                month,
+                workingDays,
+                totalAllowances,
+                totalDeductions,
+                salaryConfig,
+                dto.BasicSalary);
 
             var payroll = new Payroll
             {
                 UserId = dto.UserId,
                 UserName = dto.UserName,
                 // payroll formula fields
-                MonthlyCTC = monthlyCTC,
-                NoOfPayableDays = presentDays,
-                MonthlyCTCApportioned = monthlyCTCApportioned,
-                BasicSalary = basicSalary,
-                HRA = hra,
-                ConveyanceAllowance = conveyance,
-                MedicalAllowance = medical,
-                OtherAllowance = otherAllowance,
-                OvertimePay = Math.Round(overtimePay, 2),
-                TAOrPBonus = Math.Round(bonusAmount, 2),
-                BonusAmount = Math.Round(bonusAmount, 2),
+                MonthlyCTC = computed.MonthlyCTC,
+                NoOfPayableDays = computed.NoOfPayableDays,
+                MonthlyCTCApportioned = computed.MonthlyCTCApportioned,
+                BasicSalary = computed.BasicSalary,
+                HRA = computed.HRA,
+                ConveyanceAllowance = computed.Conveyance,
+                MedicalAllowance = computed.MedicalAllowance,
+                OtherAllowance = computed.OtherAllowance,
+                OvertimePay = computed.OvertimePay,
+                TAOrPBonus = computed.BonusAmount,
+                BonusAmount = computed.BonusAmount,
                 TotalAllowances = totalAllowances,
-                GrossSalary = grossSalary,
-                AbsentDeduction = Math.Round(absentDeduction, 2),
-                TaxDeduction = monthlyTax,
+                GrossSalary = computed.GrossSalary,
+                AbsentDeduction = computed.AbsentDeduction,
+                TaxDeduction = computed.MonthlyTax,
                 TotalDeductions = totalDeductions,
-                WorkingDays = workingDays,
-                PresentDays = presentDays,
-                NetSalary = Math.Round(netSalary, 2),
+                WorkingDays = computed.WorkingDays,
+                PresentDays = computed.PresentDays,
+                NetSalary = computed.NetSalary,
                 Month = currentMonth,
                 Year = year,
                 Status = "Draft",
@@ -248,64 +301,40 @@ namespace hr_crm.Service
             decimal totalDeductions = deductions.Sum(d => d.Amount);
 
             int workingDays = GetWorkingDaysInMonth(year, month);
-            double overtimeHours = await _repo.GetOvertimeHoursForMonthAsync(dto.UserId, year, month);
 
             // Use salary configuration if present
             var salaryConfig = await _repo.GetSalaryConfigAsync(dto.UserId);
-            const decimal defaultConveyance = 1600m;
-            const decimal defaultMedical = 1250m;
-
-            decimal monthlyCTC = 0m;
-            if (salaryConfig != null && salaryConfig.MonthlyCTC > 0)
-                monthlyCTC = salaryConfig.MonthlyCTC;
-            else if (dto.BasicSalary > 0)
-                monthlyCTC = dto.BasicSalary * 2m;
-
-            decimal dailySalary = workingDays > 0 ? monthlyCTC / workingDays : 0;
-            decimal overtimePay = (decimal)overtimeHours * (dailySalary / 8) * 1.5m;
-
-            int presentDays = await _repo.GetPresentDaysForMonthAsync(dto.UserId, year, month);
-            int absentDays = Math.Max(0, workingDays - presentDays);
-            decimal absentDeduction = absentDays * dailySalary;
-
-            decimal monthlyCTCApportioned = workingDays > 0 ? Math.Round(monthlyCTC * (decimal)presentDays / workingDays, 2) : 0m;
-            decimal basicSalary = Math.Round(monthlyCTCApportioned * 0.50m, 2);
-            decimal hra = Math.Round(basicSalary * 0.50m, 2);
-            decimal conveyance = salaryConfig != null && salaryConfig.Conveyance > 0 ? salaryConfig.Conveyance : defaultConveyance;
-            decimal medical = salaryConfig != null && salaryConfig.MedicalAllowance > 0 ? salaryConfig.MedicalAllowance : defaultMedical;
-            decimal otherAllowance = Math.Round(monthlyCTCApportioned - (basicSalary + hra + conveyance + medical), 2);
-            if (otherAllowance < 0) otherAllowance = 0m;
-
-            var bonuses = await _repo.GetApprovedBonusesForMonthAsync(dto.UserId, month, year);
-            decimal bonusAmount = bonuses.Sum(b => b.Amount);
-
-            decimal annualSalary = monthlyCTC * 12;
-            decimal monthlyTax = CalculateMonthlyTax(annualSalary);
-
-            decimal grossSalary = Math.Round(basicSalary + hra + conveyance + medical + otherAllowance + overtimePay + bonusAmount + totalAllowances, 2);
-            decimal netSalary = grossSalary - totalDeductions - absentDeduction - monthlyTax;
+            var computed = await ComputePayrollAmountsAsync(
+                dto.UserId,
+                year,
+                month,
+                workingDays,
+                totalAllowances,
+                totalDeductions,
+                salaryConfig,
+                dto.BasicSalary);
 
             existing.UserId = dto.UserId;
             existing.UserName = dto.UserName;
-            existing.MonthlyCTC = monthlyCTC;
-            existing.MonthlyCTCApportioned = monthlyCTCApportioned;
-            existing.NoOfPayableDays = presentDays;
-            existing.BasicSalary = basicSalary;
-            existing.HRA = hra;
-            existing.ConveyanceAllowance = conveyance;
-            existing.MedicalAllowance = medical;
-            existing.OtherAllowance = otherAllowance;
-            existing.OvertimePay = Math.Round(overtimePay, 2);
-            existing.TAOrPBonus = Math.Round(bonusAmount, 2);
-            existing.BonusAmount = Math.Round(bonusAmount, 2);
+            existing.MonthlyCTC = computed.MonthlyCTC;
+            existing.MonthlyCTCApportioned = computed.MonthlyCTCApportioned;
+            existing.NoOfPayableDays = computed.NoOfPayableDays;
+            existing.BasicSalary = computed.BasicSalary;
+            existing.HRA = computed.HRA;
+            existing.ConveyanceAllowance = computed.Conveyance;
+            existing.MedicalAllowance = computed.MedicalAllowance;
+            existing.OtherAllowance = computed.OtherAllowance;
+            existing.OvertimePay = computed.OvertimePay;
+            existing.TAOrPBonus = computed.BonusAmount;
+            existing.BonusAmount = computed.BonusAmount;
             existing.TotalAllowances = totalAllowances;
-            existing.GrossSalary = grossSalary;
-            existing.AbsentDeduction = Math.Round(absentDeduction, 2);
-            existing.TaxDeduction = monthlyTax;
+            existing.GrossSalary = computed.GrossSalary;
+            existing.AbsentDeduction = computed.AbsentDeduction;
+            existing.TaxDeduction = computed.MonthlyTax;
             existing.TotalDeductions = totalDeductions;
-            existing.WorkingDays = workingDays;
-            existing.PresentDays = presentDays;
-            existing.NetSalary = Math.Round(netSalary, 2);
+            existing.WorkingDays = computed.WorkingDays;
+            existing.PresentDays = computed.PresentDays;
+            existing.NetSalary = computed.NetSalary;
 
             var updated = await _repo.UpdatePayrollAsync(existing);
             return updated == null ? null : MapToResponse(updated);
@@ -525,37 +554,39 @@ namespace hr_crm.Service
                 decimal totalAllowances = allowances.Sum(a => a.Amount);
                 decimal totalDeductions = deductions.Sum(d => d.Amount);
 
-                double overtimeHours = await _repo.GetOvertimeHoursForMonthAsync(config.UserId, year, month);
-                decimal dailySalary = workingDays > 0 ? config.BasicSalary / workingDays : 0;
-                decimal overtimePay = (decimal)overtimeHours * (dailySalary / 8) * 1.5m;
-
-                int presentDays = await _repo.GetPresentDaysForMonthAsync(config.UserId, year, month);
-                int absentDays = Math.Max(0, workingDays - presentDays);
-                decimal absentDeduction = absentDays * dailySalary;
-
-                var bonuses = await _repo.GetApprovedBonusesForMonthAsync(config.UserId, month, year);
-                decimal bonusAmount = bonuses.Sum(b => b.Amount);
-
-                decimal annualSalary = (config.BasicSalary + totalAllowances) * 12;
-                decimal monthlyTax = CalculateMonthlyTax(annualSalary);
-
-                decimal netSalary = config.BasicSalary + overtimePay + bonusAmount + totalAllowances
-                                    - totalDeductions - absentDeduction - monthlyTax;
+                var computed = await ComputePayrollAmountsAsync(
+                    config.UserId,
+                    year,
+                    month,
+                    workingDays,
+                    totalAllowances,
+                    totalDeductions,
+                    config,
+                    config.BasicSalary);
 
                 var payroll = new Payroll
                 {
                     UserId = config.UserId,
                     UserName = config.UserName,
-                    BasicSalary = config.BasicSalary,
-                    OvertimePay = Math.Round(overtimePay, 2),
-                    BonusAmount = Math.Round(bonusAmount, 2),
+                    MonthlyCTC = computed.MonthlyCTC,
+                    NoOfPayableDays = computed.NoOfPayableDays,
+                    MonthlyCTCApportioned = computed.MonthlyCTCApportioned,
+                    BasicSalary = computed.BasicSalary,
+                    HRA = computed.HRA,
+                    ConveyanceAllowance = computed.Conveyance,
+                    MedicalAllowance = computed.MedicalAllowance,
+                    OtherAllowance = computed.OtherAllowance,
+                    OvertimePay = computed.OvertimePay,
+                    TAOrPBonus = computed.BonusAmount,
+                    BonusAmount = computed.BonusAmount,
                     TotalAllowances = totalAllowances,
-                    AbsentDeduction = Math.Round(absentDeduction, 2),
-                    TaxDeduction = monthlyTax,
+                    GrossSalary = computed.GrossSalary,
+                    AbsentDeduction = computed.AbsentDeduction,
+                    TaxDeduction = computed.MonthlyTax,
                     TotalDeductions = totalDeductions,
-                    WorkingDays = workingDays,
-                    PresentDays = presentDays,
-                    NetSalary = Math.Round(netSalary, 2),
+                    WorkingDays = computed.WorkingDays,
+                    PresentDays = computed.PresentDays,
+                    NetSalary = computed.NetSalary,
                     Month = currentMonth,
                     Year = year,
                     Status = "Draft",
