@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nafa Barter – Employee Onboarding</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+
+    .header {
+      background: #1a3c5e; color: white; padding: 20px 40px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .header h1 { font-size: 22px; font-weight: 600; }
+    .header p  { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+
+    .container { max-width: 860px; margin: 30px auto; padding: 0 20px 60px; }
+
+    .progress-bar {
+      display: flex; justify-content: space-between;
+      margin-bottom: 30px; position: relative;
+    }
+    .progress-bar::before {
+      content: ''; position: absolute; top: 18px; left: 0; right: 0;
+      height: 3px; background: #ddd; z-index: 0;
+    }
+    .step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; z-index: 1; flex: 1;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #ddd; color: #999; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; border: 3px solid #fff;
+      box-shadow: 0 0 0 2px #ddd;
+    }
+    .step.active   .step-circle { background: #1a3c5e; color: #fff; box-shadow: 0 0 0 2px #1a3c5e; }
+    .step.done     .step-circle { background: #28a745; color: #fff; box-shadow: 0 0 0 2px #28a745; }
+    .step-label { font-size: 11px; color: #888; text-align: center; }
+    .step.active .step-label { color: #1a3c5e; font-weight: 600; }
+
+    .card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 32px;
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 17px; color: #1a3c5e; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e8eef5; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .full-width { grid-column: 1 / -1; }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    label { font-size: 13px; font-weight: 500; color: #555; }
+    label .req { color: #e53935; margin-left: 2px; }
+    input, select, textarea {
+      padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 6px;
+      font-size: 14px; outline: none; transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #1a3c5e; }
+    input[type="file"] { padding: 6px; background: #f8fafc; }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .section-divider {
+      font-size: 12px; font-weight: 600; color: #1a3c5e;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      grid-column: 1 / -1; margin-top: 8px; padding-top: 12px;
+      border-top: 1px dashed #ddd;
+    }
+
+    .btn-row { display: flex; justify-content: space-between; margin-top: 24px; }
+    .btn {
+      padding: 10px 28px; border: none; border-radius: 6px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-next  { background: #1a3c5e; color: white; }
+    .btn-next:hover  { background: #14304e; }
+    .btn-back  { background: #e8eef5; color: #1a3c5e; }
+    .btn-back:hover  { background: #d0dcea; }
+    .btn-submit { background: #28a745; color: white; }
+    .btn-submit:hover { background: #218838; }
+
+    .alert {
+      padding: 12px 16px; border-radius: 6px; font-size: 14px; margin-bottom: 20px;
+    }
+    .alert-error   { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; }
+    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c3e6cb; }
+    .alert-info    { background: #e3f2fd; color: #1565c0; border: 1px solid #b8d4f5; }
+
+    .success-screen {
+      text-align: center; padding: 60px 20px; display: none;
+    }
+    .success-screen .icon { font-size: 64px; }
+    .success-screen h2 { font-size: 24px; color: #28a745; margin: 16px 0 8px; }
+    .success-screen p  { color: #666; font-size: 15px; }
+
+    .loading { display: none; text-align: center; padding: 20px; color: #1a3c5e; font-size: 15px; }
+
+    [data-page] { display: none; }
+    [data-page].active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Nafa Barter – Employee Onboarding</h1>
+    <p>Please fill in as many details as possible. All fields are optional.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="alertBox"></div>
+
+  <!-- Progress Steps -->
+  <div class="progress-bar" id="progressBar">
+    <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">Personal</div></div>
+    <div class="step"        id="step2"><div class="step-circle">2</div><div class="step-label">Work</div></div>
+    <div class="step"        id="step3"><div class="step-circle">3</div><div class="step-label">Bank</div></div>
+    <div class="step"        id="step4"><div class="step-circle">4</div><div class="step-label">Documents</div></div>
+    <div class="step"        id="step5"><div class="step-circle">5</div><div class="step-label">Office</div></div>
+  </div>
+
+  <!-- PAGE 1: Personal Details -->
+  <div data-page="1" class="active">
+    <div class="card">
+      <h2>Page 1 — Personal Details</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name </label><input type="text" name="FullName" /></div>
+        <div class="form-group"><label>Date of Joining </label><input type="date" name="DateOfJoining" /></div>
+        <div class="form-group"><label>Date of Birth </label><input type="date" name="DateOfBirth" /></div>
+        <div class="form-group"><label>Email </label><input type="email" name="Email" /></div>
+        <div class="form-group"><label>Mobile Number </label><input type="text" name="MobileNumber" /></div>
+        <div class="form-group"><label>Blood Group </label>
+          <select name="BloodGroup">
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Marital Status </label>
+          <select name="MaritalStatus">
+            <option value="">Select</option>
+            <option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+          </select>
+        </div>
+
+        <div class="section-divider">Spouse Details (if married)</div>
+        <div class="form-group"><label>Spouse Name</label><input type="text" name="SpouseName" /></div>
+        <div class="form-group"><label>Spouse Date of Birth</label><input type="date" name="SpouseDOB" /></div>
+        <div class="form-group full-width"><label>Children Details</label><textarea name="ChildrenDetails"></textarea></div>
+
+        <div class="section-divider">Father's Details</div>
+        <div class="form-group"><label>Father's Name </label><input type="text" name="FatherName" /></div>
+        <div class="form-group"><label>Father's Date of Birth </label><input type="date" name="FatherDOB" /></div>
+        <div class="form-group"><label>Is Father Deceased? </label>
+          <select name="IsFatherDeceased"><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+
+        <div class="section-divider">Mother's Details</div>
+        <div class="form-group"><label>Mother's Name </label><input type="text" name="MotherName" /></div>
+        <div class="form-group"><label>Mother's Date of Birth </label><input type="date" name="MotherDOB" /></div>
+        <div class="form-group"><label>Is Mother Deceased? </label>
+          <select name="IsMotherDeceased"><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+
+        <div class="section-divider">ID & Contact</div>
+        <div class="form-group"><label>PAN Number </label><input type="text" name="PAN" /></div>
+        <div class="form-group"><label>Aadhar Number </label><input type="text" name="AadharNumber" /></div>
+        <div class="form-group"><label>Emergency Contact Name </label><input type="text" name="EmergencyContactName" /></div>
+        <div class="form-group"><label>Emergency Contact Relationship </label><input type="text" name="EmergencyContactRelationship" /></div>
+        <div class="form-group full-width"><label>Temporary Address </label><textarea name="TemporaryAddress"></textarea></div>
+        <div class="form-group full-width"><label>Permanent Address </label><textarea name="PermanentAddress"></textarea></div>
+      </div>
+      <div class="btn-row"><div></div><button class="btn btn-next" onclick="goTo(2)">Next →</button></div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: Work Experience -->
+  <div data-page="2">
+    <div class="card">
+      <h2>Page 2 — Work Experience</h2>
+      <div class="form-grid">
+        <div class="form-group full-width"><label>Previous Company Details</label><textarea name="PreviousCompanyDetails"></textarea></div>
+        <div class="form-group"><label>Offered Designation </label><input type="text" name="OfferedDesignation" /></div>
+        <div class="form-group"><label>Total Experience </label><input type="text" name="TotalExperience" placeholder="e.g. 3 years 2 months" /></div>
+        <div class="form-group"><label>Offered Salary (NTH) </label><input type="number" name="OfferedSalaryNTH" /></div>
+        <div class="form-group"><label>Offered Monthly CTC </label><input type="number" name="OfferedMonthlyCTC" /></div>
+        <div class="form-group"><label>Offered Yearly CTC </label><input type="number" name="OfferedYearlyCTC" /></div>
+        <div class="form-group"><label>Last Company PF Number</label><input type="text" name="LastCompanyPFNumber" /></div>
+        <div class="form-group"><label>Last Company UAN</label><input type="text" name="LastCompanyUAN" /></div>
+        <div class="form-group full-width"><label>Previous Company Payslip (PDF/Image)</label><input type="file" name="PreviousCompanyPayslip" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-next" onclick="goTo(3)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: Bank Details -->
+  <div data-page="3">
+    <div class="card">
+      <h2>Page 3 — Bank Details</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Bank Name </label><input type="text" name="BankName" /></div>
+        <div class="form-group"><label>Account Number </label><input type="text" name="AccountNumber" /></div>
+        <div class="form-group"><label>IFSC Code </label><input type="text" name="IFSC" /></div>
+        <div class="form-group"><label>Branch Name </label><input type="text" name="BranchName" /></div>
+        <div class="form-group full-width"><label>Bank Statement (PDF/Image)</label><input type="file" name="BankStatement" accept=".pdf,.jpg,.jpeg,.png" /></div>
+        <div class="form-group full-width"><label>Bank Passbook (PDF/Image)</label><input type="file" name="BankPassbook" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goTo(2)">← Back</button>
+        <button class="btn btn-next" onclick="goTo(4)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: Documents -->
+  <div data-page="4">
+    <div class="card">
+      <h2>Page 4 — Documents Upload</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Aadhar Card </label><input type="file" name="AadharCard" accept=".pdf,.jpg,.jpeg,.png" /></div>
+        <div class="form-group"><label>PAN Card </label><input type="file" name="PANCard" accept=".pdf,.jpg,.jpeg,.png" /></div>
+        <div class="form-group full-width"><label>Parent Aadhar (can select multiple)</label><input type="file" name="ParentAadhar" accept=".pdf,.jpg,.jpeg,.png" multiple /></div>
+        <div class="form-group"><label>Highest Qualification Document</label><input type="file" name="HighestQualificationDocument" accept=".pdf,.jpg,.jpeg,.png" /></div>
+        <div class="form-group"><label>Experience Letter</label><input type="file" name="ExperienceLetter" accept=".pdf,.jpg,.jpeg,.png" /></div>
+        <div class="form-group"><label>Acceptance Letter</label><input type="file" name="AcceptanceLetter" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goTo(3)">← Back</button>
+        <button class="btn btn-next" onclick="goTo(5)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 5: Office Details -->
+  <div data-page="5">
+    <div class="card">
+      <h2>Page 5 — Office Details</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Office Email </label><input type="email" name="OfficeEmail" /></div>
+        <div class="form-group"><label>Office Mobile Number </label><input type="text" name="OfficeMobileNumber" /></div>
+        <div class="form-group"><label>Laptop Serial Number </label><input type="text" name="LaptopSerialNumber" /></div>
+        <div class="form-group"><label>Laptop Image</label><input type="file" name="LaptopImage" accept=".jpg,.jpeg,.png" /></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goTo(4)">← Back</button>
+        <button class="btn btn-submit" onclick="submitForm()">Submit Onboarding ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="icon">✅</div>
+    <h2>Onboarding Submitted Successfully!</h2>
+    <p>Your details have been received. HR will review and get back to you shortly.</p>
+    <p style="margin-top:10px; color:#999; font-size:13px;">You may now close this page.</p>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = 'https://crmhr.metagensoft.com';
+  let currentPage = 1;
+
+  // ── Page Navigation ──
+  function goTo(page) {
+    document.querySelectorAll('[data-page]').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+    for (let i = 1; i <= 5; i++) {
+      const s = document.getElementById(`step${i}`);
+      s.classList.remove('active', 'done');
+      if (i < page)  s.classList.add('done');
+      if (i === page) s.classList.add('active');
+    }
+
+    currentPage = page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Submit ──
+  async function submitForm() {
+    const formData = new FormData();
+
+    document.querySelectorAll('input:not([type=file]), select, textarea').forEach(el => {
+      if (el.name && el.value) formData.append(el.name, el.value);
+    });
+
+    document.querySelectorAll('input[type=file]:not([multiple])').forEach(el => {
+      if (el.name && el.files[0]) formData.append(el.name, el.files[0]);
+    });
+
+    document.querySelectorAll('input[type=file][multiple]').forEach(el => {
+      if (el.name && el.files.length > 0) {
+        Array.from(el.files).forEach(f => formData.append(el.name, f));
+      }
+    });
+
+    try {
+      const res = await fetch(`${API_BASE}/api/employeeonboarding/public-submit`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert('error', data.message || 'Submission failed. Please try again.');
+        return;
+      }
+
+      document.getElementById('progressBar').style.display = 'none';
+      document.querySelectorAll('[data-page]').forEach(p => p.style.display = 'none');
+      document.getElementById('alertBox').style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+
+    } catch (e) {
+      showAlert('error', 'Network error. Please check your connection and try again.');
+    }
+  }
+
+  function showAlert(type, msg) {
+    document.getElementById('alertBox').innerHTML =
+      `<div class="alert alert-${type}">${msg}</div>`;
+  }
+</script>
+</body>
+</html>

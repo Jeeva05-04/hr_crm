@@ -1,0 +1,1737 @@
+﻿<html>
+<head>
+<meta charset='utf-8'>
+<title>HR CRM Module-Wise API Documentation</title>
+<style>
+body{font-family:Calibri,Arial,sans-serif;line-height:1.35;margin:28px;}
+h1{font-size:24pt;margin:0 0 12px 0;}
+h2{font-size:18pt;margin:22px 0 8px 0;color:#1f4e79;}
+h3{font-size:13pt;margin:16px 0 6px 0;color:#333;}
+p{font-size:10.5pt;margin:4px 0;}
+.sp{margin:10px 0;}
+</style>
+</head>
+<body>
+<h1>HR CRM Module-Wise API Documentation</h1>
+<p>Generated from source code on 2026-04-02 16:04:17</p>
+<p>This document explains the HR CRM API module by module. Each endpoint includes its purpose, access rules, request details, response details, and operational notes.</p>
+<p class="sp"></p>
+<h2>System Overview</h2>
+<p><b>Technology stack:</b> ASP.NET Core Web API, .NET 8, Entity Framework Core, PostgreSQL, Swagger, JWT authentication, static files, and SignalR.</p>
+<p><b>Default security model:</b> most endpoints require JWT authentication. Some endpoints also require explicit permissions or role-based checks.</p>
+<p><b>Real-time endpoints:</b> /hubs/location and /hubs/notifications.</p>
+<p class="sp"></p>
+<h2>Attendance Module</h2>
+<p><b>Module description:</b> Handles employee check-in, check-out, attendance history, total hours, and live location tracking.</p>
+<p><b>Base route:</b> api/Attendence</p>
+<p><b>Endpoints in this module:</b> 8</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Attendence/checkin</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Attendence/checkin.</p>
+<p><b>Access:</b> JWT authentication required; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> dto from body as AttendanceCheckInDto</p>
+<p><b>Request fields:</b> UserId (int), Latitude (double?), Longitude (double?)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Attendence/check-out</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Attendence/check-out.</p>
+<p><b>Access:</b> JWT authentication required; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message, UserId, Time</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;No active check-in found&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/total-hours</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/total-hours.</p>
+<p><b>Access:</b> JWT authentication required; Additional role-based checks are applied in controller logic; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: UserId, TotalHoursHistory</p>
+<p><b>Error response:</b> 404 Not Found: &quot;No attendance history found&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/history/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/history/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Additional role-based checks are applied in controller logic; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;No attendance history found&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Attendence/location</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Attendence/location.</p>
+<p><b>Access:</b> JWT authentication required; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> dto from body as LocationUpdateDto</p>
+<p><b>Request fields:</b> UserId (int), Latitude (double), Longitude (double)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, UserId, Latitude, Longitude, UpdatedAt, GoogleMapsLink</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;No active check-in found. Please check in first.&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p><b>Note:</b> Publishes a real-time SignalR location update event.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/live-locations</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/live-locations.</p>
+<p><b>Access:</b> JWT authentication required; Additional role-based checks are applied in controller logic</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Employees</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/location-trail/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/location-trail/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Additional role-based checks are applied in controller logic</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Request:</b> date from query as DateTime?</p>
+<p><b>Success response:</b> Returns JSON fields: UserId, Date, Trail, Message</p>
+<p><b>Success response:</b> Returns JSON fields: UserId, Date, TotalPoints, StartLocation, CurrentLocation, Trail</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Attendence/live-location/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Attendence/live-location/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Additional role-based checks are applied in controller logic</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: CheckInLocation, Longitude, GoogleMapsLink, LiveLocation, Longitude, LastUpdated, GoogleMapsLink</p>
+<p><b>Error response:</b> 404 Not Found: &quot;User is not currently checked in.&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h2>Branch Management Module</h2>
+<p><b>Module description:</b> Maintains branch master data.</p>
+<p><b>Base route:</b> api/Branch</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Branch</h3>
+<p><b>What it does:</b> Fetches data for api/Branch.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Branch</h3>
+<p><b>What it does:</b> Creates or submits data for api/Branch.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as BranchCreateDto</p>
+<p><b>Request fields:</b> BranchName (string), Location (string), Status (string)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Branch/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Branch/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as BranchCreateDto</p>
+<p><b>Request fields:</b> BranchName (string), Location (string), Status (string)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Branch not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Branch/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Branch/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Branch not found&quot;</p>
+<p class="sp"></p>
+<h2>Budget Change Request Module</h2>
+<p><b>Module description:</b> Manages budget change requests and approval actions.</p>
+<p><b>Base route:</b> api/BudgetChange</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/BudgetChange</h3>
+<p><b>What it does:</b> Creates or submits data for api/BudgetChange.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_REQUEST</p>
+<p><b>Request:</b> dto from body as BudgetRequestDto</p>
+<p><b>Request fields:</b> DepartmentId (int), RequestedAmount (decimal), Reason (string)</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/BudgetChange</h3>
+<p><b>What it does:</b> Fetches data for api/BudgetChange.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/BudgetChange/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/BudgetChange/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Request not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/BudgetChange/approve/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/BudgetChange/approve/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_APPROVE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;Invalid request&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/BudgetChange/reject/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/BudgetChange/reject/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_APPROVE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;Invalid request&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/BudgetChange/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/BudgetChange/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Request not found&quot;</p>
+<p class="sp"></p>
+<h2>Chat Module</h2>
+<p><b>Module description:</b> Supports internal messaging and chat presence.</p>
+<p><b>Base route:</b> api/Chat</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Chat/send</h3>
+<p><b>What it does:</b> Creates or submits data for api/Chat/send.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as SendChatMessageDto</p>
+<p><b>Request fields:</b> Content (string), ReceiverUserId (int?), ChatMessageId (int), SentByUserId (int), SentByUserName (string?), ReceiverUserId (int?), Content (string), SentAt (DateTime), UserId (int), UserName (string?), UserId (int), UserName (string?), Status (string), StatusMessage (string?), UpdatedAt (DateTime), Status (string), StatusMessage (string?)</p>
+<p><b>Success response:</b> Returns JSON fields: success, messageType</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = &quot;Request body is required&quot; }</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = &quot;Message content cannot be empty&quot; }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 500 Server/Application Error</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Chat/history</h3>
+<p><b>What it does:</b> Fetches data for api/Chat/history.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> pageSize from query as int</p>
+<p><b>Request:</b> pageNumber from query as int</p>
+<p><b>Success response:</b> Returns JSON fields: success, totalCount, pageSize, pageNumber, messages</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 500 Server/Application Error</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Chat/status</h3>
+<p><b>What it does:</b> Fetches data for api/Chat/status.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: success, presence</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 500 Server/Application Error</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Chat/status</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Chat/status.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as UpdateChatPresenceDto</p>
+<p><b>Success response:</b> Returns JSON fields: success, presence</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = &quot;Request body is required&quot; }</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = ex.Message }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 500 Server/Application Error</p>
+<p class="sp"></p>
+<h2>Department Budget Module</h2>
+<p><b>Module description:</b> Stores and exposes department budget records.</p>
+<p><b>Base route:</b> api/DepartmentBudget</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentBudget</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentBudget.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_CREATE</p>
+<p><b>Request:</b> dto from body as DepartmentBudgetDto</p>
+<p><b>Request fields:</b> DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), Year (int)</p>
+<p><b>Success response:</b> Returns DepartmentBudget. Fields: Id (int), DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), UsedBudget (decimal), Year (int), Status (string), ApprovedAmount (decimal?), HeadApprovedBy (int?), HeadApprovedDate (DateTime?), FinanceApprovedBy (int?), FinanceApprovedDate (DateTime?), CreatedDate (DateTime), Department (Department?)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget/department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget/department/{departmentId}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> departmentId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DepartmentBudget/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DepartmentBudget/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: BUDGET_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Budget not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentBudget/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentBudget/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns DepartmentBudget?.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Budget not found&quot;</p>
+<p class="sp"></p>
+<h2>Department Module</h2>
+<p><b>Module description:</b> Maintains department master records and department user lookup.</p>
+<p><b>Base route:</b> api/Department</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Department</h3>
+<p><b>What it does:</b> Fetches data for api/Department.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Department</h3>
+<p><b>What it does:</b> Creates or submits data for api/Department.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as DepartmentDto</p>
+<p><b>Request fields:</b> DepartmentName (string), BranchId (int)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Department/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Department/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as DepartmentDto</p>
+<p><b>Request fields:</b> DepartmentName (string), BranchId (int)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Department not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Department/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Department/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Department not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Department/{departmentId}/users</h3>
+<p><b>What it does:</b> Fetches data for api/Department/{departmentId}/users.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_VIEW</p>
+<p><b>Request:</b> departmentId from route/query as int</p>
+<p><b>Success response:</b> Returns object?.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Department not found&quot;</p>
+<p class="sp"></p>
+<h2>Department Role Module</h2>
+<p><b>Module description:</b> Manages department roles and user role assignment.</p>
+<p><b>Base route:</b> api/DepartmentRole</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentRole</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentRole.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_CREATE</p>
+<p><b>Request:</b> dto from route/query as DepartmentRoleCreateDto</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentRole</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentRole.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DepartmentRole/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/DepartmentRole/assign.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_ASSIGN</p>
+<p><b>Request:</b> dto from route/query as AssignUserRoleDto</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DepartmentRole/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/DepartmentRole/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_VIEW; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;No role assigned&quot;</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/DepartmentRole/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/DepartmentRole/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from route/query as DepartmentRoleCreateDto</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Role not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DepartmentRole/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DepartmentRole/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: ROLE_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;Cannot delete role assigned to users&quot;</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Role not found&quot;</p>
+<p class="sp"></p>
+<h2>Digital Signature Module</h2>
+<p><b>Module description:</b> Handles signature requests, signing flow, and document retrieval.</p>
+<p><b>Base route:</b> api/DigitalSignature</p>
+<p><b>Endpoints in this module:</b> 9</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/DigitalSignature/sign/{id}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/DigitalSignature/sign/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_CREATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from form-data as DigitalSignatureSignCreateDto</p>
+<p><b>Request fields:</b> SignedByIp (string?), Remarks (string?), SignatureImageBase64 (string?)</p>
+<p><b>Success response:</b> Returns JSON fields: message, data</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = ex.Message }</p>
+<p><b>Error response:</b> 404 Not Found: new { message = ex.Message }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/status/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/status/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns DigitalSignatureResponseCreateDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { message = $&quot;Signature request {id} not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/history/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/history/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/DigitalSignature/update/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/DigitalSignature/update/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from form-data as DigitalSignatureRequestCreateDto</p>
+<p><b>Request fields:</b> Remarks (string?)</p>
+<p><b>Success response:</b> Returns JSON fields: message, data</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = ex.Message }</p>
+<p><b>Error response:</b> 404 Not Found: new { message = ex.Message }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/all</h3>
+<p><b>What it does:</b> Fetches data for api/DigitalSignature/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/DigitalSignature/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/DigitalSignature/delete/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: message</p>
+<p><b>Error response:</b> 400 Bad Request: new { message = ex.Message }</p>
+<p><b>Error response:</b> 404 Not Found: new { message = ex.Message }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/view/{id}</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/DigitalSignature/view/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a file stream or downloadable file.</p>
+<p><b>Error response:</b> 404 Not Found: new { message = &quot;Document not found or file missing.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/DigitalSignature/download-signed/{id}</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/DigitalSignature/download-signed/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: DIGITALSIGNATURE_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a file stream or downloadable file.</p>
+<p><b>Error response:</b> 404 Not Found: new { message = &quot;Signed document not found. Employee may not have signed yet.&quot; }</p>
+<p class="sp"></p>
+<h2>Employee Onboarding Module</h2>
+<p><b>Module description:</b> Captures onboarding forms and onboarding documents.</p>
+<p><b>Base route:</b> api/EmployeeOnboarding</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeOnboarding/public-submit</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeOnboarding/public-submit.</p>
+<p><b>Access:</b> No authentication required.</p>
+<p><b>Request:</b> dto from form-data as EmployeeOnboardingCreateDto</p>
+<p><b>Request fields:</b> FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslip (IFormFile?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCard (IFormFile?), PANCard (IFormFile?), BankStatement (IFormFile?), BankPassbook (IFormFile?), ParentAadhar (List&lt;IFormFile&gt;?), HighestQualificationDocument (IFormFile?), ExperienceLetter (IFormFile?), AcceptanceLetter (IFormFile?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImage (IFormFile?)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeOnboarding</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeOnboarding.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from form-data as EmployeeOnboardingCreateDto</p>
+<p><b>Request fields:</b> FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslip (IFormFile?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCard (IFormFile?), PANCard (IFormFile?), BankStatement (IFormFile?), BankPassbook (IFormFile?), ParentAadhar (List&lt;IFormFile&gt;?), HighestQualificationDocument (IFormFile?), ExperienceLetter (IFormFile?), AcceptanceLetter (IFormFile?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImage (IFormFile?)</p>
+<p><b>Success response:</b> Returns EmployeeOnboarding. Fields: EmployeeOnboardingId (int), FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), FatherDOD (DateTime?), FatherAge (int?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), MotherDOD (DateTime?), MotherAge (int?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImagePath (string?), Status (string), CreatedDate (DateTime)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeOnboarding.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeOnboarding/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns EmployeeOnboardingResponseDto?.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeOnboarding/{id}/documents</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/EmployeeOnboarding/{id}/documents.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a file stream or downloadable file.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Onboarding record not found.&quot; }</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;No documents uploaded for this employee.&quot; }</p>
+<p><b>Note:</b> Can return a ZIP archive when requested.</p>
+<p><b>Note:</b> Includes file upload or file storage handling.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/EmployeeOnboarding/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/EmployeeOnboarding/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Onboarding record not found&quot;</p>
+<p class="sp"></p>
+<h2>Employee Training Module</h2>
+<p><b>Module description:</b> Assigns training and tracks employee training records.</p>
+<p><b>Base route:</b> api/EmployeeTraining</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/EmployeeTraining/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/EmployeeTraining/assign.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EMPLOYEETRAINING_ASSIGN</p>
+<p><b>Request:</b> dto from body as AssignTrainingDto</p>
+<p><b>Request fields:</b> UserId (int), TrainingName (string), Description (string), IsMandatory (bool), TrainingProvider (string?), Category (string?), DurationHours (int?), AssignedBy (int), DueDate (DateTime?)</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeTraining/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeTraining/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EMPLOYEETRAINING_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/EmployeeTraining/all</h3>
+<p><b>What it does:</b> Fetches data for api/EmployeeTraining/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EMPLOYEETRAINING_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/EmployeeTraining/update-status/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/EmployeeTraining/update-status/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EMPLOYEETRAINING_ASSIGN</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as UpdateTrainingStatusCreateDto</p>
+<p><b>Request fields:</b> Status (string), Progress (int), CompletionDate (DateTime?), IsCertified (bool), Score (int?), Feedback (string?)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Training record not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/EmployeeTraining/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/EmployeeTraining/delete/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EMPLOYEETRAINING_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Training record not found&quot;</p>
+<p class="sp"></p>
+<h2>Exit Interview Module</h2>
+<p><b>Module description:</b> Schedules and tracks exit interviews and feedback.</p>
+<p><b>Base route:</b> api/ExitInterview</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/ExitInterview/schedule</h3>
+<p><b>What it does:</b> Creates or submits data for api/ExitInterview/schedule.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EXITINTERVIEW_SCHEDULE</p>
+<p><b>Request:</b> dto from route/query as ExitInterviewRequestDto</p>
+<p><b>Success response:</b> Returns ExitInterviewResponseDto. Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/ExitInterview/submit-feedback</h3>
+<p><b>What it does:</b> Creates or submits data for api/ExitInterview/submit-feedback.</p>
+<p><b>Access:</b> JWT authentication required; Roles: HR_MANAGER,ADMIN,HR,MANAGER</p>
+<p><b>Request:</b> dto from route/query as ExitInterviewFeedbackDto</p>
+<p><b>Success response:</b> Returns ExitInterviewResponseDto. Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/ExitInterview/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/ExitInterview/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EXITINTERVIEW_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns ExitInterviewResponseDto. Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/ExitInterview/all</h3>
+<p><b>What it does:</b> Fetches data for api/ExitInterview/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: EXITINTERVIEW_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/ExitInterview/update/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/ExitInterview/update/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Roles: HR_MANAGER,ADMIN,HR,MANAGER</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from route/query as ExitInterviewResponseDto</p>
+<p><b>Success response:</b> Returns ExitInterviewResponseDto. Fields: Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/ExitInterview/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/ExitInterview/delete/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Roles: HR_MANAGER,ADMIN,HR,MANAGER</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Job Opening Module</h2>
+<p><b>Module description:</b> Maintains job openings used by recruitment.</p>
+<p><b>Base route:</b> api/JobOpening</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening/department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening/department/{departmentId}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> departmentId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/JobOpening/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JobOpeningResponseDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Job opening not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/JobOpening</h3>
+<p><b>What it does:</b> Creates or submits data for api/JobOpening.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as JobOpeningCreateDto</p>
+<p><b>Request fields:</b> Description (string?), Title (string?), TotalOpenings (int?), Description (string?), Status (string?), JobOpeningId (int), Title (string), DepartmentId (int), DepartmentName (string), TotalOpenings (int), Description (string?), Status (string), CreatedAt (DateTime), ClosedAt (DateTime?), FilledCount (int), RemainingOpenings (int)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Data</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/JobOpening/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as JobOpeningUpdateDto</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/JobOpening/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/JobOpening/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = error }</p>
+<p class="sp"></p>
+<h2>Knowledge Module</h2>
+<p><b>Module description:</b> Stores organization knowledge-base records.</p>
+<p><b>Base route:</b> api/Knowledge</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Knowledge</h3>
+<p><b>What it does:</b> Fetches data for api/Knowledge.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Knowledge</h3>
+<p><b>What it does:</b> Creates or submits data for api/Knowledge.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as KnowledgeCreateDto</p>
+<p><b>Request fields:</b> BranchId (int), RecordType (string), Code (string), Title (string), Category (string), SubCategory (string), Summary (string), ApprovalStatus (string), ApprovedBy (string), Visibility (string), Status (string), CreatedBy (int)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Knowledge/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Knowledge/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Knowledge record not found&quot;</p>
+<p class="sp"></p>
+<h2>Lead Module</h2>
+<p><b>Module description:</b> Maintains lead assignment and lead status workflows.</p>
+<p><b>Base route:</b> api/Lead</p>
+<p><b>Endpoints in this module:</b> 8</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead</h3>
+<p><b>What it does:</b> Fetches data for api/Lead.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/status/{status}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/status/{status}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> status from route/query as string</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/assigned/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/assigned/{userId}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Lead/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Lead/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns LeadResponseDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Lead not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Lead</h3>
+<p><b>What it does:</b> Creates or submits data for api/Lead.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from body as LeadCreateDto</p>
+<p><b>Request fields:</b> Phone (string?), Source (string), Notes (string?), Notes (string?), LeadId (int), LeadName (string), Email (string), Phone (string?), Source (string), Status (string), Notes (string?), AssignedToUserId (int?), AssignedByUserId (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Data</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Lead/{id}/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/Lead/{id}/assign.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as LeadAssignDto</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Lead/{id}/status</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Lead/{id}/status.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as LeadUpdateStatusDto</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Lead/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Lead/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = error }</p>
+<p class="sp"></p>
+<h2>Learning Module</h2>
+<p><b>Module description:</b> Assigns courses and updates learning progress.</p>
+<p><b>Base route:</b> api/Learning</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Learning/assign-course</h3>
+<p><b>What it does:</b> Creates or submits data for api/Learning/assign-course.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_ASSIGN</p>
+<p><b>Request:</b> dto from route/query as LearningCourseDto</p>
+<p><b>Success response:</b> Returns LearningCourse. Fields: Id (int), UserId (int), CourseName (string?), Description (string?), Role (string?), AssignedDate (DateTime), DueDate (DateTime), Progress (int), Status (string?)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Learning/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Learning/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Learning/update-progress/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Learning/update-progress/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from route/query as LearningUpdateProgressDto</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Learning/complete/{id}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/Learning/complete/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Learning/all</h3>
+<p><b>What it does:</b> Fetches data for api/Learning/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Learning/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Learning/delete/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEARNING_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Leave Module</h2>
+<p><b>Module description:</b> Covers leave types, leave applications, approval flow, holidays, balances, and encashment.</p>
+<p><b>Base route:</b> api/Leave</p>
+<p><b>Endpoints in this module:</b> 10</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/types</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/types.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_UPDATE</p>
+<p><b>Request:</b> dto from body as LeaveTypeDto</p>
+<p><b>Request fields:</b> LeaveTypeId (int), Name (string)</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 409 Conflict</p>
+<p><b>Note:</b> Writes an audit or business log entry.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/types</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/types.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/apply</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/apply.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_APPLY; Additional role-based checks are applied in controller logic</p>
+<p><b>Request:</b> dto from body as LeaveCreateDto</p>
+<p><b>Request fields:</b> UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave</h3>
+<p><b>What it does:</b> Fetches data for api/Leave.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Leave/{leaveId}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Leave/{leaveId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_DELETE</p>
+<p><b>Request:</b> leaveId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Leave not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/balance/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/balance/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: UserId, Year, Balance</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/holiday</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/holiday.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_UPDATE</p>
+<p><b>Request:</b> dto from body as HolidayCreateDto</p>
+<p><b>Request fields:</b> Name (string), Date (DateTime), Type (string)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Holiday</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/holidays</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/holidays.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Holiday not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Leave/calendar</h3>
+<p><b>What it does:</b> Fetches data for api/Leave/calendar.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_VIEW</p>
+<p><b>Request:</b> month from query as int?</p>
+<p><b>Request:</b> year from query as int?</p>
+<p><b>Success response:</b> Returns object.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Leave/encashment/{userId}</h3>
+<p><b>What it does:</b> Creates or submits data for api/Leave/encashment/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LEAVE_UPDATE</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Request:</b> userName from query as string</p>
+<p><b>Request:</b> year from query as int?</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h2>Logs Module</h2>
+<p><b>Module description:</b> Exposes audit and log data stored by the application.</p>
+<p><b>Base route:</b> api/Logs</p>
+<p><b>Endpoints in this module:</b> 2</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Logs</h3>
+<p><b>What it does:</b> Fetches data for api/Logs.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LOGS_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Logs/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Logs/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: LOGS_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Notification Module</h2>
+<p><b>Module description:</b> Returns user notifications and supports read/delete actions.</p>
+<p><b>Base route:</b> api/Notification</p>
+<p><b>Endpoints in this module:</b> 6</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Notification</h3>
+<p><b>What it does:</b> Fetches data for api/Notification.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Notification/unread-count</h3>
+<p><b>What it does:</b> Fetches data for api/Notification/unread-count.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: UnreadCount</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Notification/read/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Notification/read/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Notification/read-all</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Notification/read-all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_UPDATE</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Notification/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Notification/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Notification not found.&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Notification/clear-all</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Notification/clear-all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: NOTIFICATION_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h2>Offboarding Module</h2>
+<p><b>Module description:</b> Handles offboarding records and their status updates.</p>
+<p><b>Base route:</b> api/OffBoarding</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OffBoarding/create</h3>
+<p><b>What it does:</b> Creates or submits data for api/OffBoarding/create.</p>
+<p><b>Access:</b> Permission: OFFBOARDING_CREATE</p>
+<p><b>Request:</b> dto from route/query as OffBoardingDto</p>
+<p><b>Success response:</b> Returns OffBoarding. Fields: Id (int), UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string), AccountDeactivation (bool)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OffBoarding/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/OffBoarding/{id}.</p>
+<p><b>Access:</b> Permission: OFFBOARDING_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns OffBoarding. Fields: Id (int), UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string), AccountDeactivation (bool)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OffBoarding</h3>
+<p><b>What it does:</b> Fetches data for api/OffBoarding.</p>
+<p><b>Access:</b> Permission: OFFBOARDING_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/OffBoarding/update-status/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OffBoarding/update-status/{id}.</p>
+<p><b>Access:</b> Permission: OFFBOARDING_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from route/query as UpdateOffboardingStatusDTO</p>
+<p><b>Success response:</b> Returns OffBoarding. Fields: Id (int), UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string), AccountDeactivation (bool)</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/OffBoarding/delete/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/OffBoarding/delete/{id}.</p>
+<p><b>Access:</b> Permission: OFFBOARDING_DELETE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Onboarding Invite Module</h2>
+<p><b>Module description:</b> Creates and validates onboarding invite tokens.</p>
+<p><b>Base route:</b> api/OnboardingInvite</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OnboardingInvite/generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/OnboardingInvite/generate.</p>
+<p><b>Access:</b> Permission: ONBOARDING_INVITE_GENERATE</p>
+<p><b>Request:</b> dto from body as GenerateInviteDto</p>
+<p><b>Request fields:</b> EmployeeEmail (string?), EmployeeName (string?)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, ShareableLink, Token, EmployeeName, EmployeeEmail, ExpiresAt, Note</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OnboardingInvite/validate/{token}</h3>
+<p><b>What it does:</b> Handles the endpoint route api/OnboardingInvite/validate/{token}.</p>
+<p><b>Access:</b> No authentication required.</p>
+<p><b>Request:</b> token from route/query as string</p>
+<p><b>Success response:</b> Returns JSON fields: Valid, EmployeeName, EmployeeEmail, ExpiresAt</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OnboardingInvite/submit/{token}</h3>
+<p><b>What it does:</b> Creates or submits data for api/OnboardingInvite/submit/{token}.</p>
+<p><b>Access:</b> No authentication required.</p>
+<p><b>Request:</b> token from route/query as string</p>
+<p><b>Request:</b> dto from form-data as EmployeeOnboardingCreateDto</p>
+<p><b>Request fields:</b> FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslip (IFormFile?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCard (IFormFile?), PANCard (IFormFile?), BankStatement (IFormFile?), BankPassbook (IFormFile?), ParentAadhar (List&lt;IFormFile&gt;?), HighestQualificationDocument (IFormFile?), ExperienceLetter (IFormFile?), AcceptanceLetter (IFormFile?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImage (IFormFile?)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, OnboardingId, EmployeeName</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OnboardingInvite/all</h3>
+<p><b>What it does:</b> Fetches data for api/OnboardingInvite/all.</p>
+<p><b>Access:</b> Permission: ONBOARDING_INVITE_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Overtime Approval Module</h2>
+<p><b>Module description:</b> Handles overtime approval requests.</p>
+<p><b>Base route:</b> api/OvertimeApproval</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OvertimeApproval</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OvertimeApproval.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_APPROVE</p>
+<p><b>Request:</b> dto from body as OvertimeApprovalCreateDto</p>
+<p><b>Request fields:</b> UserId (int), ValidFrom (DateTime), ValidTo (DateTime)</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;ValidFrom cannot be later than ValidTo.&quot;</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeApproval</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeApproval.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_APPROVAL_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeApproval/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeApproval/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_APPROVAL_VIEW</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Overtime Policy Module</h2>
+<p><b>Module description:</b> Maintains overtime policies.</p>
+<p><b>Base route:</b> api/OvertimePolicy</p>
+<p><b>Endpoints in this module:</b> 3</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/OvertimePolicy</h3>
+<p><b>What it does:</b> Creates or submits data for api/OvertimePolicy.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_POLICY_CREATE</p>
+<p><b>Request:</b> dto from body as OvertimePolicyCreateDto</p>
+<p><b>Request fields:</b> DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;Policy already exists for this department.&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimePolicy</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimePolicy.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_POLICY_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/OvertimePolicy/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/OvertimePolicy/{id}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_POLICY_CREATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as OvertimePolicyUpdateDto</p>
+<p><b>Request fields:</b> StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Policy not found.&quot;</p>
+<p class="sp"></p>
+<h2>Overtime Record Module</h2>
+<p><b>Module description:</b> Returns overtime records and summaries.</p>
+<p><b>Base route:</b> api/OvertimeRecord</p>
+<p><b>Endpoints in this module:</b> 2</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeRecord/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeRecord/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_VIEW; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/OvertimeRecord/weekly/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/OvertimeRecord/weekly/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: OVERTIME_VIEW; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: UserId, WeeklyOvertimeHours</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h2>Payroll Module</h2>
+<p><b>Module description:</b> Handles payroll, payslips, salary configuration, bonuses, allowances, and deductions.</p>
+<p><b>Base route:</b> api/Payroll</p>
+<p><b>Endpoints in this module:</b> 18</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/generate.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_GENERATE</p>
+<p><b>Request:</b> dto from body as PayrollCreateDto</p>
+<p><b>Request fields:</b> UserId (int), UserName (string), BasicSalary (decimal)</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_UPDATE</p>
+<p><b>Request:</b> payrollId from route/query as int</p>
+<p><b>Request:</b> dto from body as PayrollCreateDto</p>
+<p><b>Request fields:</b> UserId (int), UserName (string), BasicSalary (decimal)</p>
+<p><b>Success response:</b> Returns PayrollResponseDto?.</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = &quot;Payroll not found or cannot be edited. Only Draft payrolls can be updated.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Payroll/{payrollId}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Payroll/{payrollId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_DELETE</p>
+<p><b>Request:</b> payrollId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Payroll record not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/allowance</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/allowance.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_CREATE</p>
+<p><b>Request:</b> dto from body as AllowanceCreateDto</p>
+<p><b>Request fields:</b> UserId (int), AllowanceType (string), Amount (decimal)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/deduction</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/deduction.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_CREATE</p>
+<p><b>Request:</b> dto from body as DeductionCreateDto</p>
+<p><b>Request fields:</b> UserId (int), DeductionType (string), Amount (decimal)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/payslip/current/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/payslip/current/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns PayslipDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Payslip not found for current month.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}/approve</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}/approve.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_UPDATE</p>
+<p><b>Request:</b> payrollId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message, PayrollId</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/{payrollId}/mark-paid</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/{payrollId}/mark-paid.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_UPDATE</p>
+<p><b>Request:</b> payrollId from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message, PayrollId</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/salary-config</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/salary-config.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_CREATE</p>
+<p><b>Request:</b> dto from body as SalaryConfigDto</p>
+<p><b>Request fields:</b> UserId (int), UserName (string), BasicSalary (decimal), MonthlyCTC (decimal), Conveyance (decimal), MedicalAllowance (decimal)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Config</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/salary-config/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/salary-config/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns SalaryConfiguration?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;No salary configuration found for this employee.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/salary-config/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/salary-config/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/auto-generate</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/auto-generate.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_GENERATE</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Generated, Skipped</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Payroll/bonus</h3>
+<p><b>What it does:</b> Creates or submits data for api/Payroll/bonus.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_CREATE</p>
+<p><b>Request:</b> dto from body as BonusCreateDto</p>
+<p><b>Request fields:</b> UserId (int), UserName (string), BonusType (string), Amount (decimal), Reason (string?), Month (int), Year (int)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, Bonus</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Payroll/bonus/{id}/approve</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Payroll/bonus/{id}/approve.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_UPDATE</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message, BonusId</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/bonus/all</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/bonus/all.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Payroll/bonus/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Payroll/bonus/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: PAYROLL_VIEW</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h2>Project Module</h2>
+<p><b>Module description:</b> Maintains project records and manager notifications.</p>
+<p><b>Base route:</b> api/Project</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Project</h3>
+<p><b>What it does:</b> Fetches data for api/Project.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Project</h3>
+<p><b>What it does:</b> Creates or submits data for api/Project.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> dto from body as ProjectCreateDto</p>
+<p><b>Request fields:</b> ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: ModelState</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Project/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Project/{id}.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as ProjectCreateDto</p>
+<p><b>Request fields:</b> ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Project not found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Project/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Project/{id}.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Project not found&quot;</p>
+<p class="sp"></p>
+<h2>Recruitment Module</h2>
+<p><b>Module description:</b> Handles candidate recruitment, dashboards, resumes, interviews, and onboarding conversion.</p>
+<p><b>Base route:</b> api/Recruitment</p>
+<p><b>Endpoints in this module:</b> 12</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns hr_crm.DTO.RecruitmentDashboardDto.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard/by-role/{role}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard/by-role/{role}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> role from route/query as string</p>
+<p><b>Success response:</b> Returns hr_crm.DTO.RoleStatsDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = $&quot;No data found for role: {role}&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/dashboard/by-department/{departmentId}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/dashboard/by-department/{departmentId}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> departmentId from route/query as int</p>
+<p><b>Success response:</b> Returns hr_crm.DTO.DepartmentStatsDto?.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Department not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/status/{status}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/status/{status}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> status from route/query as string</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Fetches data for api/Recruitment/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Candidate not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Recruitment</h3>
+<p><b>What it does:</b> Creates or submits data for api/Recruitment.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> dto from form-data as RecruitmentCreateDto</p>
+<p><b>Request fields:</b> FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateTime), Source (string), ExpectedSalary (decimal?), JobOpeningId (int?), Resume (IFormFile?), InterviewDate (DateTime), InterviewerName (string), InterviewType (string), Notes (string?), Status (string), Notes (string?), OfferedSalary (decimal?), AssignedToUserId (int)</p>
+<p><b>Success response:</b> Returns JSON fields: Message, CandidateId, ResumeUrl</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p><b>Note:</b> Includes file upload or file storage handling.</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Recruitment/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as RecruitmentCreateDto</p>
+<p><b>Request fields:</b> FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateTime), Source (string), ExpectedSalary (decimal?), JobOpeningId (int?), Resume (IFormFile?), InterviewDate (DateTime), InterviewerName (string), InterviewType (string), Notes (string?), Status (string), Notes (string?), OfferedSalary (decimal?), AssignedToUserId (int)</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Candidate not found.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Recruitment/{id}/resume</h3>
+<p><b>What it does:</b> Returns a downloadable or viewable file for api/Recruitment/{id}/resume.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns a file stream or downloadable file.</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Candidate not found.&quot; }</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;No resume uploaded for this candidate.&quot; }</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Resume file not found on server.&quot; }</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Recruitment/{id}/schedule-interview</h3>
+<p><b>What it does:</b> Creates or submits data for api/Recruitment/{id}/schedule-interview.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as ScheduleInterviewDto</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Recruitment/{id}/convert-to-onboarding</h3>
+<p><b>What it does:</b> Converts one business record into another workflow state for api/Recruitment/{id}/convert-to-onboarding.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message, OnboardingId, EmployeeName, Note</p>
+<p><b>Error response:</b> 400 Bad Request: new { Message = error }</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Recruitment/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Recruitment/{id}.</p>
+<p><b>Access:</b> JWT authentication required</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns JSON fields: Message</p>
+<p><b>Error response:</b> 404 Not Found: new { Message = &quot;Candidate not found.&quot; }</p>
+<p class="sp"></p>
+<h2>Shift Module</h2>
+<p><b>Module description:</b> Maintains shifts and user shift assignments.</p>
+<p><b>Base route:</b> api/Shift</p>
+<p><b>Endpoints in this module:</b> 5</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift</h3>
+<p><b>What it does:</b> Fetches data for api/Shift.</p>
+<p><b>Access:</b> JWT authentication required; Permission: SHIFT_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift/assigned-users</h3>
+<p><b>What it does:</b> Fetches data for api/Shift/assigned-users.</p>
+<p><b>Access:</b> JWT authentication required; Permission: SHIFT_VIEW</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;No shift assignments found&quot;</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Shift/user/{userId}</h3>
+<p><b>What it does:</b> Fetches data for api/Shift/user/{userId}.</p>
+<p><b>Access:</b> JWT authentication required; Permission: SHIFT_VIEW; Self-user validation is enforced for user-specific data</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Shift not assigned&quot;</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Shift</h3>
+<p><b>What it does:</b> Creates or submits data for api/Shift.</p>
+<p><b>Access:</b> JWT authentication required; Permission: SHIFT_CREATE</p>
+<p><b>Request:</b> dto from route/query as ShiftCreateDto</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Shift/assign</h3>
+<p><b>What it does:</b> Creates or submits data for api/Shift/assign.</p>
+<p><b>Access:</b> JWT authentication required; Permission: SHIFT_ASSIGN</p>
+<p><b>Request:</b> userId from route/query as int</p>
+<p><b>Request:</b> shiftId from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> No explicit custom error response found in controller logic beyond framework-level validation.</p>
+<p><b>Note:</b> Triggers an in-app notification.</p>
+<p class="sp"></p>
+<h2>To-Do Module</h2>
+<p><b>Module description:</b> Manages task assignments and task status updates.</p>
+<p><b>Base route:</b> api/Todo</p>
+<p><b>Endpoints in this module:</b> 4</p>
+<p class="sp"></p>
+<h3>Endpoint: GET api/Todo</h3>
+<p><b>What it does:</b> Fetches data for api/Todo.</p>
+<p><b>Access:</b> Additional role-based checks are applied in controller logic</p>
+<p><b>Request:</b> No request body or explicit parameter is defined on the action signature.</p>
+<p><b>Success response:</b> Returns a success result based on the controller logic.</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p class="sp"></p>
+<h3>Endpoint: POST api/Todo</h3>
+<p><b>What it does:</b> Creates or submits data for api/Todo.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> dto from body as TodoCreateDto</p>
+<p><b>Request fields:</b> Title (string), Description (string), AssignedTo (int), DueDate (DateTime), Status (string)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 400 Bad Request: &quot;Invalid request&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: PUT api/Todo/{id}</h3>
+<p><b>What it does:</b> Updates existing data or changes state for api/Todo/{id}.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Request:</b> dto from body as TodoCreateDto</p>
+<p><b>Request fields:</b> Title (string), Description (string), AssignedTo (int), DueDate (DateTime), Status (string)</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Task not found&quot;</p>
+<p><b>Error response:</b> 401 Unauthorized</p>
+<p><b>Error response:</b> 403 Forbidden</p>
+<p class="sp"></p>
+<h3>Endpoint: DELETE api/Todo/{id}</h3>
+<p><b>What it does:</b> Deletes or clears data for api/Todo/{id}.</p>
+<p><b>Access:</b> Review application auth filters for access control.</p>
+<p><b>Request:</b> id from route/query as int</p>
+<p><b>Success response:</b> Returns success message text.</p>
+<p><b>Error response:</b> 404 Not Found: &quot;Task not found&quot;</p>
+<p class="sp"></p>
+<h2>Model Reference</h2>
+<p>The following DTOs and entities are available in the current codebase and can be used as field-level references while integrating with the API.</p>
+<p>Allowance</p>
+<p><b>Defined in:</b> Allowance.cs</p>
+<p><b>Fields:</b> AllowanceId (int), UserId (int), AllowanceType (string), Amount (decimal), Month (DateTime), Year (int)</p>
+<p>AllowanceCreateDto</p>
+<p><b>Defined in:</b> AllowanceCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), AllowanceType (string), Amount (decimal)</p>
+<p>AssignTrainingDto</p>
+<p><b>Defined in:</b> AssignTrainingDto.cs</p>
+<p><b>Fields:</b> UserId (int), TrainingName (string), Description (string), IsMandatory (bool), TrainingProvider (string?), Category (string?), DurationHours (int?), AssignedBy (int), DueDate (DateTime?)</p>
+<p>AssignUserRoleDto</p>
+<p><b>Defined in:</b> AssignUserRoleDto.cs</p>
+<p><b>Fields:</b> UserId (int), DepartmentRoleId (int)</p>
+<p>Attendance</p>
+<p><b>Defined in:</b> Attendance.cs</p>
+<p><b>Fields:</b> AttendanceId (int), UserId (int), AttendanceDate (DateTime), CheckInTime (DateTime), CheckOutTime (DateTime?), IpAddress (string?), DeviceInfo (string?), Status (string?), CheckInLatitude (double?), CheckInLongitude (double?), LastKnownLatitude (double?), LastKnownLongitude (double?), LastLocationUpdated (DateTime?)</p>
+<p>AttendanceCheckInDto</p>
+<p><b>Defined in:</b> AttendanceCheckInDto.cs</p>
+<p><b>Fields:</b> UserId (int), Latitude (double?), Longitude (double?)</p>
+<p>AttendanceTracking</p>
+<p><b>Defined in:</b> AttendanceTracking.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), IpAddress (string), DeviceInfo (string), CheckInTime (DateTime), CheckOutTime (DateTime?)</p>
+<p>Bonus</p>
+<p><b>Defined in:</b> Bonus.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), UserName (string), BonusType (string), Amount (decimal), Reason (string?), Month (int), Year (int), Status (string), CreatedDate (DateTime), CreatedBy (int), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>BonusCreateDto</p>
+<p><b>Defined in:</b> BonusCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), UserName (string), BonusType (string), Amount (decimal), Reason (string?), Month (int), Year (int)</p>
+<p>Branch</p>
+<p><b>Defined in:</b> Branch.cs</p>
+<p><b>Fields:</b> BranchId (int), BranchName (string), Location (string), Status (string?), Departments (virtual ICollection&lt;Department&gt;)</p>
+<p>BranchCreateDto</p>
+<p><b>Defined in:</b> BranchCreateDto.cs</p>
+<p><b>Fields:</b> BranchName (string), Location (string), Status (string)</p>
+<p>BudgetChangeRequest</p>
+<p><b>Defined in:</b> BudgetChangeRequest.cs</p>
+<p><b>Fields:</b> BudgetChangeRequestId (int), DepartmentId (int), RequestedAmount (decimal), Reason (string), Status (string), RequestDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>BudgetGuideline</p>
+<p><b>Defined in:</b> BudgetGuideline.cs</p>
+<p><b>Fields:</b> BudgetGuidelineId (int), MaxAnnualBudget (decimal), MaxTrainingPercentage (decimal), MaxResourcePercentage (decimal)</p>
+<p>BudgetRequestDto</p>
+<p><b>Defined in:</b> BudgetRequestDto.cs</p>
+<p><b>Fields:</b> DepartmentId (int), RequestedAmount (decimal), Reason (string)</p>
+<p>ChatMessage</p>
+<p><b>Defined in:</b> ChatMessage.cs</p>
+<p><b>Fields:</b> ChatMessageId (int), SentByUserId (int), SentByUserName (string?), ReceiverUserId (int?), Content (string), SentAt (DateTime), IsDeleted (bool)</p>
+<p>ChatUserPresence</p>
+<p><b>Defined in:</b> ChatUserPresence.cs</p>
+<p><b>Fields:</b> ChatUserPresenceId (int), UserId (int), UserName (string?), Status (string), StatusMessage (string?), UpdatedAt (DateTime)</p>
+<p>Deduction</p>
+<p><b>Defined in:</b> Deduction.cs</p>
+<p><b>Fields:</b> DeductionId (int), UserId (int), DeductionType (string), Amount (decimal), Month (DateTime), Year (int)</p>
+<p>DeductionCreateDto</p>
+<p><b>Defined in:</b> DeductionCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), DeductionType (string), Amount (decimal)</p>
+<p>Department</p>
+<p><b>Defined in:</b> Department.cs</p>
+<p><b>Fields:</b> DepartmentId (int), DepartmentName (string), BranchId (int?), Branch (virtual Branch?), Projects (virtual ICollection&lt;Project&gt;), Recruitments (virtual ICollection&lt;Recruitment&gt;), Budgets (ICollection&lt;DepartmentBudget&gt;)</p>
+<p>DepartmentBudget</p>
+<p><b>Defined in:</b> DepartmentBudget.cs</p>
+<p><b>Fields:</b> Id (int), DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), UsedBudget (decimal), Year (int), Status (string), ApprovedAmount (decimal?), HeadApprovedBy (int?), HeadApprovedDate (DateTime?), FinanceApprovedBy (int?), FinanceApprovedDate (DateTime?), CreatedDate (DateTime), Department (Department?)</p>
+<p>DepartmentBudgetDto</p>
+<p><b>Defined in:</b> DepartmentBudgetDto.cs</p>
+<p><b>Fields:</b> DepartmentId (int), TotalAnnualBudget (decimal), TrainingBudget (decimal), ResourceBudget (decimal), Year (int)</p>
+<p>DepartmentDto</p>
+<p><b>Defined in:</b> DepartmentDto.cs</p>
+<p><b>Fields:</b> DepartmentName (string), BranchId (int)</p>
+<p>DepartmentRole</p>
+<p><b>Defined in:</b> DepartmentRole.cs</p>
+<p><b>Fields:</b> DepartmentRoleId (int), RoleName (string), RequiredSkillLevel (string), PerformanceLevel (string), DepartmentId (int), Department (Department), UserDepartmentRoles (ICollection&lt;UserDepartmentRole&gt;)</p>
+<p>DepartmentRoleCreateDto</p>
+<p><b>Defined in:</b> DepartmentRoleCreateDto.cs</p>
+<p><b>Fields:</b> RoleName (string), RequiredSkillLevel (string), PerformanceLevel (string), DepartmentId (int)</p>
+<p>DigitalSignature</p>
+<p><b>Defined in:</b> DigitalSignature.cs</p>
+<p><b>Fields:</b> SignatureId (int), UserId (int), RequestedBy (int), DocumentName (string), DocumentType (string), Status (string), FilePath (string?), SignedFilePath (string?), SignatureHash (string?), SignedByIp (string?), RequestedAt (DateTime), SignedAt (DateTime?), Remarks (string?)</p>
+<p>DigitalSignatureRequestCreateDto</p>
+<p><b>Defined in:</b> DigitalSignatureRequestCreateDto.cs</p>
+<p><b>Fields:</b> Remarks (string?)</p>
+<p>DigitalSignatureResponseCreateDto</p>
+<p><b>Defined in:</b> DigitalSignatureResponseCreateDto.cs</p>
+<p><b>Fields:</b> SignatureId (int), UserId (int), RequestedBy (int), DocumentName (string), DocumentType (string), Status (string), FilePath (string?), SignedFilePath (string?), SignatureHash (string?), SignedByIp (string?), RequestedAt (DateTime), SignedAt (DateTime?), Remarks (string?)</p>
+<p>DigitalSignatureSignCreateDto</p>
+<p><b>Defined in:</b> DigitalSignatureSignCreateDto.cs</p>
+<p><b>Fields:</b> SignedByIp (string?), Remarks (string?), SignatureImageBase64 (string?)</p>
+<p>EmployeeLocationTrail</p>
+<p><b>Defined in:</b> EmployeeLocationTrail.cs</p>
+<p><b>Fields:</b> Id (int), AttendanceId (int), UserId (int), Latitude (double), Longitude (double), RecordedAt (DateTime)</p>
+<p>EmployeeOnboarding</p>
+<p><b>Defined in:</b> EmployeeOnboarding.cs</p>
+<p><b>Fields:</b> EmployeeOnboardingId (int), FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), FatherDOD (DateTime?), FatherAge (int?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), MotherDOD (DateTime?), MotherAge (int?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImagePath (string?), Status (string), CreatedDate (DateTime)</p>
+<p>EmployeeOnboardingCreateDto</p>
+<p><b>Defined in:</b> EmployeeOnboardingDto.cs</p>
+<p><b>Fields:</b> FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (string?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (string?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslip (IFormFile?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCard (IFormFile?), PANCard (IFormFile?), BankStatement (IFormFile?), BankPassbook (IFormFile?), ParentAadhar (List&lt;IFormFile&gt;?), HighestQualificationDocument (IFormFile?), ExperienceLetter (IFormFile?), AcceptanceLetter (IFormFile?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImage (IFormFile?)</p>
+<p>EmployeeOnboardingDocuments</p>
+<p><b>Defined in:</b> Documents.cs</p>
+<p><b>Fields:</b> Id (int), EmployeeOnboardingId (int), AadharCardPath (string?), PANCardPath (string?), BankStatementPath (string?), BankPassbookPath (string?), ParentAadharPath (string?), HighestQualificationDocumentPath (string?), ExperienceLetterPath (string?), AcceptanceLetterPath (string?)</p>
+<p>EmployeeOnboardingResponseDto</p>
+<p><b>Defined in:</b> EmployeeOnboardingResponseDto.cs</p>
+<p><b>Fields:</b> EmployeeOnboardingId (int), FullName (string?), DateOfJoining (DateTime?), DateOfBirth (DateTime?), Email (string?), MobileNumber (string?), BloodGroup (string?), MaritalStatus (string?), SpouseName (string?), SpouseDOB (DateTime?), ChildrenDetails (string?), FatherName (string?), FatherDOB (DateTime?), IsFatherDeceased (bool?), FatherDOD (DateTime?), FatherAge (int?), MotherName (string?), MotherDOB (DateTime?), IsMotherDeceased (bool?), MotherDOD (DateTime?), MotherAge (int?), PAN (string?), AadharNumber (string?), EmergencyContactName (string?), EmergencyContactRelationship (string?), TemporaryAddress (string?), PermanentAddress (string?), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslipPath (string?), BankName (string?), AccountNumber (string?), IFSC (string?), BranchName (string?), AadharCardPath (string?), PANCardPath (string?), BankStatementPath (string?), BankPassbookPath (string?), ParentAadharPath (string?), HighestQualificationDocumentPath (string?), ExperienceLetterPath (string?), AcceptanceLetterPath (string?), OfficeEmail (string?), OfficeMobileNumber (string?), LaptopSerialNumber (string?), LaptopImagePath (string?), Status (string), CreatedDate (DateTime)</p>
+<p>EmployeeTraining</p>
+<p><b>Defined in:</b> EmployeeTraining.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), TrainingName (string), Description (string), IsMandatory (bool), Status (string), AssignedDate (DateTime), CompletionDate (DateTime?), DueDate (DateTime?), TrainingProvider (string?), Category (string?), DurationHours (int?), Progress (int), AssignedBy (int), IsCertified (bool), Feedback (string?), Score (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>ExitInterview</p>
+<p><b>Defined in:</b> ExitInterview.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p>ExitInterviewFeedbackDto</p>
+<p><b>Defined in:</b> ExitInterviewFeedbackDto.cs</p>
+<p><b>Fields:</b> UserId (int), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?)</p>
+<p>ExitInterviewRequestDto</p>
+<p><b>Defined in:</b> ExitInterviewRequestDto.cs</p>
+<p><b>Fields:</b> UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?)</p>
+<p>ExitInterviewResponseDto</p>
+<p><b>Defined in:</b> ExitInterviewResponseDto.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), ScheduledDate (DateTime), ReasonForLeaving (string?), Feedback (string?), Suggestions (string?), Status (string)</p>
+<p>GenerateInviteDto</p>
+<p><b>Defined in:</b> GenerateInviteDto.cs</p>
+<p><b>Fields:</b> EmployeeEmail (string?), EmployeeName (string?)</p>
+<p>Holiday</p>
+<p><b>Defined in:</b> Holiday.cs</p>
+<p><b>Fields:</b> Id (int), Name (string), Date (DateTime), Type (string), CreatedBy (int), CreatedDate (DateTime)</p>
+<p>HolidayCreateDto</p>
+<p><b>Defined in:</b> HolidayCreateDto.cs</p>
+<p><b>Fields:</b> Name (string), Date (DateTime), Type (string)</p>
+<p>JobOpening</p>
+<p><b>Defined in:</b> JobOpening.cs</p>
+<p><b>Fields:</b> JobOpeningId (int), Title (string), DepartmentId (int), TotalOpenings (int), Description (string?), Status (string), CreatedAt (DateTime), ClosedAt (DateTime?), Department (virtual Department)</p>
+<p>JobOpeningCreateDto</p>
+<p><b>Defined in:</b> JobOpeningDto.cs</p>
+<p><b>Fields:</b> Description (string?), Title (string?), TotalOpenings (int?), Description (string?), Status (string?), JobOpeningId (int), Title (string), DepartmentId (int), DepartmentName (string), TotalOpenings (int), Description (string?), Status (string), CreatedAt (DateTime), ClosedAt (DateTime?), FilledCount (int), RemainingOpenings (int)</p>
+<p>Knowledge</p>
+<p><b>Defined in:</b> Knowledge.cs</p>
+<p><b>Fields:</b> KnowledgeId (int), BranchId (int), RecordType (string?), Code (string?), Title (string), Category (string?), SubCategory (string?), Summary (string?), ApprovalStatus (string?), ApporvedBy (string?), Visibility (string?), Status (string?), CreatedBy (int?), CreatedDate (DateTime?), Branch (virtual Branch)</p>
+<p>KnowledgeCreateDto</p>
+<p><b>Defined in:</b> knowledgeCreateDto.cs</p>
+<p><b>Fields:</b> BranchId (int), RecordType (string), Code (string), Title (string), Category (string), SubCategory (string), Summary (string), ApprovalStatus (string), ApprovedBy (string), Visibility (string), Status (string), CreatedBy (int)</p>
+<p>Lead</p>
+<p><b>Defined in:</b> Lead.cs</p>
+<p><b>Fields:</b> LeadId (int), LeadName (string), Email (string), Phone (string?), Source (string), Status (string), Notes (string?), AssignedToUserId (int?), AssignedByUserId (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>LeadCreateDto</p>
+<p><b>Defined in:</b> LeadDto.cs</p>
+<p><b>Fields:</b> Phone (string?), Source (string), Notes (string?), Notes (string?), LeadId (int), LeadName (string), Email (string), Phone (string?), Source (string), Status (string), Notes (string?), AssignedToUserId (int?), AssignedByUserId (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>LearningCourse</p>
+<p><b>Defined in:</b> LearningCourse.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), CourseName (string?), Description (string?), Role (string?), AssignedDate (DateTime), DueDate (DateTime), Progress (int), Status (string?)</p>
+<p>LearningCourseDto</p>
+<p><b>Defined in:</b> LearningCourseDto.cs</p>
+<p><b>Fields:</b> UserId (int), CourseName (string?), Description (string?), Role (string?), AssignedDate (DateTime), DueDate (DateTime), Progress (int), Status (string?)</p>
+<p>LearningUpdateProgressDto</p>
+<p><b>Defined in:</b> LearningUpdateProgressDto.cs</p>
+<p><b>Fields:</b> Progress (int), Status (string?)</p>
+<p>Leave</p>
+<p><b>Defined in:</b> Leave.cs</p>
+<p><b>Fields:</b> LeaveId (int), UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string), AppliedOn (DateTime), TotalDays (int)</p>
+<p>LeaveBalance</p>
+<p><b>Defined in:</b> LeaveBalance.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), LeaveType (string), TotalAllowed (int), UsedDays (int), Year (int)</p>
+<p>LeaveCreateDto</p>
+<p><b>Defined in:</b> LeaveCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string)</p>
+<p>LeaveEncashment</p>
+<p><b>Defined in:</b> LeaveEncashment.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), UserName (string), EncashedDays (int), AmountPaid (decimal), Year (int), ProcessedDate (DateTime), ProcessedBy (int)</p>
+<p>LeaveResponseDto</p>
+<p><b>Defined in:</b> LeaveResponseDto.cs</p>
+<p><b>Fields:</b> LeaveId (int), UserId (int), LeaveType (string), StartDate (DateTime), EndDate (DateTime), Reason (string), Status (string), ApprovedBY (string), AppliedOn (DateTime)</p>
+<p>LeaveStatusDto</p>
+<p><b>Defined in:</b> LeaveStatusDto.cs</p>
+<p><b>Fields:</b> Status (string), ApprovedBY (string)</p>
+<p>LeaveType</p>
+<p><b>Defined in:</b> LeaveType.cs</p>
+<p><b>Fields:</b> LeaveTypeId (int), Name (string), CreatedBy (int?), CreatedAt (DateTime)</p>
+<p>LeaveTypeDto</p>
+<p><b>Defined in:</b> LeaveTypeDto.cs</p>
+<p><b>Fields:</b> LeaveTypeId (int), Name (string)</p>
+<p>LocationUpdateDto</p>
+<p><b>Defined in:</b> LocationUpdateDto.cs</p>
+<p><b>Fields:</b> UserId (int), Latitude (double), Longitude (double)</p>
+<p>LogEntry</p>
+<p><b>Defined in:</b> LogEntry.cs</p>
+<p><b>Fields:</b> LogEntryId (int), UserId (int?), UserName (string?), Action (string), Details (string?), Timestamp (DateTime), StatusCode (int?), DurationMs (int?), ControllerName (string?), ActionName (string?), UserAgent (string?)</p>
+<p>LogEntryDto</p>
+<p><b>Defined in:</b> LogEntryDto.cs</p>
+<p><b>Fields:</b> LogEntryId (int), UserId (int?), UserName (string?), Action (string), Details (string?), Timestamp (DateTime)</p>
+<p>Notification</p>
+<p><b>Defined in:</b> Notification.cs</p>
+<p><b>Fields:</b> NotificationId (int), UserId (int), Title (string), Message (string), Module (string), ReferenceId (int), IsRead (bool), CreatedAt (DateTime)</p>
+<p>OffBoarding</p>
+<p><b>Defined in:</b> OffBoarding.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string), AccountDeactivation (bool)</p>
+<p>OffBoardingDto</p>
+<p><b>Defined in:</b> OffBoardingDto.cs</p>
+<p><b>Fields:</b> UserId (int), ResignationDate (DateTime), LastWorkingDate (DateTime), Reason (string), AccountDeactivation (bool), KnowledgeTransferStatus (string), AssetReturnStatus (string), ExitInterviewStatus (string), OverallStatus (string)</p>
+<p>OnboardingInvite</p>
+<p><b>Defined in:</b> OnboardingInvite.cs</p>
+<p><b>Fields:</b> Id (int), Token (string), EmployeeEmail (string?), EmployeeName (string?), CreatedByUserId (int), CreatedAt (DateTime), ExpiresAt (DateTime), IsUsed (bool), OnboardingId (int?)</p>
+<p>OvertimeApproval</p>
+<p><b>Defined in:</b> OvertimeApproval.cs</p>
+<p><b>Fields:</b> OvertimeApprovalId (int), UserId (int), ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimeApprovalCreateDto</p>
+<p><b>Defined in:</b> OvertimeApprovalCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), ValidFrom (DateTime), ValidTo (DateTime)</p>
+<p>OvertimeApprovalResponseDto</p>
+<p><b>Defined in:</b> OvertimeApprovalResponseDto.cs</p>
+<p><b>Fields:</b> OvertimeApprovalId (int), UserId (int), ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimeApprovalUpdateDto</p>
+<p><b>Defined in:</b> OvertimeApprovalUpdateDto.cs</p>
+<p><b>Fields:</b> ValidFrom (DateTime), ValidTo (DateTime), IsApproved (bool)</p>
+<p>OvertimePolicy</p>
+<p><b>Defined in:</b> OvertimePolicy.cs</p>
+<p><b>Fields:</b> OvertimePolicyId (int), DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double), Department (Department)</p>
+<p>OvertimePolicyCreateDto</p>
+<p><b>Defined in:</b> OvertimePolicyCreateDto.cs</p>
+<p><b>Fields:</b> DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimePolicyResponseDto</p>
+<p><b>Defined in:</b> OvertimePolicyResponseDto.cs</p>
+<p><b>Fields:</b> OvertimePolicyId (int), DepartmentId (int), StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimePolicyUpdateDto</p>
+<p><b>Defined in:</b> OvertimePolicyUpdateDto.cs</p>
+<p><b>Fields:</b> StandardDailyHours (double), MaxWeeklyOvertimeHours (double)</p>
+<p>OvertimeRecord</p>
+<p><b>Defined in:</b> OvertimeRecord.cs</p>
+<p><b>Fields:</b> OvertimeRecordId (int), UserId (int), Date (DateTime), OvertimeHours (double)</p>
+<p>OvertimeRecordResponseDto</p>
+<p><b>Defined in:</b> OvertimeRecordResponseDto.cs</p>
+<p><b>Fields:</b> OvertimeRecordId (int), UserId (int), Date (DateTime), OvertimeHours (double)</p>
+<p>Payroll</p>
+<p><b>Defined in:</b> Payroll.cs</p>
+<p><b>Fields:</b> PayrollId (int), UserId (int), UserName (string), Month (DateTime), Year (int), EmploymentType (string), Department (string), Designation (string), DOJ (DateTime?), MonthlyCTC (decimal), NoOfPayableDays (int), MonthlyCTCApportioned (decimal), BasicSalary (decimal), HRA (decimal), ConveyanceAllowance (decimal), MedicalAllowance (decimal), OtherAllowance (decimal), TAOrPBonus (decimal), OvertimePay (decimal), TotalAllowances (decimal), GrossSalary (decimal), BonusAmount (decimal), EmployeePF (decimal), EmployerPF (decimal), PT (decimal), AbsentDeduction (decimal), TaxDeduction (decimal), TotalDeductions (decimal), WorkingDays (int), PresentDays (int), NetSalary (decimal), Status (string), CreatedDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?)</p>
+<p>PayrollCreateDto</p>
+<p><b>Defined in:</b> PayrollCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), UserName (string), BasicSalary (decimal)</p>
+<p>PayrollResponseDto</p>
+<p><b>Defined in:</b> PayrollResponseDto.cs</p>
+<p><b>Fields:</b> PayrollId (int), UserId (int), UserName (string), Month (DateTime), Year (int), EmploymentType (string), Department (string), Designation (string), DOJ (DateTime?), MonthlyCTC (decimal), NoOfPayableDays (int), MonthlyCTCApportioned (decimal), BasicSalary (decimal), HRA (decimal), ConveyanceAllowance (decimal), MedicalAllowance (decimal), OtherAllowance (decimal), TAOrPBonus (decimal), GrossSalary (decimal), EmployeePF (decimal), PT (decimal), EmployerPF (decimal), TDS (decimal), NetPay (decimal), WorkingDays (int), PresentDays (int), Status (string), CreatedDate (DateTime), ApprovedBy (int?), ApprovedDate (DateTime?), TotalAllowances (decimal), AbsentDeduction (decimal), TotalDeductions (decimal), BonusAmount (decimal), OvertimePay (decimal)</p>
+<p>PayslipDto</p>
+<p><b>Defined in:</b> PayslipCreateDto.cs</p>
+<p><b>Fields:</b> UserId (int), UserName (string), Month (DateTime), Year (int), WorkingDays (int), PresentDays (int), BasicSalary (decimal), OvertimePay (decimal), BonusAmount (decimal), BonusDetails (string?), Allowances (List&lt;AllowanceItemDto&gt;), TotalAllowances (decimal), AbsentDeduction (decimal), TaxDeduction (decimal), AnnualSalary (decimal), Deductions (List&lt;DeductionItemDto&gt;), TotalDeductions (decimal), NetSalary (decimal), Status (string), GeneratedDate (DateTime), Type (string), Amount (decimal), Type (string), Amount (decimal)</p>
+<p>Project</p>
+<p><b>Defined in:</b> Project.cs</p>
+<p><b>Fields:</b> ProjectId (int), ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int), CreatedDate (DateTime?), Department (virtual Department)</p>
+<p>ProjectCreateDto</p>
+<p><b>Defined in:</b> ProjectCreateDto.cs</p>
+<p><b>Fields:</b> ProjectName (string), Duration (string), Status (string), ManagerId (int), DepartmentId (int)</p>
+<p>Recruitment</p>
+<p><b>Defined in:</b> Recruitment.cs</p>
+<p><b>Fields:</b> CandidateId (int), FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateOnly), Status (string), Source (string), InterviewDate (DateTime?), InterviewerName (string?), InterviewType (string?), InterviewNotes (string?), ExpectedSalary (decimal?), OfferedSalary (decimal?), ResumeUrl (string?), OnboardingId (int?), AssignedToUserId (int?), JobOpeningId (int?), Department (virtual Department)</p>
+<p>RecruitmentCreateDto</p>
+<p><b>Defined in:</b> RecruitmentCreateDto.cs</p>
+<p><b>Fields:</b> FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (DateTime), Source (string), ExpectedSalary (decimal?), JobOpeningId (int?), Resume (IFormFile?), InterviewDate (DateTime), InterviewerName (string), InterviewType (string), Notes (string?), Status (string), Notes (string?), OfferedSalary (decimal?), AssignedToUserId (int)</p>
+<p>RecruitmentDashboardDto</p>
+<p><b>Defined in:</b> RecruitmentDashboardDto.cs</p>
+<p><b>Fields:</b> TotalOpenings (int), TotalApplicants (int), ByStatus (StatusBreakdownDto), ByDepartment (List&lt;DepartmentStatsDto&gt;), ByRole (List&lt;RoleStatsDto&gt;), Applied (int), Screening (int), InterviewScheduled (int), OnHold (int), Selected (int), Offered (int), Hired (int), Rejected (int), DepartmentId (int), DepartmentName (string), Openings (int), Applicants (int), InterviewsDone (int), OnHold (int), Selected (int), Hired (int), Rejected (int), Role (string), Openings (int), Applicants (int), InterviewsDone (int), OnHold (int), Selected (int), Offered (int), Hired (int), Rejected (int)</p>
+<p>RecruitmentResponseDto</p>
+<p><b>Defined in:</b> RecruitmentResponseDto.cs</p>
+<p><b>Fields:</b> CandidateId (int), FirstName (string), LastName (string), Email (string), Phone (string), AppliedPosition (string), DepartmentId (int), ApplicationDate (string), Status (string), Source (string), InterviewDate (DateTime?), InterviewerName (string?), InterviewType (string?), InterviewNotes (string?), ExpectedSalary (decimal?), OfferedSalary (decimal?), ResumeUrl (string?), OnboardingId (int?), AssignedToUserId (int?), JobOpeningId (int?)</p>
+<p>SalaryConfigDto</p>
+<p><b>Defined in:</b> SalaryConfigDto.cs</p>
+<p><b>Fields:</b> UserId (int), UserName (string), BasicSalary (decimal), MonthlyCTC (decimal), Conveyance (decimal), MedicalAllowance (decimal)</p>
+<p>SalaryConfiguration</p>
+<p><b>Defined in:</b> SalaryConfiguration.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), UserName (string), MonthlyCTC (decimal), Conveyance (decimal), MedicalAllowance (decimal), BasicSalary (decimal), EffectiveFrom (DateTime), CreatedDate (DateTime), UpdatedDate (DateTime?), SetBy (int)</p>
+<p>SendChatMessageDto</p>
+<p><b>Defined in:</b> ChatMessageDto.cs</p>
+<p><b>Fields:</b> Content (string), ReceiverUserId (int?), ChatMessageId (int), SentByUserId (int), SentByUserName (string?), ReceiverUserId (int?), Content (string), SentAt (DateTime), UserId (int), UserName (string?), UserId (int), UserName (string?), Status (string), StatusMessage (string?), UpdatedAt (DateTime), Status (string), StatusMessage (string?)</p>
+<p>Shift</p>
+<p><b>Defined in:</b> Shift.cs</p>
+<p><b>Fields:</b> ShiftId (int), ShiftName (string), StartTime (TimeSpan), EndTime (TimeSpan), DepartmentId (int), Department (Department)</p>
+<p>ShiftCreateDto</p>
+<p><b>Defined in:</b> ShiftCreateDto.cs</p>
+<p><b>Fields:</b> ShiftName (string), StartTime (string), EndTime (string), DepartmentId (int)</p>
+<p>TodoCreateDto</p>
+<p><b>Defined in:</b> To-Do CreateDtocs.cs</p>
+<p><b>Fields:</b> Title (string), Description (string), AssignedTo (int), DueDate (DateTime), Status (string)</p>
+<p>TodoTask</p>
+<p><b>Defined in:</b> TodoTask.cs</p>
+<p><b>Fields:</b> TaskId (int), Title (string), Description (string?), AssignedTo (int), DueDate (DateOnly), Status (string), CreatedAt (DateTime?)</p>
+<p>TrainingResponseDto</p>
+<p><b>Defined in:</b> TrainingResponseDto.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), TrainingName (string), Description (string), IsMandatory (bool), Status (string), AssignedDate (DateTime), DueDate (DateTime?), CompletionDate (DateTime?), Progress (int), TrainingProvider (string?), Category (string?), DurationHours (int?), AssignedBy (int), IsCertified (bool), Feedback (string?), Score (int?), CreatedAt (DateTime), UpdatedAt (DateTime?)</p>
+<p>UpdateTrainingStatusCreateDto</p>
+<p><b>Defined in:</b> UpdateTrainingStatusCreateDto.cs</p>
+<p><b>Fields:</b> Status (string), Progress (int), CompletionDate (DateTime?), IsCertified (bool), Score (int?), Feedback (string?)</p>
+<p>UserDepartmentRole</p>
+<p><b>Defined in:</b> UserDepartmentRole.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), DepartmentRoleId (int), DepartmentRole (DepartmentRole)</p>
+<p>UserShift</p>
+<p><b>Defined in:</b> UserShift.cs</p>
+<p><b>Fields:</b> Id (int), UserId (int), ShiftId (int), Shift (Shift)</p>
+<p>WorkExperience</p>
+<p><b>Defined in:</b> Work Experience.cs</p>
+<p><b>Fields:</b> Id (int), EmployeeOnboardingId (int), PreviousCompanyDetails (string?), OfferedDesignation (string?), OfferedSalaryNTH (decimal?), OfferedMonthlyCTC (decimal?), OfferedYearlyCTC (decimal?), TotalExperience (string?), LastCompanyPFNumber (string?), LastCompanyUAN (string?), PreviousCompanyPayslipPath (string?)</p>
+<h2>Document Summary</h2>
+<p><b>Total modules documented:</b> 28</p>
+<p><b>Total endpoints documented:</b> 164</p>
+</body>
+</html>

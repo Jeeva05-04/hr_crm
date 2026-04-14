@@ -1,0 +1,6 @@
+@hr_crm_HostAddress = http://localhost:5188
+
+GET {{hr_crm_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

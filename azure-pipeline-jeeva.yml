@@ -1,0 +1,54 @@
+trigger:
+  branches:
+    include:
+      - user/jeeva
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'crm-backend-hr'
+  registry: 'registry.nafabarter.com'
+  fullImageName: '$(registry)/$(imageName)'
+  tag: '$(Build.BuildId)'
+
+steps:
+
+- task: Docker@2
+  displayName: 'Build and push $(imageName)'
+  inputs:
+    command: buildAndPush
+    containerRegistry: 'nafa-registry'
+    repository: '$(imageName)'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      latest
+      $(tag)
+
+- task: SSH@0
+  displayName: 'Deploy $(imageName)'
+  condition: succeeded()
+  inputs:
+    sshEndpoint: 'hostinger-vps'
+    runOptions: inline
+    inline: |
+      set -e
+
+      IMAGE="$(registry)/$(imageName):$(Build.BuildId)"
+      CONTAINER="$(imageName)"
+
+      echo "Deploying $IMAGE"
+
+      # Stop & remove old container
+      docker stop $CONTAINER || true
+      docker rm $CONTAINER || true
+
+      # Pull new image
+      docker pull $IMAGE
+
+      # Run container
+      docker run -d \
+        --name $CONTAINER \
+        -p 9095:8080 \
+        --restart always \
+        $IMAGE

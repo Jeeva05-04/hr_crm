@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Live Tracking</title>
+
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+
+  <!-- SignalR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: #16213e;
+      border-bottom: 1px solid #0f3460;
+    }
+    .topbar h1 { font-size: 18px; color: #e94560; }
+    #status-badge {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      background: #333;
+      color: #aaa;
+    }
+    #status-badge.connected { background: #1a472a; color: #57d97d; }
+    #status-badge.disconnected { background: #4a1020; color: #e94560; }
+
+    /* ── Layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 300px;
+      background: #16213e;
+      border-right: 1px solid #0f3460;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 14px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a0aec0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #0f3460;
+    }
+    #employee-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    .emp-card {
+      padding: 12px;
+      border-radius: 8px;
+      background: #0f3460;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border 0.2s;
+    }
+    .emp-card:hover, .emp-card.active { border-color: #e94560; }
+    .emp-card .emp-name { font-size: 14px; font-weight: 600; }
+    .emp-card .emp-meta { font-size: 12px; color: #a0aec0; margin-top: 4px; }
+    .emp-card .emp-status {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #1a472a;
+      color: #57d97d;
+    }
+    .emp-card .emp-last-update { font-size: 11px; color: #718096; margin-top: 4px; }
+
+    /* ── Map ── */
+    #map { flex: 1; }
+
+    /* ── Login Form ── */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .login-box {
+      background: #16213e;
+      padding: 32px;
+      border-radius: 12px;
+      border: 1px solid #0f3460;
+      width: 340px;
+    }
+    .login-box h2 { margin-bottom: 20px; color: #e94560; font-size: 20px; }
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: #1a1a2e;
+      color: #eee;
+      font-size: 14px;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: #c73652; }
+    .login-error { color: #e94560; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>HR Manager Login</h2>
+    <input type="text" id="input-token" placeholder="Paste your JWT token here" />
+    <button onclick="startTracking()">Start Live Tracking</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <h1>Live Employee Tracking</h1>
+  <span id="status-badge" class="disconnected">Disconnected</span>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-header">Checked-In Employees</div>
+    <div id="employee-list"><p style="padding:16px;color:#718096;font-size:13px;">No active employees</p></div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script>
+  let map;
+  let connection;
+  let jwtToken = '';
+
+  // employee data: { marker, polyline, positions[], card }
+  const employees = {};
+
+  // Colors for different employees on map
+  const COLORS = ['#e94560','#00b4d8','#f4a261','#57d97d','#a78bfa','#fb923c','#34d399','#f472b6'];
+  let colorIndex = 0;
+
+  // ── Google Maps init ──────────────────────────────────────────────
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 20.5937, lng: 78.9629 }, // India center — will auto-pan on first update
+      zoom: 5,
+      mapTypeId: 'roadmap',
+      styles: darkMapStyle()
+    });
+  }
+
+  // ── Login & connect ───────────────────────────────────────────────
+  async function startTracking() {
+    jwtToken = document.getElementById('input-token').value.trim();
+    if (!jwtToken) {
+      document.getElementById('login-error').textContent = 'Please enter your JWT token.';
+      return;
+    }
+
+    // Load current active employees from REST API
+    try {
+      const resp = await fetch('/api/attendence/live-locations', {
+        headers: { 'Authorization': 'Bearer ' + jwtToken }
+      });
+      if (!resp.ok) {
+        document.getElementById('login-error').textContent = 'Auth failed. Check your token.';
+        return;
+      }
+      const data = await resp.json();
+      document.getElementById('login-overlay').style.display = 'none';
+
+      // Plot existing checked-in employees
+      if (data && data.length > 0) {
+        data.forEach(emp => {
+          const loc = emp.liveLocation || emp.checkInLocation;
+          if (loc) {
+            addOrUpdateEmployee(emp.userId, loc.latitude, loc.longitude, new Date().toISOString());
+          } else {
+            addOrUpdateEmployee(emp.userId, null, null, null);
+          }
+        });
+        // Pan map to first employee
+        const first = data.find(e => e.liveLocation);
+        if (first?.liveLocation) {
+          map.setCenter({ lat: first.liveLocation.latitude, lng: first.liveLocation.longitude });
+          map.setZoom(13);
+        }
+      }
+
+      // Connect SignalR
+      connectSignalR();
+
+    } catch (e) {
+      document.getElementById('login-error').textContent = 'Failed to connect: ' + e.message;
+    }
+  }
+
+  // ── SignalR ───────────────────────────────────────────────────────
+  function connectSignalR() {
+    connection = new signalR.HubConnectionBuilder()
+      .withUrl('/hubs/location', { accessTokenFactory: () => jwtToken })
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on('EmployeeLocationUpdated', (data) => {
+      // data: { userId, latitude, longitude, lastUpdated }
+      addOrUpdateEmployee(data.userId, data.latitude, data.longitude, data.lastUpdated);
+    });
+
+    connection.onreconnecting(() => setBadge('Reconnecting...', ''));
+    connection.onreconnected(() => {
+      setBadge('Connected', 'connected');
+      connection.invoke('JoinManagerGroup');
+    });
+    connection.onclose(() => setBadge('Disconnected', 'disconnected'));
+
+    connection.start()
+      .then(() => {
+        setBadge('Connected', 'connected');
+        connection.invoke('JoinManagerGroup');
+      })
+      .catch(e => setBadge('Error: ' + e.message, 'disconnected'));
+  }
+
+  // ── Add / update employee on map ──────────────────────────────────
+  function addOrUpdateEmployee(userId, lat, lng, updatedAt) {
+    if (!employees[userId]) {
+      const color = COLORS[colorIndex++ % COLORS.length];
+      employees[userId] = {
+        color,
+        positions: [],
+        marker: null,
+        polyline: null,
+        card: createCard(userId, color)
+      };
+    }
+
+    const emp = employees[userId];
+
+    // Update sidebar card
+    updateCard(emp.card, userId, lat, lng, updatedAt);
+
+    if (lat == null || lng == null) return;
+
+    const pos = { lat, lng };
+    emp.positions.push(pos);
+
+    // Create or move marker
+    if (!emp.marker) {
+      emp.marker = new google.maps.Marker({
+        position: pos,
+        map,
+        title: 'User ' + userId,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: emp.color,
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2
+        },
+        animation: google.maps.Animation.DROP
+      });
+
+      // Info window on marker click
+      const infoWindow = new google.maps.InfoWindow();
+      emp.marker.addListener('click', () => {
+        infoWindow.setContent(`
+          <div style="color:#000;font-size:13px;line-height:1.6">
+            <b>Employee #${userId}</b><br>
+            Lat: ${lat.toFixed(6)}<br>
+            Lng: ${lng.toFixed(6)}<br>
+            Updated: ${formatTime(updatedAt)}
+          </div>
+        `);
+        infoWindow.open(map, emp.marker);
+      });
+    } else {
+      emp.marker.setPosition(pos);
+    }
+
+    // Draw/update trail polyline
+    if (!emp.polyline) {
+      emp.polyline = new google.maps.Polyline({
+        path: emp.positions,
+        geodesic: true,
+        strokeColor: emp.color,
+        strokeOpacity: 0.8,
+        strokeWeight: 3,
+        map
+      });
+    } else {
+      emp.polyline.setPath(emp.positions);
+    }
+
+    // Pan map to latest position if this employee card is active
+    if (emp.card.classList.contains('active')) {
+      map.panTo(pos);
+    }
+  }
+
+  // ── Sidebar card helpers ──────────────────────────────────────────
+  function createCard(userId, color) {
+    const list = document.getElementById('employee-list');
+
+    // Remove "no employees" message
+    const empty = list.querySelector('p');
+    if (empty) empty.remove();
+
+    const card = document.createElement('div');
+    card.className = 'emp-card';
+    card.id = 'card-' + userId;
+    card.innerHTML = `
+      <div class="emp-name" style="color:${color}">Employee #${userId}</div>
+      <div class="emp-meta" id="card-coords-${userId}">Waiting for location...</div>
+      <span class="emp-status">Checked In</span>
+      <div class="emp-last-update" id="card-time-${userId}"></div>
+    `;
+
+    // Click to focus on map
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.emp-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const emp = employees[userId];
+      if (emp?.marker) {
+        map.panTo(emp.marker.getPosition());
+        map.setZoom(16);
+      }
+    });
+
+    list.appendChild(card);
+    return card;
+  }
+
+  function updateCard(card, userId, lat, lng, updatedAt) {
+    const coords = document.getElementById('card-coords-' + userId);
+    const time = document.getElementById('card-time-' + userId);
+    if (coords && lat != null) {
+      coords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+    if (time && updatedAt) {
+      time.textContent = 'Updated: ' + formatTime(updatedAt);
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────
+  function setBadge(text, cls) {
+    const el = document.getElementById('status-badge');
+    el.textContent = text;
+    el.className = cls;
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleTimeString();
+  }
+
+  // ── Dark map style ────────────────────────────────────────────────
+  function darkMapStyle() {
+    return [
+      { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#373737' }] },
+      { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+      { featureType: 'poi', stylers: [{ visibility: 'off' }] }
+    ];
+  }
+</script>
+</body>
+</html>
