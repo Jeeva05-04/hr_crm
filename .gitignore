@@ -367,3 +367,5 @@ appsettings.Development.json
 *-service-account*.json
 *service-account*.json
 crm-meet-project-*.json
+.dotnet/
+.dotnet_home/
